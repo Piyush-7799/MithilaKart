@@ -21,25 +21,33 @@ export function ProductGrid({
   selectedCategory = "All",
   searchQuery = "",
 }: ProductGridProps) {
+  const isMithilaSpecials = selectedCategory === "Mithila Specials";
+
   const sectionTitle =
     selectedCategory === "All"
       ? "Popular Essentials"
       : selectedCategory;
 
+  const sectionBadge = isMithilaSpecials
+    ? "🌾 Mithila Signature Category"
+    : "Mithila Express Store";
+
+  const sectionSubtitle = searchQuery
+    ? `Showing results for "${searchQuery}"`
+    : isMithilaSpecials
+    ? "Authentic regional staples, traditional Makhana varieties & regional essentials"
+    : "Guaranteed 10-15 minute delivery from your nearest dark store";
+
   return (
     <section className="products-section" id="products" aria-label="Product catalog">
       <div className="section-header">
         <div>
-          <div className="section-badge">
+          <div className={`section-badge ${isMithilaSpecials ? "section-badge-special" : ""}`}>
             <Sparkles size={13} />
-            <span>Mithila Express Store</span>
+            <span>{sectionBadge}</span>
           </div>
           <h2 className="section-title">{sectionTitle}</h2>
-          <p className="section-subtitle">
-            {searchQuery
-              ? `Showing results for "${searchQuery}"`
-              : "Guaranteed 10-15 minute delivery from your nearest dark store"}
-          </p>
+          <p className="section-subtitle">{sectionSubtitle}</p>
         </div>
 
         <div className="product-count-badge">

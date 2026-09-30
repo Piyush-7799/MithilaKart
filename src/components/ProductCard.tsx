@@ -1,4 +1,4 @@
-import { Star, Zap, Plus, Minus } from "lucide-react";
+import { Star, Zap, Plus, Minus, Sparkles } from "lucide-react";
 import type { Product } from "../types";
 
 interface ProductCardProps {
@@ -20,12 +20,21 @@ export function ProductCard({
   const savings = product.mrp - product.price;
 
   return (
-    <article className="product-card" data-product-id={product.id}>
+    <article
+      className={`product-card ${product.isMithilaSpecial ? "product-card-signature" : ""}`}
+      data-product-id={product.id}
+    >
       {/* Visual Area */}
       <div className="product-visual-wrapper">
         {discount > 0 && (
           <span className="product-discount-tag">
             {discount}% OFF
+          </span>
+        )}
+
+        {product.isMithilaSpecial && (
+          <span className="product-signature-tag" title="Mithila Regional Special">
+            <Sparkles size={10} /> Special
           </span>
         )}
 

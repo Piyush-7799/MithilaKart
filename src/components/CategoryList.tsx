@@ -1,4 +1,4 @@
-import { LayoutGrid } from "lucide-react";
+import { LayoutGrid, Sparkles } from "lucide-react";
 import type { Category } from "../types";
 
 interface CategoryListProps {
@@ -17,7 +17,9 @@ export function CategoryList({
       <div className="section-header">
         <div>
           <h2 className="section-title">Shop by Category</h2>
-          <p className="section-subtitle">Explore daily staples, fresh picks and regional delights</p>
+          <p className="section-subtitle">
+            Explore daily staples, fresh picks and regional Mithila specialties
+          </p>
         </div>
       </div>
 
@@ -37,18 +39,27 @@ export function CategoryList({
             <span className="category-label">All Products</span>
           </button>
 
-          {/* Dynamic Categories */}
+          {/* Dynamic Categories (Mithila Specials first) */}
           {categories.map((category) => {
             const isActive = selectedCategory === category.name;
+            const isSignature = Boolean(category.isSignature);
+
             return (
               <button
                 type="button"
                 role="tab"
                 aria-selected={isActive}
                 key={category.name}
-                className={`category-pill ${isActive ? "category-pill-active" : ""}`}
+                className={`category-pill ${isActive ? "category-pill-active" : ""} ${
+                  isSignature ? "category-pill-signature" : ""
+                }`}
                 onClick={() => onSelectCategory(category.name)}
               >
+                {isSignature && (
+                  <span className="signature-pill-tag">
+                    <Sparkles size={9} /> Signature
+                  </span>
+                )}
                 <div className="category-icon-box">
                   <span className="category-emoji">{category.icon}</span>
                 </div>

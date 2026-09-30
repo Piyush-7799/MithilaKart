@@ -1,4 +1,5 @@
-import { Star, Zap, Plus, Minus, Sparkles } from "lucide-react";
+import { useState } from "react";
+import { Star, Zap, Plus, Minus, Sparkles, Package } from "lucide-react";
 import type { Product } from "../types";
 
 interface ProductCardProps {
@@ -14,6 +15,9 @@ export function ProductCard({
   onAddToCart,
   onRemoveFromCart,
 }: ProductCardProps) {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
   const discount = Math.round(
     ((product.mrp - product.price) / product.mrp) * 100
   );
@@ -39,7 +43,29 @@ export function ProductCard({
         )}
 
         <div className="product-image-display">
-          <span className="product-emoji-art">{product.image}</span>
+          {!imageError ? (
+            <>
+              {!imageLoaded && (
+                <div className="product-image-skeleton" aria-hidden="true" />
+              )}
+              <img
+                src={product.image}
+                alt={product.name}
+                loading="lazy"
+                decoding="async"
+                className={`product-img ${imageLoaded ? "product-img-loaded" : "product-img-loading"}`}
+                onLoad={() => setImageLoaded(true)}
+                onError={() => setImageError(true)}
+              />
+            </>
+          ) : (
+            <div className="product-image-fallback">
+              <span className="fallback-icon">
+                {product.fallbackIcon || <Package size={32} className="fallback-pkg-icon" />}
+              </span>
+              <span className="fallback-category-label">{product.category}</span>
+            </div>
+          )}
         </div>
 
         <div className="product-delivery-badge">

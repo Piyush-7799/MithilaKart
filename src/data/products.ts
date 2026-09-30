@@ -24,7 +24,8 @@ export const PRODUCTS: Product[] = [
   // =========================================================================
   {
     id: "prod-ms-raw-makhana",
-    image: "🥣",
+    image: "https://images.unsplash.com/photo-1599940824399-b87987ceb72a?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🥣",
     name: "Jumbo Grade Phool Makhana",
     price: 240,
     mrp: 290,
@@ -37,7 +38,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-ms-roasted-makhana-salt",
-    image: "🍿",
+    image: "https://images.unsplash.com/photo-1563865436874-9aef32095fad?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🍿",
     name: "Roasted Himalayan Pink Salt Makhana",
     price: 120,
     mrp: 150,
@@ -50,7 +52,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-ms-roasted-makhana-pudina",
-    image: "🌿",
+    image: "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🌿",
     name: "Crispy Roasted Pudina Makhana",
     price: 125,
     mrp: 155,
@@ -63,7 +66,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-ms-katarni-chawal",
-    image: "🍚",
+    image: "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🍚",
     name: "Katarni Fragrant Aromatic Rice",
     price: 140,
     mrp: 175,
@@ -76,7 +80,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-ms-chana-sattu",
-    image: "🌾",
+    image: "https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🌾",
     name: "Roasted Desi Chana Sattu (Flavored)",
     price: 85,
     mrp: 105,
@@ -89,7 +94,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-ms-barhee-poha",
-    image: "🥣",
+    image: "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🥣",
     name: "Traditional Thick Flattened Rice (Chura)",
     price: 75,
     mrp: 95,
@@ -102,7 +108,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-ms-red-chura",
-    image: "🌾",
+    image: "https://images.unsplash.com/photo-1541832676-9b763b0239ab?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🌾",
     name: "Nutritious Red Rice Poha (Lal Chura)",
     price: 65,
     mrp: 80,
@@ -115,7 +122,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-ms-thekua",
-    image: "🍪",
+    image: "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🍪",
     name: "Handcrafted Khasta Thekua (Jaggery)",
     price: 160,
     mrp: 199,
@@ -128,7 +136,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-ms-tilkut",
-    image: "🍬",
+    image: "https://images.unsplash.com/photo-1590080875515-8a3a8dc5735e?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🍬",
     name: "Traditional Sesame Khasta Tilkut",
     price: 130,
     mrp: 160,
@@ -141,7 +150,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-ms-mustard-oil",
-    image: "🫒",
+    image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🫒",
     name: "Cold-Pressed Kacchi Ghani Mustard Oil",
     price: 195,
     mrp: 230,
@@ -154,7 +164,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-ms-panchforan",
-    image: "🧂",
+    image: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🧂",
     name: "Panch Phoron Traditional 5-Spice Blend",
     price: 55,
     mrp: 70,
@@ -167,7 +178,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-ms-mango-achar",
-    image: "🥭",
+    image: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🥭",
     name: "Homestyle Spiced Green Mango Pickle",
     price: 145,
     mrp: 180,
@@ -184,7 +196,8 @@ export const PRODUCTS: Product[] = [
   // =========================================================================
   {
     id: "prod-fv-potato",
-    image: "🥔",
+    image: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🥔",
     name: "Fresh Farm Potatoes (Aloo)",
     price: 30,
     mrp: 40,
@@ -195,7 +208,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-fv-onion",
-    image: "🧅",
+    image: "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🧅",
     name: "Fresh Pink Hybrid Onions (Pyaz)",
     price: 35,
     mrp: 45,
@@ -206,7 +220,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-fv-tomato",
-    image: "🍅",
+    image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🍅",
     name: "Local Vine Tomatoes (Tamatar)",
     price: 38,
     mrp: 50,
@@ -217,7 +232,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-fv-cauliflower",
-    image: "🥦",
+    image: "https://images.unsplash.com/photo-1568584711075-3d021a7c3ca3?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🥦",
     name: "Fresh Crisp Gobhi (Cauliflower)",
     price: 35,
     mrp: 45,
@@ -228,7 +244,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-fv-spinach",
-    image: "🥬",
+    image: "https://images.unsplash.com/photo-1576045057995-568f588f82fb?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🥬",
     name: "Farm Fresh Green Spinach (Palak)",
     price: 20,
     mrp: 30,
@@ -239,7 +256,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-fv-green-chilli",
-    image: "🌶️",
+    image: "https://images.unsplash.com/photo-1588252303782-cb80119abd6d?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🌶️",
     name: "Fresh Spicy Green Chillies",
     price: 15,
     mrp: 20,
@@ -250,7 +268,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-fv-ginger",
-    image: "🫚",
+    image: "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🫚",
     name: "Fresh Ginger Root (Adrak)",
     price: 28,
     mrp: 35,
@@ -261,7 +280,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-fv-apple",
-    image: "🍎",
+    image: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🍎",
     name: "Crisp Royal Sweet Apples",
     price: 140,
     mrp: 180,
@@ -272,7 +292,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-fv-banana",
-    image: "🍌",
+    image: "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🍌",
     name: "Fresh Robusta Bananas",
     price: 55,
     mrp: 70,
@@ -287,7 +308,8 @@ export const PRODUCTS: Product[] = [
   // =========================================================================
   {
     id: "prod-db-toned-milk",
-    image: "🥛",
+    image: "https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🥛",
     name: "Fresh Toned Milk Pouch",
     price: 65,
     mrp: 70,
@@ -298,7 +320,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-db-full-cream-milk",
-    image: "🥛",
+    image: "https://images.unsplash.com/photo-1563636619-e9143da7973b?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🥛",
     name: "Rich Full Cream Cow Milk",
     price: 72,
     mrp: 78,
@@ -309,7 +332,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-db-curd",
-    image: "🥣",
+    image: "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🥣",
     name: "Homestyle Thick Dahi (Curd)",
     price: 45,
     mrp: 50,
@@ -320,7 +344,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-db-paneer",
-    image: "🧀",
+    image: "https://images.unsplash.com/photo-1631451095765-2c91616fc9e6?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🧀",
     name: "Soft Fresh Malai Paneer",
     price: 90,
     mrp: 105,
@@ -331,7 +356,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-db-butter",
-    image: "🧈",
+    image: "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🧈",
     name: "Pasteurized Salted Table Butter",
     price: 56,
     mrp: 60,
@@ -342,7 +368,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-db-brown-bread",
-    image: "🍞",
+    image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🍞",
     name: "100% Whole Wheat Brown Bread",
     price: 45,
     mrp: 55,
@@ -353,7 +380,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-db-sandwich-bread",
-    image: "🍞",
+    image: "https://images.unsplash.com/photo-1549931319-a545dcf3bc73?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🍞",
     name: "Classic Soft Sandwich White Bread",
     price: 38,
     mrp: 45,
@@ -364,7 +392,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-db-farm-eggs",
-    image: "🥚",
+    image: "https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🥚",
     name: "Fresh Farm White Eggs",
     price: 68,
     mrp: 80,
@@ -375,7 +404,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-db-oats",
-    image: "🥣",
+    image: "https://images.unsplash.com/photo-1584776296944-ab6fb57b0bdd?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🥣",
     name: "Rolled High-Fiber Whole Oats",
     price: 110,
     mrp: 135,
@@ -390,7 +420,8 @@ export const PRODUCTS: Product[] = [
   // =========================================================================
   {
     id: "prod-ars-sharbati-atta",
-    image: "🌾",
+    image: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🌾",
     name: "100% Sharbati Whole Wheat Atta",
     price: 245,
     mrp: 290,
@@ -401,7 +432,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-ars-chakki-atta",
-    image: "🌾",
+    image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🌾",
     name: "Traditional Stone-Ground Chakki Atta",
     price: 440,
     mrp: 510,
@@ -412,7 +444,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-ars-basmati-rice",
-    image: "🍚",
+    image: "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🍚",
     name: "Royal Long Grain Aged Basmati Rice",
     price: 175,
     mrp: 220,
@@ -423,7 +456,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-ars-daily-rice",
-    image: "🍚",
+    image: "https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🍚",
     name: "Sona Masoori Everyday Steamed Rice",
     price: 310,
     mrp: 370,
@@ -434,7 +468,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-ars-sooji",
-    image: "🌾",
+    image: "https://images.unsplash.com/photo-1586444248902-2f64eddc13df?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🌾",
     name: "Fine Granular Roasted Sooji (Rava)",
     price: 38,
     mrp: 48,
@@ -445,7 +480,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-ars-maida",
-    image: "🌾",
+    image: "https://images.unsplash.com/photo-1589367920969-ab8e050bbb04?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🌾",
     name: "Refined All-Purpose Wheat Maida",
     price: 35,
     mrp: 45,
@@ -456,7 +492,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-ars-besan",
-    image: "🥣",
+    image: "https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🥣",
     name: "Pure 100% Chana Dal Besan",
     price: 65,
     mrp: 80,
@@ -467,7 +504,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-ars-sugar",
-    image: "🍬",
+    image: "https://images.unsplash.com/photo-1628088062854-d1870b4553da?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🍬",
     name: "Sulphur-Free Crystal Refined Sugar",
     price: 48,
     mrp: 55,
@@ -482,7 +520,8 @@ export const PRODUCTS: Product[] = [
   // =========================================================================
   {
     id: "prod-dp-toor-dal",
-    image: "🥣",
+    image: "https://images.unsplash.com/photo-1515543237350-b3eea1ec8082?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🥣",
     name: "Unpolished Premium Toor/Arhar Dal",
     price: 165,
     mrp: 195,
@@ -493,7 +532,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-dp-moong-dal",
-    image: "🥣",
+    image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🥣",
     name: "Yellow Split Moong Dal (Dhuli)",
     price: 140,
     mrp: 170,
@@ -504,7 +544,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-dp-chana-dal",
-    image: "🥣",
+    image: "https://images.unsplash.com/photo-1586444248902-2f64eddc13df?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🥣",
     name: "Polished High-Protein Chana Dal",
     price: 115,
     mrp: 140,
@@ -515,7 +556,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-dp-masoor-dal",
-    image: "🥣",
+    image: "https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🥣",
     name: "Red Lentil Masoor Malka Dal",
     price: 120,
     mrp: 145,
@@ -526,7 +568,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-dp-urad-dal",
-    image: "🥣",
+    image: "https://images.unsplash.com/photo-1599940824399-b87987ceb72a?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🥣",
     name: "Split Black Urad Dal with Chilka",
     price: 75,
     mrp: 92,
@@ -537,7 +580,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-dp-kabuli-chana",
-    image: "🧆",
+    image: "https://images.unsplash.com/photo-1509914398892-963f53e6e2f1?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🧆",
     name: "Jumbo White Kabuli Chana (Chickpeas)",
     price: 85,
     mrp: 105,
@@ -548,7 +592,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-dp-kala-chana",
-    image: "🧆",
+    image: "https://images.unsplash.com/photo-1589367920969-ab8e050bbb04?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🧆",
     name: "Desi Brown Protein Kala Chana",
     price: 58,
     mrp: 72,
@@ -559,7 +604,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-dp-rajma",
-    image: "🫘",
+    image: "https://images.unsplash.com/photo-1541832676-9b763b0239ab?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🫘",
     name: "Kashmiri Red Kidney Beans (Rajma)",
     price: 95,
     mrp: 120,
@@ -574,7 +620,8 @@ export const PRODUCTS: Product[] = [
   // =========================================================================
   {
     id: "prod-mce-turmeric-powder",
-    image: "🟡",
+    image: "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🟡",
     name: "Pure Golden Turmeric Powder (Haldi)",
     price: 52,
     mrp: 65,
@@ -585,7 +632,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-mce-chilli-powder",
-    image: "🌶️",
+    image: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🌶️",
     name: "Kashmiri Degi Mirch Powder",
     price: 78,
     mrp: 98,
@@ -596,7 +644,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-mce-coriander-powder",
-    image: "🌿",
+    image: "https://images.unsplash.com/photo-1599940824399-b87987ceb72a?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🌿",
     name: "Fresh Aromatic Dhania Powder",
     price: 48,
     mrp: 60,
@@ -607,7 +656,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-mce-garam-masala",
-    image: "🤎",
+    image: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🤎",
     name: "Royal Kitchen King Garam Masala",
     price: 85,
     mrp: 110,
@@ -618,7 +668,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-mce-cumin-seeds",
-    image: "🌾",
+    image: "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🌾",
     name: "Whole Cumin Seeds (Jeera)",
     price: 68,
     mrp: 85,
@@ -629,7 +680,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-mce-mustard-seeds",
-    image: "⚫",
+    image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "⚫",
     name: "Small Black Mustard Seeds (Rai)",
     price: 30,
     mrp: 40,
@@ -640,7 +692,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-mce-iodized-salt",
-    image: "🧂",
+    image: "https://images.unsplash.com/photo-1628088062854-d1870b4553da?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🧂",
     name: "Vacuum Evaporated Iodized Salt",
     price: 26,
     mrp: 30,
@@ -651,7 +704,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-mce-cow-ghee",
-    image: "🧈",
+    image: "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🧈",
     name: "Danedar Pure Desi Cow Ghee",
     price: 340,
     mrp: 395,
@@ -666,7 +720,8 @@ export const PRODUCTS: Product[] = [
   // =========================================================================
   {
     id: "prod-bs-marie-biscuits",
-    image: "🍪",
+    image: "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🍪",
     name: "Crisp Tea-Time Marie Biscuits",
     price: 35,
     mrp: 42,
@@ -677,7 +732,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-bs-butter-cookies",
-    image: "🍪",
+    image: "https://images.unsplash.com/photo-1499636136210-6f4ee915583e?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🍪",
     name: "Danish Style Rich Butter Cookies",
     price: 75,
     mrp: 95,
@@ -688,7 +744,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-bs-bourbon-biscuits",
-    image: "🍪",
+    image: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🍪",
     name: "Rich Chocolate Creme Bourbon Biscuits",
     price: 38,
     mrp: 45,
@@ -699,7 +756,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-bs-rusk",
-    image: "🍞",
+    image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🍞",
     name: "Crunchy Cardamom Toast Rusk",
     price: 50,
     mrp: 60,
@@ -710,7 +768,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-bs-bhujia-sev",
-    image: "🍟",
+    image: "https://images.unsplash.com/photo-1563865436874-9aef32095fad?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🍟",
     name: "Crisp Spicy Potato Bhujia Sev",
     price: 55,
     mrp: 65,
@@ -721,7 +780,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-bs-moong-dal-namkeen",
-    image: "🥣",
+    image: "https://images.unsplash.com/photo-1599490659213-e2b9527bd087?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🥣",
     name: "Salted Crispy Moong Dal Namkeen",
     price: 58,
     mrp: 70,
@@ -732,7 +792,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-bs-potato-chips-salted",
-    image: "🥔",
+    image: "https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🥔",
     name: "Classic Salted Crispy Potato Chips",
     price: 30,
     mrp: 35,
@@ -743,7 +804,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-bs-masala-chips",
-    image: "🌶️",
+    image: "https://images.unsplash.com/photo-1621447504864-d8686e12698c?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🌶️",
     name: "Tangy Tomato & Chatpata Chips",
     price: 30,
     mrp: 35,
@@ -758,7 +820,8 @@ export const PRODUCTS: Product[] = [
   // =========================================================================
   {
     id: "prod-cs-dairy-milk",
-    image: "🍫",
+    image: "https://images.unsplash.com/photo-1548907040-4baa42d10919?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🍫",
     name: "Creamy Hazelnut Milk Chocolate Bar",
     price: 85,
     mrp: 95,
@@ -769,7 +832,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-cs-dark-chocolate",
-    image: "🍫",
+    image: "https://images.unsplash.com/photo-1511381939415-e44015466834?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🍫",
     name: "70% Rich Cocoa Dark Chocolate",
     price: 140,
     mrp: 170,
@@ -780,7 +844,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-cs-gulab-jamun",
-    image: "🧆",
+    image: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🧆",
     name: "Homestyle Soft Gulab Jamun (Tin)",
     price: 135,
     mrp: 165,
@@ -791,7 +856,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-cs-rasgulla",
-    image: "⚪",
+    image: "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "⚪",
     name: "Spongy Sweet White Rasgulla (Tin)",
     price: 130,
     mrp: 160,
@@ -802,7 +868,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-cs-soan-papdi",
-    image: "🥮",
+    image: "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🥮",
     name: "Flaky Pure Ghee Soan Papdi Box",
     price: 90,
     mrp: 110,
@@ -813,7 +880,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-cs-kaju-katli",
-    image: "💎",
+    image: "https://images.unsplash.com/photo-1590080875515-8a3a8dc5735e?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "💎",
     name: "Traditional Cashew Kaju Katli",
     price: 210,
     mrp: 260,
@@ -824,7 +892,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-cs-caramel-eclairs",
-    image: "🍬",
+    image: "https://images.unsplash.com/photo-1582058091505-f87a2e55a40f?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🍬",
     name: "Chewy Caramel Chocolate Toffee Pack",
     price: 50,
     mrp: 60,
@@ -835,7 +904,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-cs-besan-laddu",
-    image: "🟡",
+    image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🟡",
     name: "Melt-in-Mouth Pure Ghee Besan Laddu",
     price: 180,
     mrp: 220,
@@ -850,7 +920,8 @@ export const PRODUCTS: Product[] = [
   // =========================================================================
   {
     id: "prod-bev-assam-tea",
-    image: "☕",
+    image: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "☕",
     name: "Strong CTC Premium Assam Black Tea",
     price: 185,
     mrp: 230,
@@ -861,7 +932,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-bev-green-tea",
-    image: "🍵",
+    image: "https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🍵",
     name: "Antioxidant Honey Lemon Green Tea",
     price: 160,
     mrp: 195,
@@ -872,7 +944,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-bev-instant-coffee",
-    image: "☕",
+    image: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "☕",
     name: "Rich Roasted Classic Instant Coffee",
     price: 195,
     mrp: 240,
@@ -883,7 +956,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-bev-mango-juice",
-    image: "🥭",
+    image: "https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🥭",
     name: "Thick Alphonso Pulp Mango Drink",
     price: 75,
     mrp: 90,
@@ -894,7 +968,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-bev-orange-juice",
-    image: "🍊",
+    image: "https://images.unsplash.com/photo-1613478223719-2ab802602423?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🍊",
     name: "100% Real Citrus Orange Juice",
     price: 115,
     mrp: 140,
@@ -905,7 +980,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-bev-cola",
-    image: "🥤",
+    image: "https://images.unsplash.com/photo-1554866585-cd94860890b7?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🥤",
     name: "Chilled Sparkling Refreshing Cola",
     price: 45,
     mrp: 50,
@@ -916,7 +992,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-bev-lemon-soda",
-    image: "🍋",
+    image: "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🍋",
     name: "Zesty Nimbu Fresh Carbonated Soda",
     price: 38,
     mrp: 45,
@@ -927,7 +1004,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-bev-energy-drink",
-    image: "⚡",
+    image: "https://images.unsplash.com/photo-1622543925917-763c34d1a86e?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "⚡",
     name: "Instant Electrolyte Energy Hydration",
     price: 60,
     mrp: 70,
@@ -942,7 +1020,8 @@ export const PRODUCTS: Product[] = [
   // =========================================================================
   {
     id: "prod-mdf-cashews",
-    image: "🥜",
+    image: "https://images.unsplash.com/photo-1509914398892-963f53e6e2f1?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🥜",
     name: "Crunchy Whole Cashew Nuts (Kaju W240)",
     price: 260,
     mrp: 320,
@@ -953,7 +1032,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-mdf-almonds",
-    image: "🌰",
+    image: "https://images.unsplash.com/photo-1574856344991-aaa31b6f4ce3?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🌰",
     name: "Premium California Sweet Almonds (Badam)",
     price: 240,
     mrp: 300,
@@ -964,7 +1044,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-mdf-walnuts",
-    image: "🥜",
+    image: "https://images.unsplash.com/photo-1558818498-28c1e002b655?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🥜",
     name: "Natural Light Walnut Kernels (Akhrot)",
     price: 290,
     mrp: 360,
@@ -975,7 +1056,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-mdf-raisins",
-    image: "🍇",
+    image: "https://images.unsplash.com/photo-1589367920969-ab8e050bbb04?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🍇",
     name: "Long Sweet Golden Raisins (Kismis)",
     price: 110,
     mrp: 140,
@@ -986,7 +1068,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-mdf-pistachios",
-    image: "🥜",
+    image: "https://images.unsplash.com/photo-1563865436874-9aef32095fad?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🥜",
     name: "Roasted Salted California Pistachios",
     price: 280,
     mrp: 350,
@@ -997,7 +1080,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-mdf-dried-figs",
-    image: "🫒",
+    image: "https://images.unsplash.com/photo-1590080875515-8a3a8dc5735e?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🫒",
     name: "Rich Soft Medjool Dried Figs (Anjeer)",
     price: 270,
     mrp: 340,
@@ -1008,7 +1092,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-mdf-roasted-seeds",
-    image: "🌱",
+    image: "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🌱",
     name: "Roasted 5-in-1 Super Seed Energy Mix",
     price: 145,
     mrp: 180,
@@ -1019,7 +1104,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-mdf-cardamom",
-    image: "🫚",
+    image: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🫚",
     name: "Bold Green Cardamom Pods (Chhoti Elaichi)",
     price: 120,
     mrp: 150,
@@ -1034,7 +1120,8 @@ export const PRODUCTS: Product[] = [
   // =========================================================================
   {
     id: "prod-if-masala-noodles",
-    image: "🍜",
+    image: "https://images.unsplash.com/photo-1612927601601-6638404737ce?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🍜",
     name: "2-Minute Spicy Masala Instant Noodles",
     price: 56,
     mrp: 60,
@@ -1045,7 +1132,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-if-atta-noodles",
-    image: "🍜",
+    image: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🍜",
     name: "Wholesome Wheat Atta Vegetable Noodles",
     price: 85,
     mrp: 95,
@@ -1056,7 +1144,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-if-tomato-soup",
-    image: "🥣",
+    image: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🥣",
     name: "Classic Creamy Tomato Instant Soup",
     price: 32,
     mrp: 38,
@@ -1067,7 +1156,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-if-poha-mix",
-    image: "🥣",
+    image: "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🥣",
     name: "Instant Ready-to-Cook Onion Poha Mix",
     price: 30,
     mrp: 35,
@@ -1078,7 +1168,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-if-upma-mix",
-    image: "🥣",
+    image: "https://images.unsplash.com/photo-1586444248902-2f64eddc13df?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🥣",
     name: "Quick Vegetable Rava Upma Mix",
     price: 30,
     mrp: 35,
@@ -1089,7 +1180,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-if-pasta-masala",
-    image: "🍝",
+    image: "https://images.unsplash.com/photo-1551462147-37885acc36f1?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🍝",
     name: "Cheesy Masala Treat Quick Macaroni",
     price: 35,
     mrp: 40,
@@ -1100,7 +1192,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-if-peanut-butter",
-    image: "🥜",
+    image: "https://images.unsplash.com/photo-1532336414038-cf19250c5757?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🥜",
     name: "All-Natural Crunchy Peanut Butter",
     price: 165,
     mrp: 199,
@@ -1111,7 +1204,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-if-mayonnaise",
-    image: "🥪",
+    image: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🥪",
     name: "Eggless Creamy Sandwich Mayonnaise",
     price: 75,
     mrp: 90,
@@ -1126,7 +1220,8 @@ export const PRODUCTS: Product[] = [
   // =========================================================================
   {
     id: "prod-pc-face-wash",
-    image: "🧴",
+    image: "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🧴",
     name: "Neem & Tea Tree Clarifying Face Wash",
     price: 140,
     mrp: 175,
@@ -1137,7 +1232,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-pc-bathing-soap",
-    image: "🧼",
+    image: "https://images.unsplash.com/photo-1600857544200-b2f666a9a2ec?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🧼",
     name: "Moisturizing Cream Bathing Soap",
     price: 120,
     mrp: 145,
@@ -1148,7 +1244,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-pc-shampoo",
-    image: "🧴",
+    image: "https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🧴",
     name: "Anti-Dandruff Cooling Scalp Shampoo",
     price: 160,
     mrp: 199,
@@ -1159,7 +1256,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-pc-toothpaste",
-    image: "🪥",
+    image: "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🪥",
     name: "Herbal Clove & Mint Toothpaste",
     price: 78,
     mrp: 95,
@@ -1170,7 +1268,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-pc-hair-oil",
-    image: "🧴",
+    image: "https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🧴",
     name: "Pure Cold-Pressed Coconut Hair Oil",
     price: 90,
     mrp: 110,
@@ -1181,7 +1280,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-pc-body-lotion",
-    image: "🧴",
+    image: "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🧴",
     name: "Deep Nourish Cocoa Butter Body Lotion",
     price: 175,
     mrp: 225,
@@ -1192,7 +1292,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-pc-handwash",
-    image: "🧴",
+    image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🧴",
     name: "Germ Defense Liquid Handwash Refill",
     price: 85,
     mrp: 110,
@@ -1203,7 +1304,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-pc-deodorant",
-    image: "💨",
+    image: "https://images.unsplash.com/photo-1523293182086-7651a899d37f?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "💨",
     name: "All-Day Fresh Sport Body Spray",
     price: 165,
     mrp: 210,
@@ -1218,7 +1320,8 @@ export const PRODUCTS: Product[] = [
   // =========================================================================
   {
     id: "prod-hc-detergent-liquid",
-    image: "🧴",
+    image: "https://images.unsplash.com/photo-1563453392212-326f5e854473?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🧴",
     name: "Multi-Action Liquid Laundry Detergent",
     price: 185,
     mrp: 230,
@@ -1229,7 +1332,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-hc-detergent-powder",
-    image: "🧺",
+    image: "https://images.unsplash.com/photo-1583947215259-38e31be8751f?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🧺",
     name: "Active Oxygen Clean Washing Powder",
     price: 115,
     mrp: 140,
@@ -1240,7 +1344,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-hc-dishwash-gel",
-    image: "🍋",
+    image: "https://images.unsplash.com/photo-1585421514738-01798e348b17?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🍋",
     name: "Lemon Power Concentrate Dishwash Gel",
     price: 105,
     mrp: 130,
@@ -1251,7 +1356,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-hc-floor-cleaner",
-    image: "🧽",
+    image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🧽",
     name: "Citrus Disinfectant Surface Floor Cleaner",
     price: 145,
     mrp: 180,
@@ -1262,7 +1368,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-hc-toilet-cleaner",
-    image: "🚽",
+    image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🚽",
     name: "Ultra Stain Removal Power Toilet Cleaner",
     price: 88,
     mrp: 105,
@@ -1273,7 +1380,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-hc-garbage-bags",
-    image: "🗑️",
+    image: "https://images.unsplash.com/photo-1583947215259-38e31be8751f?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🗑️",
     name: "Medium Leak-Proof Garbage Bags",
     price: 95,
     mrp: 120,
@@ -1284,7 +1392,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-hc-paper-napkins",
-    image: "🧻",
+    image: "https://images.unsplash.com/photo-1585421514284-efb74c2b69ba?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🧻",
     name: "Absorbent 2-Ply Kitchen Towel Tissues",
     price: 110,
     mrp: 140,
@@ -1295,7 +1404,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-hc-mosquito-refill",
-    image: "🦟",
+    image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🦟",
     name: "Fast Action Mosquito Liquid Vaporizer",
     price: 135,
     mrp: 160,
@@ -1310,7 +1420,8 @@ export const PRODUCTS: Product[] = [
   // =========================================================================
   {
     id: "prod-bc-baby-wipes",
-    image: "👶",
+    image: "https://images.unsplash.com/photo-1583947215259-38e31be8751f?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "👶",
     name: "Extra Sensitive Water-Based Baby Wipes",
     price: 115,
     mrp: 150,
@@ -1321,7 +1432,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-bc-diapers-m",
-    image: "👶",
+    image: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "👶",
     name: "Ultra-Absorbent Breathable Diaper Pants (M)",
     price: 310,
     mrp: 390,
@@ -1332,7 +1444,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-bc-baby-shampoo",
-    image: "🧴",
+    image: "https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🧴",
     name: "Gentle No-Tears Herbal Baby Shampoo",
     price: 165,
     mrp: 210,
@@ -1343,7 +1456,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-bc-baby-soap",
-    image: "🧼",
+    image: "https://images.unsplash.com/photo-1600857544200-b2f666a9a2ec?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🧼",
     name: "Almond & Milk Extra Mild Baby Soap",
     price: 95,
     mrp: 120,
@@ -1354,7 +1468,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-bc-baby-massage-oil",
-    image: "🫒",
+    image: "https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🫒",
     name: "Pure Sesame & Olive Baby Massage Oil",
     price: 145,
     mrp: 180,
@@ -1365,7 +1480,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-bc-baby-cereal",
-    image: "🥣",
+    image: "https://images.unsplash.com/photo-1584776296944-ab6fb57b0bdd?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🥣",
     name: "Multi-Grain Wheat & Apple Baby Cereal",
     price: 240,
     mrp: 280,
@@ -1376,7 +1492,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-bc-baby-powder",
-    image: "🧴",
+    image: "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🧴",
     name: "Talc-Free Calming Cornstarch Baby Powder",
     price: 85,
     mrp: 105,
@@ -1387,7 +1504,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-bc-baby-lotion",
-    image: "🧴",
+    image: "https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🧴",
     name: "Daily Deep Moisture Sensitive Baby Lotion",
     price: 175,
     mrp: 220,
@@ -1402,7 +1520,8 @@ export const PRODUCTS: Product[] = [
   // =========================================================================
   {
     id: "prod-pet-adult-dog-food",
-    image: "🐶",
+    image: "https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🐶",
     name: "Nutritious Chicken & Rice Adult Dog Food",
     price: 310,
     mrp: 380,
@@ -1413,7 +1532,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-pet-puppy-food",
-    image: "🐕",
+    image: "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🐕",
     name: "Growth Booster Calcium Puppy Food",
     price: 290,
     mrp: 350,
@@ -1424,7 +1544,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-pet-wet-cat-food",
-    image: "🐱",
+    image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🐱",
     name: "Salmon & Tuna Gravy Wet Cat Food Pouch",
     price: 170,
     mrp: 210,
@@ -1435,7 +1556,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-pet-cat-dry-food",
-    image: "🐟",
+    image: "https://images.unsplash.com/photo-1535294435445-d7249524ef2e?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🐟",
     name: "Ocean Fish Crunchy Dry Cat Food",
     price: 295,
     mrp: 360,
@@ -1446,7 +1568,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-pet-dog-biscuits",
-    image: "🦴",
+    image: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🦴",
     name: "Crunchy Calcium Milk Bone Dog Treats",
     price: 140,
     mrp: 175,
@@ -1457,7 +1580,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-pet-pet-shampoo",
-    image: "🧴",
+    image: "https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🧴",
     name: "Herbal Flea & Tick Defense Pet Shampoo",
     price: 180,
     mrp: 230,
@@ -1468,7 +1592,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-pet-cat-litter",
-    image: "🐾",
+    image: "https://images.unsplash.com/photo-1535294435445-d7249524ef2e?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🐾",
     name: "Quick Clumping Odor Control Cat Litter",
     price: 340,
     mrp: 420,
@@ -1479,7 +1604,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "prod-pet-chew-sticks",
-    image: "🐕",
+    image: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=360&h=360&q=80",
+    fallbackIcon: "🐕",
     name: "Dental Rawhide Twist Chew Sticks for Dogs",
     price: 115,
     mrp: 145,

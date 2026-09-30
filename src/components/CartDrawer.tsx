@@ -116,7 +116,25 @@ export function CartDrawer({
                 return (
                   <div className="drawer-item-card" key={product.id}>
                     <div className="item-thumbnail">
-                      <span className="item-thumbnail-emoji">{product.image}</span>
+                      {product.image.startsWith("http") ? (
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          className="item-thumbnail-photo"
+                          loading="lazy"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                            const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                            if (fallback) fallback.style.display = "flex";
+                          }}
+                        />
+                      ) : null}
+                      <span
+                        className="item-thumbnail-emoji"
+                        style={{ display: product.image.startsWith("http") ? "none" : "flex" }}
+                      >
+                        {product.fallbackIcon || "🛒"}
+                      </span>
                     </div>
 
                     <div className="item-info">

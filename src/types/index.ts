@@ -8,6 +8,7 @@ export interface Product {
   rating: number;
   delivery: string;
   image: string;
+  fallbackIcon?: string;
   badge?: string;
   isMithilaSpecial?: boolean;
 }

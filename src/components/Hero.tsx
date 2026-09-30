@@ -49,7 +49,7 @@ export function Hero({ onShopNow }: HeroProps) {
             </button>
             <div className="hero-guarantee">
               <span className="guarantee-dot"></span>
-              <span>Dark Stores active in Darbhanga & surrounding hubs</span>
+              <span>Express Dark Stores active across Mithila</span>
             </div>
           </div>
 

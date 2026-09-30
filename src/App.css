@@ -50,24 +50,30 @@
 .logo {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   cursor: pointer;
   user-select: none;
+  text-decoration: none;
 }
 
-.logo-icon-wrapper {
-  width: 42px;
-  height: 42px;
-  background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary));
-  border-radius: var(--radius-md);
+.logo-mark {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 10px rgba(5, 150, 105, 0.25);
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  transition: transform var(--transition-fast);
 }
 
-.logo-symbol {
-  font-size: 22px;
+.brand-symbol {
+  width: 36px;
+  height: 36px;
+  display: block;
+}
+
+.logo:hover .logo-mark {
+  transform: translateY(-1px) scale(1.04);
 }
 
 .logo-text-block {
@@ -76,26 +82,29 @@
 }
 
 .logo-name {
-  font-size: 22px;
+  font-family: var(--font-sans);
+  font-size: 21px;
   font-weight: 800;
   color: var(--color-primary-dark);
-  letter-spacing: -0.5px;
-  line-height: 1.1;
+  letter-spacing: -0.6px;
+  line-height: 1.15;
 }
 
 .logo-accent {
   color: var(--color-primary);
+  font-weight: 800;
 }
 
 .logo-tagline {
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 3.5px;
   font-size: 10px;
   font-weight: 700;
   color: var(--color-accent-gold);
   letter-spacing: 0.5px;
   text-transform: uppercase;
+  margin-top: 1px;
 }
 
 .zap-icon {
@@ -150,7 +159,7 @@
   font-size: 13px;
   font-weight: 600;
   color: var(--color-text-main);
-  max-width: 170px;
+  max-width: 200px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1758,7 +1767,7 @@
   }
 
   .location-address {
-    max-width: 120px;
+    max-width: 155px;
   }
 
   .search-wrapper {

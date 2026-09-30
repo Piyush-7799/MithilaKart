@@ -1,3 +1,4 @@
+import { Star, Zap, Plus, Minus } from "lucide-react";
 import type { Product } from "../types";
 
 interface ProductCardProps {
@@ -16,57 +17,95 @@ export function ProductCard({
   const discount = Math.round(
     ((product.mrp - product.price) / product.mrp) * 100
   );
+  const savings = product.mrp - product.price;
 
   return (
-    <div className="product" key={product.id}>
-      <div className="product-image-wrapper">
-        <span className="discount-badge">{discount}% OFF</span>
+    <article className="product-card" data-product-id={product.id}>
+      {/* Visual Area */}
+      <div className="product-visual-wrapper">
+        {discount > 0 && (
+          <span className="product-discount-tag">
+            {discount}% OFF
+          </span>
+        )}
 
-        <div className="product-image">{product.image}</div>
-      </div>
-
-      <div className="delivery-time">⚡ {product.delivery}</div>
-
-      <h3>{product.name}</h3>
-
-      <p className="product-unit">{product.unit}</p>
-
-      <div className="rating">⭐ {product.rating}</div>
-
-      <div className="price-row">
-        <div>
-          <span className="price">₹{product.price}</span>
-          <span className="mrp">₹{product.mrp}</span>
+        <div className="product-image-display">
+          <span className="product-emoji-art">{product.image}</span>
         </div>
 
-        {quantity > 0 ? (
-          <div className="quantity-control">
-            <button
-              onClick={() => onRemoveFromCart(product.id)}
-              aria-label={`Decrease quantity of ${product.name}`}
-            >
-              −
-            </button>
-
-            <span>{quantity}</span>
-
-            <button
-              onClick={() => onAddToCart(product.id)}
-              aria-label={`Increase quantity of ${product.name}`}
-            >
-              +
-            </button>
-          </div>
-        ) : (
-          <button
-            className="add-btn"
-            onClick={() => onAddToCart(product.id)}
-            aria-label={`Add ${product.name} to cart`}
-          >
-            ADD
-          </button>
-        )}
+        <div className="product-delivery-badge">
+          <Zap size={11} className="delivery-zap" />
+          <span>{product.delivery}</span>
+        </div>
       </div>
-    </div>
+
+      {/* Details Area */}
+      <div className="product-details">
+        <div className="product-meta-row">
+          <span className="product-unit-text">{product.unit}</span>
+          <div className="product-rating-pill" title={`Rated ${product.rating} out of 5 stars`}>
+            <Star size={12} className="star-icon" />
+            <span>{product.rating}</span>
+          </div>
+        </div>
+
+        <h3 className="product-name" title={product.name}>
+          {product.name}
+        </h3>
+
+        {/* Pricing & Cart Action Row */}
+        <div className="product-action-row">
+          <div className="product-pricing">
+            <div className="price-main-group">
+              <span className="price-current">₹{product.price}</span>
+              {product.mrp > product.price && (
+                <span className="price-mrp">₹{product.mrp}</span>
+              )}
+            </div>
+            {savings > 0 && (
+              <span className="price-savings">Save ₹{savings}</span>
+            )}
+          </div>
+
+          <div className="product-cart-controls">
+            {quantity > 0 ? (
+              <div className="quantity-stepper">
+                <button
+                  type="button"
+                  className="stepper-btn stepper-btn-decrement"
+                  onClick={() => onRemoveFromCart(product.id)}
+                  aria-label={`Decrease quantity of ${product.name}`}
+                >
+                  <Minus size={14} />
+                </button>
+
+                <span className="stepper-count" aria-live="polite">
+                  {quantity}
+                </span>
+
+                <button
+                  type="button"
+                  className="stepper-btn stepper-btn-increment"
+                  onClick={() => onAddToCart(product.id)}
+                  aria-label={`Increase quantity of ${product.name}`}
+                >
+                  <Plus size={14} />
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                className="add-to-cart-btn"
+                onClick={() => onAddToCart(product.id)}
+                aria-label={`Add ${product.name} to cart`}
+              >
+                <span>ADD</span>
+                <Plus size={14} />
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </article>
   );
 }

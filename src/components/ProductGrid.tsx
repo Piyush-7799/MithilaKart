@@ -1,3 +1,4 @@
+import { PackageSearch, RotateCcw, Sparkles } from "lucide-react";
 import type { Product } from "../types";
 import { ProductCard } from "./ProductCard";
 
@@ -6,6 +7,9 @@ interface ProductGridProps {
   cart: Record<string, number>;
   onAddToCart: (id: string) => void;
   onRemoveFromCart: (id: string) => void;
+  onResetFilters?: () => void;
+  selectedCategory?: string;
+  searchQuery?: string;
 }
 
 export function ProductGrid({
@@ -13,24 +17,60 @@ export function ProductGrid({
   cart,
   onAddToCart,
   onRemoveFromCart,
+  onResetFilters,
+  selectedCategory = "All",
+  searchQuery = "",
 }: ProductGridProps) {
+  const sectionTitle =
+    selectedCategory === "All"
+      ? "Popular Essentials"
+      : selectedCategory;
+
   return (
-    <section className="section" id="products">
-      <div className="section-heading">
+    <section className="products-section" id="products" aria-label="Product catalog">
+      <div className="section-header">
         <div>
-          <h2>Popular Products</h2>
-          <span>{products.length} products available</span>
+          <div className="section-badge">
+            <Sparkles size={13} />
+            <span>Mithila Express Store</span>
+          </div>
+          <h2 className="section-title">{sectionTitle}</h2>
+          <p className="section-subtitle">
+            {searchQuery
+              ? `Showing results for "${searchQuery}"`
+              : "Guaranteed 10-15 minute delivery from your nearest dark store"}
+          </p>
+        </div>
+
+        <div className="product-count-badge">
+          <span>{products.length} {products.length === 1 ? "Product" : "Products"}</span>
         </div>
       </div>
 
       {products.length === 0 ? (
-        <div className="no-products">
-          <div>🔍</div>
-          <h3>No products found</h3>
-          <p>Try searching for another product.</p>
+        <div className="no-products-state">
+          <div className="no-products-icon-circle">
+            <PackageSearch size={40} className="empty-search-icon" />
+          </div>
+          <h3>No matching items found</h3>
+          <p>
+            We couldn't find any products
+            {searchQuery && <> matching <strong>"{searchQuery}"</strong></>}
+            {selectedCategory !== "All" && <> in <strong>"{selectedCategory}"</strong></>}.
+          </p>
+          {onResetFilters && (
+            <button
+              type="button"
+              className="reset-filters-btn"
+              onClick={onResetFilters}
+            >
+              <RotateCcw size={15} />
+              <span>Reset Filters & Show All</span>
+            </button>
+          )}
         </div>
       ) : (
-        <div className="products">
+        <div className="products-grid">
           {products.map((product) => (
             <ProductCard
               key={product.id}

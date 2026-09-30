@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ShoppingBag, ArrowRight } from "lucide-react";
 import "./App.css";
 import { Header } from "./components/Header";
 import { Hero } from "./components/Hero";
@@ -41,6 +42,11 @@ function App() {
     });
   };
 
+  const resetFilters = () => {
+    setSearch("");
+    setSelectedCategory("All");
+  };
+
   const filteredProducts = PRODUCTS.filter((product) => {
     const searchMatch = product.name
       .toLowerCase()
@@ -59,12 +65,12 @@ function App() {
   });
 
   const cartCount = Object.values(cart).reduce(
-    (total, quantity) => total + quantity,
+    (totalCount, quantity) => totalCount + quantity,
     0
   );
 
   const subtotal = cartItems.reduce(
-    (total, item) => total + item.product.price * item.quantity,
+    (acc, item) => acc + item.product.price * item.quantity,
     0
   );
 
@@ -77,38 +83,61 @@ function App() {
         search={search}
         onSearchChange={setSearch}
         cartCount={cartCount}
+        cartTotal={total}
         onOpenCart={() => setShowCart(true)}
       />
 
-      <Hero />
+      <main className="main-content">
+        <Hero />
 
-      <CategoryList
-        categories={CATEGORIES}
-        selectedCategory={selectedCategory}
-        onSelectCategory={setSelectedCategory}
-      />
+        <CategoryList
+          categories={CATEGORIES}
+          selectedCategory={selectedCategory}
+          onSelectCategory={setSelectedCategory}
+        />
 
-      <ProductGrid
-        products={filteredProducts}
-        cart={cart}
-        onAddToCart={addToCart}
-        onRemoveFromCart={removeFromCart}
-      />
+        <ProductGrid
+          products={filteredProducts}
+          cart={cart}
+          onAddToCart={addToCart}
+          onRemoveFromCart={removeFromCart}
+          onResetFilters={resetFilters}
+          selectedCategory={selectedCategory}
+          searchQuery={search}
+        />
+      </main>
 
+      {/* Floating Cart Bar */}
       {cartCount > 0 && (
-        <button
-          className="floating-cart"
-          onClick={() => setShowCart(true)}
-          aria-label="View shopping cart"
-        >
-          <span>🛒 View Cart</span>
-          <span>
-            {cartCount} items · ₹{total}
-          </span>
-          <span>→</span>
-        </button>
+        <aside className="floating-cart-wrapper" aria-label="Shopping cart quick access">
+          <button
+            type="button"
+            className="floating-cart-pill"
+            onClick={() => setShowCart(true)}
+            aria-label={`View shopping cart with ${cartCount} items valued at ₹${total}`}
+          >
+            <div className="floating-cart-left">
+              <div className="floating-icon-wrapper">
+                <ShoppingBag size={18} />
+                <span className="floating-badge">{cartCount}</span>
+              </div>
+              <div className="floating-details">
+                <span className="floating-items">
+                  {cartCount} {cartCount === 1 ? "item" : "items"}
+                </span>
+                <span className="floating-total">₹{total}</span>
+              </div>
+            </div>
+
+            <div className="floating-cart-right">
+              <span>View Cart</span>
+              <ArrowRight size={17} />
+            </div>
+          </button>
+        </aside>
       )}
 
+      {/* Cart Drawer */}
       <CartDrawer
         isOpen={showCart}
         onClose={() => setShowCart(false)}

@@ -7,12 +7,14 @@ import { CategoryList } from "./components/CategoryList";
 import { ProductRail } from "./components/ProductRail";
 import { ProductGrid } from "./components/ProductGrid";
 import { CartDrawer } from "./components/CartDrawer";
+import { WishlistDrawer } from "./components/WishlistDrawer";
 import { LocationModal } from "./components/LocationModal";
 import { ProductDetailsModal } from "./components/ProductDetailsModal";
 import { CATEGORIES, PRODUCTS } from "./data/products";
 import type { CartItem, DeliveryLocation, Product } from "./types";
 import { loadSavedCart, saveCart } from "./utils/cartStorage";
 import { loadSavedLocation, saveLocation, clearSavedLocation } from "./utils/locationStorage";
+import { loadWishlist, saveWishlist } from "./utils/wishlistStorage";
 
 // Curated deterministic product IDs for homepage promotional rails
 const POPULAR_PICKS_IDS = [
@@ -60,10 +62,47 @@ function App() {
   // Product Details Modal state
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
+  // Restore wishlist from localStorage on mount, validated against valid product IDs
+  const [wishlist, setWishlist] = useState<string[]>(() => {
+    return loadWishlist(new Set(PRODUCTS.map((p) => p.id)));
+  });
+  const [showWishlist, setShowWishlist] = useState(false);
+
+  const wishlistSet = useMemo(() => new Set(wishlist), [wishlist]);
+
+  const wishlistProducts = useMemo(() => {
+    return wishlist
+      .map((id) => PRODUCTS.find((p) => p.id === id))
+      .filter((p): p is Product => p !== undefined);
+  }, [wishlist]);
+
   // Synchronize cart state to localStorage on every change
   useEffect(() => {
     saveCart(cart);
   }, [cart]);
+
+  // Synchronize wishlist state to localStorage on every change
+  useEffect(() => {
+    saveWishlist(wishlist);
+  }, [wishlist]);
+
+  const handleToggleWishlist = (productId: string) => {
+    setWishlist((prev) => {
+      if (prev.includes(productId)) {
+        return prev.filter((id) => id !== productId);
+      } else {
+        return [...prev, productId];
+      }
+    });
+  };
+
+  const handleRemoveFromWishlist = (productId: string) => {
+    setWishlist((prev) => prev.filter((id) => id !== productId));
+  };
+
+  const handleClearWishlist = () => {
+    setWishlist([]);
+  };
 
   const handleSelectLocation = (location: DeliveryLocation) => {
     setSelectedLocation(location);
@@ -214,6 +253,10 @@ function App() {
         onSelectProduct={(product) => setSelectedProduct(product)}
         selectedCategory={selectedCategory}
         onSelectCategory={setSelectedCategory}
+        wishlistCount={wishlist.length}
+        onOpenWishlist={() => setShowWishlist(true)}
+        wishlistSet={wishlistSet}
+        onToggleWishlist={handleToggleWishlist}
       />
 
       <main className="main-content">
@@ -241,6 +284,8 @@ function App() {
           onRemoveFromCart={removeFromCart}
           onSelectProduct={(product) => setSelectedProduct(product)}
           onSeeAll={handleExploreMithilaSpecials}
+          wishlistSet={wishlistSet}
+          onToggleWishlist={handleToggleWishlist}
         />
 
         {/* 4. Popular Picks Rail */}
@@ -254,6 +299,8 @@ function App() {
           onRemoveFromCart={removeFromCart}
           onSelectProduct={(product) => setSelectedProduct(product)}
           onSeeAll={handleShopNow}
+          wishlistSet={wishlistSet}
+          onToggleWishlist={handleToggleWishlist}
         />
 
         {/* 5. Everyday Essentials Rail */}
@@ -267,6 +314,8 @@ function App() {
           onRemoveFromCart={removeFromCart}
           onSelectProduct={(product) => setSelectedProduct(product)}
           onSeeAll={handleShopNow}
+          wishlistSet={wishlistSet}
+          onToggleWishlist={handleToggleWishlist}
         />
 
         {/* 6. Full Product Catalogue with Search & Category Filtering */}
@@ -280,6 +329,8 @@ function App() {
           onClearSearch={clearSearch}
           selectedCategory={selectedCategory}
           searchQuery={search}
+          wishlistSet={wishlistSet}
+          onToggleWishlist={handleToggleWishlist}
         />
       </main>
 
@@ -331,6 +382,23 @@ function App() {
         }}
       />
 
+      {/* Wishlist Drawer */}
+      <WishlistDrawer
+        isOpen={showWishlist}
+        onClose={() => setShowWishlist(false)}
+        products={wishlistProducts}
+        cart={cart}
+        onAddToCart={addToCart}
+        onRemoveFromCart={removeFromCart}
+        onRemoveFromWishlist={handleRemoveFromWishlist}
+        onClearWishlist={handleClearWishlist}
+        onSelectProduct={(product) => setSelectedProduct(product)}
+        onExploreCatalogue={() => {
+          setShowWishlist(false);
+          handleShopNow();
+        }}
+      />
+
       {/* Location Selector Modal */}
       <LocationModal
         isOpen={showLocationModal}
@@ -348,6 +416,8 @@ function App() {
         cartQuantity={selectedProduct ? cart[selectedProduct.id] || 0 : 0}
         onAddToCart={addToCart}
         onRemoveFromCart={removeFromCart}
+        isWishlisted={selectedProduct ? wishlistSet.has(selectedProduct.id) : false}
+        onToggleWishlist={handleToggleWishlist}
       />
     </div>
   );

@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   RotateCcw,
   ShoppingBag,
+  Heart,
 } from "lucide-react";
 import type { Product } from "../types";
 
@@ -20,6 +21,8 @@ interface ProductDetailsModalProps {
   cartQuantity: number;
   onAddToCart: (id: string) => void;
   onRemoveFromCart: (id: string) => void;
+  isWishlisted?: boolean;
+  onToggleWishlist?: (id: string) => void;
 }
 
 /**
@@ -40,6 +43,8 @@ interface ProductDetailsModalInnerProps {
   cartQuantity: number;
   onAddToCart: (id: string) => void;
   onRemoveFromCart: (id: string) => void;
+  isWishlisted?: boolean;
+  onToggleWishlist?: (id: string) => void;
 }
 
 function ProductDetailsModalInner({
@@ -48,6 +53,8 @@ function ProductDetailsModalInner({
   cartQuantity,
   onAddToCart,
   onRemoveFromCart,
+  isWishlisted = false,
+  onToggleWishlist,
 }: ProductDetailsModalInnerProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -158,15 +165,40 @@ function ProductDetailsModalInner({
 
           {/* Details & Action Column */}
           <div className="product-modal-info-col">
-            {/* Category & Rating */}
+            {/* Category & Rating & Wishlist Toggle */}
             <div className="product-modal-meta-top">
               <span className="product-modal-category">{product.category}</span>
-              <div
-                className="product-modal-rating"
-                title={`Rated ${product.rating} out of 5 stars`}
-              >
-                <Star size={13} className="star-icon" />
-                <span>{product.rating}</span>
+              <div className="product-modal-meta-right">
+                <div
+                  className="product-modal-rating"
+                  title={`Rated ${product.rating} out of 5 stars`}
+                >
+                  <Star size={13} className="star-icon" />
+                  <span>{product.rating}</span>
+                </div>
+
+                {onToggleWishlist && (
+                  <button
+                    type="button"
+                    className={`product-modal-wishlist-btn ${
+                      isWishlisted ? "product-modal-wishlist-btn-active" : ""
+                    }`}
+                    onClick={() => onToggleWishlist(product.id)}
+                    aria-label={
+                      isWishlisted
+                        ? `Remove ${product.name} from wishlist`
+                        : `Add ${product.name} to wishlist`
+                    }
+                    aria-pressed={isWishlisted}
+                  >
+                    <Heart
+                      size={15}
+                      className="modal-wishlist-icon"
+                      fill={isWishlisted ? "currentColor" : "none"}
+                    />
+                    <span>{isWishlisted ? "Saved" : "Save"}</span>
+                  </button>
+                )}
               </div>
             </div>
 
@@ -295,6 +327,8 @@ export function ProductDetailsModal(props: ProductDetailsModalProps) {
       cartQuantity={props.cartQuantity}
       onAddToCart={props.onAddToCart}
       onRemoveFromCart={props.onRemoveFromCart}
+      isWishlisted={props.isWishlisted}
+      onToggleWishlist={props.onToggleWishlist}
     />
   );
 }

@@ -13,6 +13,8 @@ export interface ProductRailProps {
   onRemoveFromCart: (id: string) => void;
   onSelectProduct: (product: Product) => void;
   onSeeAll?: () => void;
+  wishlistSet?: Set<string>;
+  onToggleWishlist?: (id: string) => void;
 }
 
 export function ProductRail({
@@ -25,6 +27,8 @@ export function ProductRail({
   onRemoveFromCart,
   onSelectProduct,
   onSeeAll,
+  wishlistSet,
+  onToggleWishlist,
 }: ProductRailProps) {
   const trackRef = useRef<HTMLDivElement>(null);
 
@@ -106,6 +110,8 @@ export function ProductRail({
             onAddToCart={onAddToCart}
             onRemoveFromCart={onRemoveFromCart}
             onSelectProduct={onSelectProduct}
+            isWishlisted={wishlistSet ? wishlistSet.has(product.id) : false}
+            onToggleWishlist={onToggleWishlist}
           />
         ))}
       </div>

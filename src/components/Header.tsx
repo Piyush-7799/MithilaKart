@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Search, ShoppingBag, MapPin, ChevronDown, X, Zap } from "lucide-react";
+import { Search, ShoppingBag, MapPin, ChevronDown, X, Zap, Heart } from "lucide-react";
 import type { DeliveryLocation, Product } from "../types";
 import { SearchSuggestions } from "./SearchSuggestions";
 
@@ -15,6 +15,10 @@ interface HeaderProps {
   onSelectProduct?: (product: Product) => void;
   selectedCategory?: string;
   onSelectCategory?: (category: string) => void;
+  wishlistCount?: number;
+  onOpenWishlist?: () => void;
+  wishlistSet?: Set<string>;
+  onToggleWishlist?: (id: string) => void;
 }
 
 export function Header({
@@ -29,6 +33,10 @@ export function Header({
   onSelectProduct,
   selectedCategory,
   onSelectCategory,
+  wishlistCount = 0,
+  onOpenWishlist,
+  wishlistSet,
+  onToggleWishlist,
 }: HeaderProps) {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -131,12 +139,35 @@ export function Header({
                 setIsSearchFocused(false);
               }}
               onClose={() => setIsSearchFocused(false)}
+              wishlistSet={wishlistSet}
+              onToggleWishlist={onToggleWishlist}
             />
           )}
         </div>
 
-        {/* Header Actions / Cart Button */}
+        {/* Header Actions / Wishlist & Cart Buttons */}
         <div className="header-actions">
+          {onOpenWishlist && (
+            <button
+              type="button"
+              className={`wishlist-header-btn ${wishlistCount > 0 ? "wishlist-header-btn-active" : ""}`}
+              onClick={onOpenWishlist}
+              aria-label="Open wishlist"
+            >
+              <div className="wishlist-icon-box">
+                <Heart
+                  size={19}
+                  className="wishlist-header-icon"
+                  fill={wishlistCount > 0 ? "currentColor" : "none"}
+                />
+                {wishlistCount > 0 && (
+                  <span className="wishlist-badge">{wishlistCount}</span>
+                )}
+              </div>
+              <span className="wishlist-btn-label">Wishlist</span>
+            </button>
+          )}
+
           <button
             className={`cart-button ${cartCount > 0 ? "cart-button-active" : ""}`}
             onClick={onOpenCart}

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, Sparkles, Tag, Package } from "lucide-react";
+import { ArrowRight, Sparkles, Tag, Package, Heart } from "lucide-react";
 import type { Product } from "../types";
 
 interface SearchSuggestionsProps {
@@ -9,6 +9,8 @@ interface SearchSuggestionsProps {
   onSelectCategory?: (category: string) => void;
   onSelectProduct: (product: Product) => void;
   onClose: () => void;
+  wishlistSet?: Set<string>;
+  onToggleWishlist?: (id: string) => void;
 }
 
 export function SearchSuggestions({
@@ -18,6 +20,8 @@ export function SearchSuggestions({
   onSelectCategory,
   onSelectProduct,
   onClose,
+  wishlistSet,
+  onToggleWishlist,
 }: SearchSuggestionsProps) {
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -134,9 +138,9 @@ export function SearchSuggestions({
             const isHighlighted = selectedIndex === index;
 
             return (
-              <button
-                type="button"
+              <div
                 role="option"
+                tabIndex={0}
                 aria-selected={isHighlighted}
                 key={product.id}
                 className={`suggestion-item ${
@@ -145,6 +149,13 @@ export function SearchSuggestions({
                 onClick={() => {
                   onSelectProduct(product);
                   onClose();
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onSelectProduct(product);
+                    onClose();
+                  }
                 }}
                 onMouseEnter={() => setSelectedIndex(index)}
               >
@@ -192,7 +203,42 @@ export function SearchSuggestions({
                     <span className="suggestion-mrp">₹{product.mrp}</span>
                   )}
                 </div>
-              </button>
+
+                {onToggleWishlist && (
+                  <button
+                    type="button"
+                    className={`suggestion-wishlist-btn ${
+                      wishlistSet?.has(product.id) ? "suggestion-wishlist-btn-active" : ""
+                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onToggleWishlist(product.id);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.stopPropagation();
+                      }
+                    }}
+                    aria-label={
+                      wishlistSet?.has(product.id)
+                        ? `Remove ${product.name} from wishlist`
+                        : `Add ${product.name} to wishlist`
+                    }
+                    aria-pressed={wishlistSet?.has(product.id)}
+                    title={
+                      wishlistSet?.has(product.id)
+                        ? "Remove from wishlist"
+                        : "Save to wishlist"
+                    }
+                  >
+                    <Heart
+                      size={15}
+                      className="suggestion-wishlist-icon"
+                      fill={wishlistSet?.has(product.id) ? "currentColor" : "none"}
+                    />
+                  </button>
+                )}
+              </div>
             );
           })}
         </div>

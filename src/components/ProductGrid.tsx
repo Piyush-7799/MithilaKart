@@ -12,6 +12,8 @@ interface ProductGridProps {
   onClearSearch?: () => void;
   selectedCategory?: string;
   searchQuery?: string;
+  wishlistSet?: Set<string>;
+  onToggleWishlist?: (id: string) => void;
 }
 
 export function ProductGrid({
@@ -24,6 +26,8 @@ export function ProductGrid({
   onClearSearch,
   selectedCategory = "All",
   searchQuery = "",
+  wishlistSet,
+  onToggleWishlist,
 }: ProductGridProps) {
   const isMithilaSpecials = selectedCategory === "Mithila Specials";
   const trimmedSearch = searchQuery.trim();
@@ -131,6 +135,8 @@ export function ProductGrid({
               onAddToCart={onAddToCart}
               onRemoveFromCart={onRemoveFromCart}
               onSelectProduct={onSelectProduct}
+              isWishlisted={wishlistSet ? wishlistSet.has(product.id) : false}
+              onToggleWishlist={onToggleWishlist}
             />
           ))}
         </div>

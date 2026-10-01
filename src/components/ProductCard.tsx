@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Star, Zap, Plus, Minus, Sparkles, Package } from "lucide-react";
+import { Star, Zap, Plus, Minus, Sparkles, Package, Heart } from "lucide-react";
 import type { Product } from "../types";
 
 interface ProductCardProps {
@@ -8,6 +8,8 @@ interface ProductCardProps {
   onAddToCart: (id: string) => void;
   onRemoveFromCart: (id: string) => void;
   onSelectProduct: (product: Product) => void;
+  isWishlisted?: boolean;
+  onToggleWishlist?: (id: string) => void;
 }
 
 export function ProductCard({
@@ -16,6 +18,8 @@ export function ProductCard({
   onAddToCart,
   onRemoveFromCart,
   onSelectProduct,
+  isWishlisted = false,
+  onToggleWishlist,
 }: ProductCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -55,6 +59,31 @@ export function ProductCard({
             <span className="product-signature-tag" title="Mithila Regional Special">
               <Sparkles size={10} /> Special
             </span>
+          )}
+
+          {/* Favourite / Wishlist Toggle Button */}
+          {onToggleWishlist && (
+            <button
+              type="button"
+              className={`product-wishlist-btn ${isWishlisted ? "product-wishlist-btn-active" : ""}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleWishlist(product.id);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.stopPropagation();
+                }
+              }}
+              aria-label={isWishlisted ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
+              aria-pressed={isWishlisted}
+            >
+              <Heart
+                size={16}
+                className="product-wishlist-icon"
+                fill={isWishlisted ? "currentColor" : "none"}
+              />
+            </button>
           )}
 
           <div className="product-image-display">

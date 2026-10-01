@@ -11,6 +11,7 @@ export interface Product {
   fallbackIcon?: string;
   badge?: string;
   isMithilaSpecial?: boolean;
+  description?: string;
 }
 
 export interface Category {

@@ -7,8 +7,9 @@ import { CategoryList } from "./components/CategoryList";
 import { ProductGrid } from "./components/ProductGrid";
 import { CartDrawer } from "./components/CartDrawer";
 import { LocationModal } from "./components/LocationModal";
+import { ProductDetailsModal } from "./components/ProductDetailsModal";
 import { CATEGORIES, PRODUCTS } from "./data/products";
-import type { CartItem, DeliveryLocation } from "./types";
+import type { CartItem, DeliveryLocation, Product } from "./types";
 import { loadSavedCart, saveCart } from "./utils/cartStorage";
 import { loadSavedLocation, saveLocation, clearSavedLocation } from "./utils/locationStorage";
 
@@ -27,6 +28,9 @@ function App() {
     return loadSavedLocation();
   });
   const [showLocationModal, setShowLocationModal] = useState(false);
+
+  // Product Details Modal state
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   // Synchronize cart state to localStorage on every change
   useEffect(() => {
@@ -131,6 +135,7 @@ function App() {
           cart={cart}
           onAddToCart={addToCart}
           onRemoveFromCart={removeFromCart}
+          onSelectProduct={(product) => setSelectedProduct(product)}
           onResetFilters={resetFilters}
           selectedCategory={selectedCategory}
           searchQuery={search}
@@ -192,6 +197,16 @@ function App() {
         selectedLocation={selectedLocation}
         onSelectLocation={handleSelectLocation}
         onClearLocation={handleClearLocation}
+      />
+
+      {/* Product Details Modal */}
+      <ProductDetailsModal
+        isOpen={!!selectedProduct}
+        product={selectedProduct}
+        onClose={() => setSelectedProduct(null)}
+        cartQuantity={selectedProduct ? cart[selectedProduct.id] || 0 : 0}
+        onAddToCart={addToCart}
+        onRemoveFromCart={removeFromCart}
       />
     </div>
   );

@@ -7,6 +7,7 @@ interface ProductGridProps {
   cart: Record<string, number>;
   onAddToCart: (id: string) => void;
   onRemoveFromCart: (id: string) => void;
+  onSelectProduct: (product: Product) => void;
   onResetFilters?: () => void;
   selectedCategory?: string;
   searchQuery?: string;
@@ -17,6 +18,7 @@ export function ProductGrid({
   cart,
   onAddToCart,
   onRemoveFromCart,
+  onSelectProduct,
   onResetFilters,
   selectedCategory = "All",
   searchQuery = "",
@@ -86,6 +88,7 @@ export function ProductGrid({
               quantity={cart[product.id] || 0}
               onAddToCart={onAddToCart}
               onRemoveFromCart={onRemoveFromCart}
+              onSelectProduct={onSelectProduct}
             />
           ))}
         </div>

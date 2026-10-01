@@ -2,8 +2,9 @@ import { useState, useEffect, useMemo } from "react";
 import { ShoppingBag, ArrowRight } from "lucide-react";
 import "./App.css";
 import { Header } from "./components/Header";
-import { Hero } from "./components/Hero";
+import { PromoHero } from "./components/PromoHero";
 import { CategoryList } from "./components/CategoryList";
+import { ProductRail } from "./components/ProductRail";
 import { ProductGrid } from "./components/ProductGrid";
 import { CartDrawer } from "./components/CartDrawer";
 import { LocationModal } from "./components/LocationModal";
@@ -12,6 +13,33 @@ import { CATEGORIES, PRODUCTS } from "./data/products";
 import type { CartItem, DeliveryLocation, Product } from "./types";
 import { loadSavedCart, saveCart } from "./utils/cartStorage";
 import { loadSavedLocation, saveLocation, clearSavedLocation } from "./utils/locationStorage";
+
+// Curated deterministic product IDs for homepage promotional rails
+const POPULAR_PICKS_IDS = [
+  "prod-fv-banana",
+  "prod-db-full-cream-milk",
+  "prod-db-curd",
+  "prod-db-paneer",
+  "prod-bs-marie-biscuits",
+  "prod-bev-assam-tea",
+  "prod-mdf-cashews",
+  "prod-mdf-almonds",
+  "prod-fv-tomato",
+  "prod-bs-bhujia-sev",
+];
+
+const EVERYDAY_ESSENTIALS_IDS = [
+  "prod-ars-chakki-atta",
+  "prod-ars-basmati-rice",
+  "prod-db-toned-milk",
+  "prod-db-farm-eggs",
+  "prod-ars-sugar",
+  "prod-bs-rusk",
+  "prod-hc-dishwash-gel",
+  "prod-hc-detergent-liquid",
+  "prod-bev-green-tea",
+  "prod-ars-sooji",
+];
 
 function App() {
   const [search, setSearch] = useState("");
@@ -118,6 +146,42 @@ function App() {
     });
   }, [search, selectedCategory]);
 
+  const mithilaSpecialsProducts = useMemo(
+    () => PRODUCTS.filter((p) => p.category === "Mithila Specials"),
+    []
+  );
+
+  const popularPicksProducts = useMemo(
+    () =>
+      POPULAR_PICKS_IDS.map((id) => PRODUCTS.find((p) => p.id === id)).filter(
+        (p): p is Product => p !== undefined
+      ),
+    []
+  );
+
+  const everydayEssentialsProducts = useMemo(
+    () =>
+      EVERYDAY_ESSENTIALS_IDS.map((id) => PRODUCTS.find((p) => p.id === id)).filter(
+        (p): p is Product => p !== undefined
+      ),
+    []
+  );
+
+  const handleShopNow = () => {
+    const el = document.getElementById("products");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  const handleExploreMithilaSpecials = () => {
+    setSelectedCategory("Mithila Specials");
+    const el = document.getElementById("products");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   const cartItems: CartItem[] = Object.entries(cart).flatMap(([id, quantity]) => {
     const product = PRODUCTS.find((p) => p.id === id);
     return product ? [{ product, quantity }] : [];
@@ -153,14 +217,59 @@ function App() {
       />
 
       <main className="main-content">
-        <Hero />
+        {/* 1. Premium Promotional Hero */}
+        <PromoHero
+          onShopNow={handleShopNow}
+          onExploreMithilaSpecials={handleExploreMithilaSpecials}
+        />
 
+        {/* 2. Category Navigation */}
         <CategoryList
           categories={CATEGORIES}
           selectedCategory={selectedCategory}
           onSelectCategory={setSelectedCategory}
         />
 
+        {/* 3. Mithila Specials Showcase Rail */}
+        <ProductRail
+          title="Mithila Specials"
+          subtitle="Local favourites worth discovering"
+          badge="Signature Regional"
+          products={mithilaSpecialsProducts}
+          cart={cart}
+          onAddToCart={addToCart}
+          onRemoveFromCart={removeFromCart}
+          onSelectProduct={(product) => setSelectedProduct(product)}
+          onSeeAll={handleExploreMithilaSpecials}
+        />
+
+        {/* 4. Popular Picks Rail */}
+        <ProductRail
+          title="Popular Picks"
+          subtitle="Everyday products people look for"
+          badge="Trending Now"
+          products={popularPicksProducts}
+          cart={cart}
+          onAddToCart={addToCart}
+          onRemoveFromCart={removeFromCart}
+          onSelectProduct={(product) => setSelectedProduct(product)}
+          onSeeAll={handleShopNow}
+        />
+
+        {/* 5. Everyday Essentials Rail */}
+        <ProductRail
+          title="Everyday Essentials"
+          subtitle="Daily needs, all in one place"
+          badge="Daily Staples"
+          products={everydayEssentialsProducts}
+          cart={cart}
+          onAddToCart={addToCart}
+          onRemoveFromCart={removeFromCart}
+          onSelectProduct={(product) => setSelectedProduct(product)}
+          onSeeAll={handleShopNow}
+        />
+
+        {/* 6. Full Product Catalogue with Search & Category Filtering */}
         <ProductGrid
           products={filteredProducts}
           cart={cart}

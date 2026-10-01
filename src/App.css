@@ -574,6 +574,327 @@
 }
 
 /* --------------------------------------------------------------------------
+   Promo Hero Section (Phase 9)
+   -------------------------------------------------------------------------- */
+.promo-hero-section {
+  margin: 18px 0 32px;
+}
+
+.promo-hero-banner {
+  position: relative;
+  background: linear-gradient(135deg, #064e3b 0%, #065f46 55%, #047857 100%);
+  border-radius: var(--radius-xl);
+  padding: 40px 48px;
+  color: white;
+  overflow: hidden;
+  box-shadow: 0 14px 34px rgba(6, 78, 59, 0.18), 0 4px 12px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.promo-hero-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(64px);
+  pointer-events: none;
+}
+
+.promo-hero-glow-1 {
+  width: 320px;
+  height: 320px;
+  background: rgba(16, 185, 129, 0.28);
+  top: -100px;
+  right: -50px;
+}
+
+.promo-hero-glow-2 {
+  width: 260px;
+  height: 260px;
+  background: rgba(217, 119, 6, 0.22);
+  bottom: -60px;
+  left: 25%;
+}
+
+.promo-hero-pattern {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1.2px, transparent 1.2px);
+  background-size: 24px 24px;
+  pointer-events: none;
+}
+
+.promo-hero-layout {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+.promo-hero-text-col {
+  max-width: 600px;
+  flex: 1;
+}
+
+/* Badges Strip */
+.promo-badges-strip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.promo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  backdrop-filter: blur(6px);
+}
+
+.promo-badge-delivery {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fef08a;
+  border: 1px solid rgba(254, 240, 138, 0.35);
+}
+
+.promo-badge-specials {
+  background: rgba(217, 119, 6, 0.25);
+  color: #fde68a;
+  border: 1px solid rgba(245, 158, 11, 0.45);
+}
+
+.promo-badge-essentials {
+  background: rgba(16, 185, 129, 0.22);
+  color: #a7f3d0;
+  border: 1px solid rgba(52, 211, 153, 0.35);
+}
+
+.promo-badge-icon {
+  flex-shrink: 0;
+}
+
+.promo-hero-headline {
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -1px;
+  margin-bottom: 14px;
+  color: #ffffff;
+}
+
+.promo-hero-headline-highlight {
+  background: linear-gradient(120deg, #fef08a 0%, #fbbf24 60%, #f59e0b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.promo-hero-subtext {
+  font-size: 15.5px;
+  line-height: 1.55;
+  color: #d1fae5;
+  margin-bottom: 24px;
+  max-width: 520px;
+}
+
+/* Hero CTAs */
+.promo-hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.promo-cta-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  background: #ffffff;
+  color: var(--color-primary-dark);
+  font-size: 14.5px;
+  font-weight: 800;
+  padding: 12px 24px;
+  border-radius: var(--radius-full);
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.16);
+  transition: all var(--transition-fast);
+}
+
+.promo-cta-primary:hover {
+  transform: translateY(-2px);
+  background: #fef3c7;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
+}
+
+.promo-cta-primary:focus-visible {
+  outline: 2px solid #fef08a;
+  outline-offset: 3px;
+}
+
+.promo-cta-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border: 1.5px solid rgba(253, 230, 138, 0.55);
+  font-size: 14.5px;
+  font-weight: 700;
+  padding: 11px 22px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: all var(--transition-fast);
+}
+
+.promo-cta-secondary:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: #fde68a;
+  transform: translateY(-2px);
+  color: #fef08a;
+}
+
+.promo-cta-secondary:focus-visible {
+  outline: 2px solid #fde68a;
+  outline-offset: 3px;
+}
+
+.promo-secondary-icon {
+  color: #fde68a;
+}
+
+/* Perks footer */
+.promo-hero-perks {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 12.5px;
+  color: #a7f3d0;
+  font-weight: 500;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.promo-perk-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.promo-perk-icon {
+  color: #34d399;
+}
+
+.promo-perk-divider {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.promo-perk-dot {
+  width: 6px;
+  height: 6px;
+  background: #f59e0b;
+  border-radius: 50%;
+}
+
+/* Right Column: Decorative cards */
+.promo-hero-visual-col {
+  flex-shrink: 0;
+  width: 320px;
+}
+
+.promo-showcase-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.promo-card {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-lg);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: transform var(--transition-fast), background var(--transition-fast);
+}
+
+.promo-card:hover {
+  background: rgba(255, 255, 255, 0.18);
+  transform: translateX(4px);
+}
+
+.promo-card-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.special-icon-box {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.fresh-icon-box {
+  background: #ecfdf5;
+  color: #065f46;
+}
+
+.express-icon-box {
+  background: rgba(16, 185, 129, 0.22);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.4);
+}
+
+.promo-emoji {
+  font-size: 22px;
+}
+
+.express-zap-icon {
+  color: #fef08a;
+}
+
+.promo-card-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.promo-card-tag {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #fde68a;
+}
+
+.promo-card-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.25;
+}
+
+.promo-card-sub {
+  font-size: 11px;
+  color: #d1fae5;
+}
+
+/* --------------------------------------------------------------------------
    Hero Section
    -------------------------------------------------------------------------- */
 .hero-section {
@@ -1059,6 +1380,147 @@
   padding: 3px 10px;
   border-radius: var(--radius-full);
   border: 1px solid var(--color-primary-light);
+}
+
+/* --------------------------------------------------------------------------
+   Product Rail Component (Phase 9)
+   -------------------------------------------------------------------------- */
+.product-rail-section {
+  margin: 32px 0;
+  position: relative;
+}
+
+.product-rail-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.product-rail-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.product-rail-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--color-primary-tint);
+  color: var(--color-primary-dark);
+  border: 1px solid var(--color-primary-light);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 3px 9px;
+  border-radius: var(--radius-full);
+  align-self: flex-start;
+  margin-bottom: 2px;
+}
+
+.rail-badge-icon {
+  color: var(--color-accent);
+}
+
+.product-rail-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--color-text-main);
+  letter-spacing: -0.4px;
+  margin: 0;
+}
+
+.product-rail-subtitle {
+  font-size: 13.5px;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.product-rail-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.product-rail-see-all-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  color: var(--color-primary);
+  font-size: 13.5px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  transition: all var(--transition-fast);
+}
+
+.product-rail-see-all-btn:hover {
+  background: var(--color-primary-tint);
+  color: var(--color-primary-dark);
+}
+
+.product-rail-see-all-btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.product-rail-nav-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rail-nav-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-xs);
+}
+
+.rail-nav-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary-dark);
+  background: var(--color-primary-tint);
+  transform: scale(1.05);
+}
+
+/* Horizontal Track */
+.product-rail-track {
+  display: flex;
+  align-items: stretch;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding: 6px 4px 16px 4px;
+  scroll-snap-type: x proximity;
+  outline: none;
+}
+
+.product-rail-track::-webkit-scrollbar {
+  display: none;
+}
+
+.product-rail-track .product-card {
+  flex: 0 0 240px;
+  min-width: 240px;
+  scroll-snap-align: start;
 }
 
 /* --------------------------------------------------------------------------
@@ -3261,6 +3723,25 @@
     max-width: 440px;
   }
 
+  .promo-hero-layout {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .promo-hero-visual-col {
+    width: 100%;
+  }
+
+  .promo-showcase-container {
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .promo-card {
+    flex: 1 1 calc(50% - 8px);
+  }
+
   .products-grid {
     grid-template-columns: repeat(3, 1fr);
     gap: 16px;
@@ -3360,6 +3841,66 @@
   .stepper-btn {
     width: 28px;
     height: 28px;
+  }
+
+  /* PromoHero & ProductRail Mobile */
+  .promo-hero-banner {
+    padding: 26px 20px;
+    border-radius: var(--radius-lg);
+  }
+
+  .promo-hero-headline {
+    font-size: 26px;
+    letter-spacing: -0.5px;
+  }
+
+  .promo-hero-subtext {
+    font-size: 13.5px;
+    margin-bottom: 20px;
+  }
+
+  .promo-hero-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .promo-cta-primary,
+  .promo-cta-secondary {
+    width: 100%;
+    justify-content: center;
+    padding: 11px 18px;
+    font-size: 13.5px;
+  }
+
+  .promo-showcase-container {
+    display: none; /* Keep mobile view compact & uncluttered */
+  }
+
+  .product-rail-section {
+    margin: 22px 0;
+  }
+
+  .product-rail-nav-group {
+    display: none; /* Mobile uses natural touch swipe */
+  }
+
+  .product-rail-title {
+    font-size: 18px;
+  }
+
+  .product-rail-subtitle {
+    font-size: 12px;
+  }
+
+  .product-rail-track {
+    gap: 12px;
+    padding: 4px 2px 14px 2px;
+  }
+
+  .product-rail-track .product-card {
+    flex: 0 0 170px;
+    min-width: 170px;
   }
 
   /* Hero Section Mobile */
@@ -3576,6 +4117,20 @@
   .quantity-stepper {
     width: 100%;
     justify-content: space-between;
+  }
+
+  .promo-badges-strip {
+    gap: 5px;
+  }
+
+  .promo-badge {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+
+  .product-rail-track .product-card {
+    flex: 0 0 155px;
+    min-width: 155px;
   }
 
   .category-pill {

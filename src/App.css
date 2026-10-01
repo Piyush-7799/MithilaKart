@@ -909,6 +909,14 @@
   justify-content: center;
 }
 
+.delivery-scooter-showcase {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 440px;
+}
+
 .delivery-scooter-wrapper {
   position: relative;
   width: 100%;
@@ -916,7 +924,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 0;
+  padding: 6px 0;
 }
 
 .scooter-ambient-aura {
@@ -986,18 +994,32 @@
   100% { transform: scale(0.9); opacity: 0.7; }
 }
 
-.scooter-badge-bottom {
-  bottom: 8px;
-  right: 10px;
+.scooter-sub-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   background: rgba(255, 255, 255, 0.94);
   color: #064e3b;
   border: 1px solid rgba(203, 213, 225, 0.9);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.16);
-  padding: 6px 14px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  border-radius: var(--radius-full);
+  padding: 5px 14px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.25px;
+  margin-top: 4px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  white-space: nowrap;
 }
 
-.scooter-badge-icon {
+.scooter-sub-label-icon {
   font-size: 13px;
+  line-height: 1;
+}
+
+.scooter-sub-label-text {
+  line-height: 1;
 }
 
 /* --------------------------------------------------------------------------
@@ -4385,6 +4407,7 @@
     margin: 10px auto 0 auto;
   }
 
+  .delivery-scooter-showcase,
   .delivery-scooter-wrapper {
     max-width: 380px;
   }
@@ -4392,6 +4415,11 @@
   .scooter-floating-badge {
     font-size: 11px;
     padding: 5px 12px;
+  }
+
+  .scooter-sub-label {
+    font-size: 11px;
+    padding: 5px 13px;
   }
 
   .product-rail-section {
@@ -4666,6 +4694,7 @@
     margin: 4px auto 0 auto;
   }
 
+  .delivery-scooter-showcase,
   .delivery-scooter-wrapper {
     max-width: 320px;
   }
@@ -4686,9 +4715,11 @@
     left: 2px;
   }
 
-  .scooter-badge-bottom {
-    bottom: 2px;
-    right: 2px;
+  .scooter-sub-label {
+    font-size: 10px;
+    padding: 4px 11px;
+    gap: 5px;
+    margin-top: 1px;
   }
 
   .product-rail-track .product-card {

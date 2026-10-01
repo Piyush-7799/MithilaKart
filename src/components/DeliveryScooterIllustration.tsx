@@ -4,9 +4,10 @@ interface DeliveryScooterProps {
 
 export function DeliveryScooterIllustration({ className = "" }: DeliveryScooterProps) {
   return (
-    <div className={`delivery-scooter-wrapper ${className}`} aria-hidden="true">
-      {/* Background Soft Ambient Aura */}
-      <div className="scooter-ambient-aura" />
+    <div className={`delivery-scooter-showcase ${className}`} aria-hidden="true">
+      <div className="delivery-scooter-wrapper">
+        {/* Background Soft Ambient Aura */}
+        <div className="scooter-ambient-aura" />
 
       {/* Bespoke Vector Scooter & Rider SVG */}
       <svg
@@ -250,15 +251,17 @@ export function DeliveryScooterIllustration({ className = "" }: DeliveryScooterP
         </g>
       </svg>
 
-      {/* Floating Quick-Commerce Micro Badges */}
-      <div className="scooter-floating-badge scooter-badge-top">
-        <span className="scooter-pulse-dot" />
-        <span className="scooter-badge-text">⚡ 10–15 Min Delivery</span>
+        {/* Floating Quick-Commerce Micro Badge */}
+        <div className="scooter-floating-badge scooter-badge-top">
+          <span className="scooter-pulse-dot" />
+          <span className="scooter-badge-text">⚡ 10–15 Min Delivery</span>
+        </div>
       </div>
 
-      <div className="scooter-floating-badge scooter-badge-bottom">
-        <span className="scooter-badge-icon">🏠</span>
-        <span className="scooter-badge-text">Direct to Your Kitchen</span>
+      {/* Small Supporting Badge/Label Directly BELOW the Scooter Illustration */}
+      <div className="scooter-sub-label">
+        <span className="scooter-sub-label-icon">🏠</span>
+        <span className="scooter-sub-label-text">Direct to your kitchen</span>
       </div>
     </div>
   );

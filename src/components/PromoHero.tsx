@@ -39,8 +39,8 @@ export function PromoHero({
 
             {/* Main Headline */}
             <h1 className="promo-hero-headline">
-              Direct to your{" "}
-              <span className="promo-hero-headline-highlight">kitchen</span>
+              Fast Delivery in{" "}
+              <span className="promo-hero-headline-highlight">Mithila</span>
             </h1>
 
             {/* Supporting Text */}

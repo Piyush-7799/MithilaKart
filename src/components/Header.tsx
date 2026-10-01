@@ -1,5 +1,7 @@
+import { useState, useRef } from "react";
 import { Search, ShoppingBag, MapPin, ChevronDown, X, Zap } from "lucide-react";
-import type { DeliveryLocation } from "../types";
+import type { DeliveryLocation, Product } from "../types";
+import { SearchSuggestions } from "./SearchSuggestions";
 
 interface HeaderProps {
   search: string;
@@ -9,6 +11,10 @@ interface HeaderProps {
   onOpenCart: () => void;
   selectedLocation: DeliveryLocation | null;
   onOpenLocationModal: () => void;
+  products?: Product[];
+  onSelectProduct?: (product: Product) => void;
+  selectedCategory?: string;
+  onSelectCategory?: (category: string) => void;
 }
 
 export function Header({
@@ -19,7 +25,20 @@ export function Header({
   onOpenCart,
   selectedLocation,
   onOpenLocationModal,
+  products = [],
+  onSelectProduct,
+  selectedCategory,
+  onSelectCategory,
 }: HeaderProps) {
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const showSuggestions =
+    isSearchFocused &&
+    search.trim().length > 0 &&
+    Boolean(onSelectProduct) &&
+    products.length > 0;
+
   return (
     <header className="navbar-container">
       <div className="navbar">
@@ -65,26 +84,54 @@ export function Header({
           </button>
         </div>
 
-        {/* Large Search Bar */}
-        <div className="search-wrapper">
+        {/* Large Search Bar with Live Suggestions Dropdown */}
+        <div className={`search-wrapper ${isSearchFocused ? "search-wrapper-focused" : ""}`}>
           <Search size={18} className="search-icon" />
           <input
+            ref={searchInputRef}
             className="search-input"
             type="text"
             placeholder="Search milk, fresh mangoes, makhana, vegetables..."
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
+            onFocus={() => setIsSearchFocused(true)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") {
+                setIsSearchFocused(false);
+              }
+            }}
             aria-label="Search products"
+            aria-expanded={showSuggestions}
+            aria-haspopup="listbox"
           />
           {search && (
             <button
               className="search-clear-btn"
-              onClick={() => onSearchChange("")}
+              onClick={() => {
+                onSearchChange("");
+                setIsSearchFocused(false);
+                searchInputRef.current?.focus();
+              }}
               aria-label="Clear search text"
               type="button"
             >
               <X size={15} />
             </button>
+          )}
+
+          {/* Suggestions Dropdown */}
+          {showSuggestions && onSelectProduct && (
+            <SearchSuggestions
+              query={search}
+              products={products}
+              selectedCategory={selectedCategory}
+              onSelectCategory={onSelectCategory}
+              onSelectProduct={(product) => {
+                onSelectProduct(product);
+                setIsSearchFocused(false);
+              }}
+              onClose={() => setIsSearchFocused(false)}
+            />
           )}
         </div>
 

@@ -12,6 +12,17 @@ export function CategoryList({
   selectedCategory,
   onSelectCategory,
 }: CategoryListProps) {
+  const handleCategoryClick = (name: string) => {
+    onSelectCategory(name);
+    const el = document.getElementById("products");
+    if (el) {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < 60 || rect.top > window.innerHeight - 100) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+  };
+
   return (
     <section className="categories-section" aria-label="Product categories">
       <div className="section-header">
@@ -30,8 +41,9 @@ export function CategoryList({
             type="button"
             role="tab"
             aria-selected={selectedCategory === "All"}
+            aria-label="Filter by All Products"
             className={`category-pill ${selectedCategory === "All" ? "category-pill-active" : ""}`}
-            onClick={() => onSelectCategory("All")}
+            onClick={() => handleCategoryClick("All")}
           >
             <div className="category-icon-box">
               <LayoutGrid size={22} className="all-cat-icon" />
@@ -49,11 +61,12 @@ export function CategoryList({
                 type="button"
                 role="tab"
                 aria-selected={isActive}
+                aria-label={`Filter by ${category.name}`}
                 key={category.name}
                 className={`category-pill ${isActive ? "category-pill-active" : ""} ${
                   isSignature ? "category-pill-signature" : ""
                 }`}
-                onClick={() => onSelectCategory(category.name)}
+                onClick={() => handleCategoryClick(category.name)}
               >
                 {isSignature && (
                   <span className="signature-pill-tag">

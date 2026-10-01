@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { ShoppingBag, ArrowRight } from "lucide-react";
 import "./App.css";
 import { Header } from "./components/Header";
@@ -79,17 +79,44 @@ function App() {
     setSelectedCategory("All");
   };
 
-  const filteredProducts = PRODUCTS.filter((product) => {
-    const searchMatch = product.name
-      .toLowerCase()
-      .includes(search.toLowerCase());
+  const clearSearch = () => {
+    setSearch("");
+  };
 
-    const categoryMatch =
-      selectedCategory === "All" ||
-      product.category === selectedCategory;
+  const filteredProducts = useMemo(() => {
+    const trimmed = search.trim().toLowerCase();
 
-    return searchMatch && categoryMatch;
-  });
+    return PRODUCTS.filter((product) => {
+      // Category filter check
+      const matchesCategory =
+        selectedCategory === "All" || product.category === selectedCategory;
+
+      if (!trimmed) {
+        return matchesCategory;
+      }
+
+      // Search match across name, category, unit, badge, description, and Mithila Special metadata
+      const nameMatch = product.name.toLowerCase().includes(trimmed);
+      const categoryMatch = product.category.toLowerCase().includes(trimmed);
+      const unitMatch = product.unit.toLowerCase().includes(trimmed);
+      const badgeMatch = product.badge
+        ? product.badge.toLowerCase().includes(trimmed)
+        : false;
+      const descMatch = product.description
+        ? product.description.toLowerCase().includes(trimmed)
+        : false;
+      const specialMatch =
+        Boolean(product.isMithilaSpecial) &&
+        (trimmed.includes("special") ||
+          trimmed.includes("mithila") ||
+          trimmed.includes("regional"));
+
+      const matchesSearch =
+        nameMatch || categoryMatch || unitMatch || badgeMatch || descMatch || specialMatch;
+
+      return matchesCategory && matchesSearch;
+    });
+  }, [search, selectedCategory]);
 
   const cartItems: CartItem[] = Object.entries(cart).flatMap(([id, quantity]) => {
     const product = PRODUCTS.find((p) => p.id === id);
@@ -119,6 +146,10 @@ function App() {
         onOpenCart={() => setShowCart(true)}
         selectedLocation={selectedLocation}
         onOpenLocationModal={() => setShowLocationModal(true)}
+        products={PRODUCTS}
+        onSelectProduct={(product) => setSelectedProduct(product)}
+        selectedCategory={selectedCategory}
+        onSelectCategory={setSelectedCategory}
       />
 
       <main className="main-content">
@@ -137,6 +168,7 @@ function App() {
           onRemoveFromCart={removeFromCart}
           onSelectProduct={(product) => setSelectedProduct(product)}
           onResetFilters={resetFilters}
+          onClearSearch={clearSearch}
           selectedCategory={selectedCategory}
           searchQuery={search}
         />

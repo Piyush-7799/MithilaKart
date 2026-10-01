@@ -141,6 +141,13 @@ function App() {
     });
   };
 
+  const restoreCartItem = (id: string, quantity: number) => {
+    setCart((prev) => ({
+      ...prev,
+      [id]: Math.min(99, Math.max(1, quantity)),
+    }));
+  };
+
   const resetFilters = () => {
     setSearch("");
     setSelectedCategory("All");
@@ -376,10 +383,17 @@ function App() {
         onAddToCart={addToCart}
         onRemoveFromCart={removeFromCart}
         onDeleteFromCart={deleteFromCart}
+        onRestoreCartItem={restoreCartItem}
         onSelectCategory={(category) => {
           setSelectedCategory(category);
           setShowCart(false);
         }}
+        selectedLocation={selectedLocation}
+        onOpenLocationModal={() => setShowLocationModal(true)}
+        allProducts={PRODUCTS}
+        onSelectProduct={(product) => setSelectedProduct(product)}
+        wishlistSet={wishlistSet}
+        onToggleWishlist={handleToggleWishlist}
       />
 
       {/* Wishlist Drawer */}

@@ -6,9 +6,11 @@ import { Hero } from "./components/Hero";
 import { CategoryList } from "./components/CategoryList";
 import { ProductGrid } from "./components/ProductGrid";
 import { CartDrawer } from "./components/CartDrawer";
+import { LocationModal } from "./components/LocationModal";
 import { CATEGORIES, PRODUCTS } from "./data/products";
-import type { CartItem } from "./types";
+import type { CartItem, DeliveryLocation } from "./types";
 import { loadSavedCart, saveCart } from "./utils/cartStorage";
+import { loadSavedLocation, saveLocation, clearSavedLocation } from "./utils/locationStorage";
 
 function App() {
   const [search, setSearch] = useState("");
@@ -20,10 +22,26 @@ function App() {
   });
   const [showCart, setShowCart] = useState(false);
 
+  // Restore delivery location from localStorage on mount
+  const [selectedLocation, setSelectedLocation] = useState<DeliveryLocation | null>(() => {
+    return loadSavedLocation();
+  });
+  const [showLocationModal, setShowLocationModal] = useState(false);
+
   // Synchronize cart state to localStorage on every change
   useEffect(() => {
     saveCart(cart);
   }, [cart]);
+
+  const handleSelectLocation = (location: DeliveryLocation) => {
+    setSelectedLocation(location);
+    saveLocation(location);
+  };
+
+  const handleClearLocation = () => {
+    setSelectedLocation(null);
+    clearSavedLocation();
+  };
 
   const addToCart = (id: string) => {
     setCart((prev) => ({
@@ -95,6 +113,8 @@ function App() {
         cartCount={cartCount}
         cartTotal={total}
         onOpenCart={() => setShowCart(true)}
+        selectedLocation={selectedLocation}
+        onOpenLocationModal={() => setShowLocationModal(true)}
       />
 
       <main className="main-content">
@@ -163,6 +183,15 @@ function App() {
           setSelectedCategory(category);
           setShowCart(false);
         }}
+      />
+
+      {/* Location Selector Modal */}
+      <LocationModal
+        isOpen={showLocationModal}
+        onClose={() => setShowLocationModal(false)}
+        selectedLocation={selectedLocation}
+        onSelectLocation={handleSelectLocation}
+        onClearLocation={handleClearLocation}
       />
     </div>
   );

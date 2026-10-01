@@ -23,3 +23,13 @@ export interface CartItem {
   product: Product;
   quantity: number;
 }
+
+export interface DeliveryLocation {
+  id: string;
+  label: string;
+  city: string;
+  state: string;
+  pincode?: string;
+  displayName: string;
+  isCurrentLocation?: boolean;
+}

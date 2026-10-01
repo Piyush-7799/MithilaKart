@@ -1,4 +1,5 @@
 import { Search, ShoppingBag, MapPin, ChevronDown, X, Zap } from "lucide-react";
+import type { DeliveryLocation } from "../types";
 
 interface HeaderProps {
   search: string;
@@ -6,6 +7,8 @@ interface HeaderProps {
   cartCount: number;
   cartTotal?: number;
   onOpenCart: () => void;
+  selectedLocation: DeliveryLocation | null;
+  onOpenLocationModal: () => void;
 }
 
 export function Header({
@@ -14,6 +17,8 @@ export function Header({
   cartCount,
   cartTotal = 0,
   onOpenCart,
+  selectedLocation,
+  onOpenLocationModal,
 }: HeaderProps) {
   return (
     <header className="navbar-container">
@@ -35,27 +40,29 @@ export function Header({
             </span>
           </div>
 
-          {/* Location / Delivery Indicator (Phase 4 placeholder) */}
-          <div 
+          {/* Clickable Location Selector Button */}
+          <button 
+            type="button"
             className="location-pill" 
-            title="Express delivery active across Mithila"
-            role="button"
-            tabIndex={0}
-            aria-label="Delivery location: Delivering across Mithila"
+            onClick={onOpenLocationModal}
+            title={selectedLocation ? `Delivery location: ${selectedLocation.displayName}` : "Select delivery location"}
+            aria-label={`Delivery location: ${selectedLocation ? selectedLocation.displayName : "Select location"}`}
           >
             <div className="location-icon-wrapper">
               <MapPin size={16} />
             </div>
             <div className="location-info">
               <div className="location-heading">
-                <span>Deliver in 12 mins</span>
+                <span>Deliver to</span>
               </div>
               <div className="location-detail">
-                <span className="location-address">Delivering across Mithila</span>
+                <span className="location-address">
+                  {selectedLocation ? selectedLocation.displayName : "Select location"}
+                </span>
                 <ChevronDown size={14} className="chevron-icon" />
               </div>
             </div>
-          </div>
+          </button>
         </div>
 
         {/* Large Search Bar */}

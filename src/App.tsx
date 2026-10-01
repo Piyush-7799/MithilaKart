@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ShoppingBag, ArrowRight } from "lucide-react";
 import "./App.css";
 import { Header } from "./components/Header";
@@ -8,17 +8,27 @@ import { ProductGrid } from "./components/ProductGrid";
 import { CartDrawer } from "./components/CartDrawer";
 import { CATEGORIES, PRODUCTS } from "./data/products";
 import type { CartItem } from "./types";
+import { loadSavedCart, saveCart } from "./utils/cartStorage";
 
 function App() {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [cart, setCart] = useState<Record<string, number>>({});
+
+  // Restore cart from localStorage on mount, validated against valid product IDs
+  const [cart, setCart] = useState<Record<string, number>>(() => {
+    return loadSavedCart(new Set(PRODUCTS.map((p) => p.id)));
+  });
   const [showCart, setShowCart] = useState(false);
+
+  // Synchronize cart state to localStorage on every change
+  useEffect(() => {
+    saveCart(cart);
+  }, [cart]);
 
   const addToCart = (id: string) => {
     setCart((prev) => ({
       ...prev,
-      [id]: (prev[id] || 0) + 1,
+      [id]: Math.min(99, (prev[id] || 0) + 1),
     }));
   };
 
@@ -149,6 +159,10 @@ function App() {
         onAddToCart={addToCart}
         onRemoveFromCart={removeFromCart}
         onDeleteFromCart={deleteFromCart}
+        onSelectCategory={(category) => {
+          setSelectedCategory(category);
+          setShowCart(false);
+        }}
       />
     </div>
   );

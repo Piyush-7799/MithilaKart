@@ -1,4 +1,4 @@
-import { ShoppingBag, X, Trash2, Plus, Minus, ArrowRight, ShieldCheck, Sparkles } from "lucide-react";
+import { ShoppingBag, X, Trash2, Plus, Minus, ArrowRight, ShieldCheck, Sparkles, Zap } from "lucide-react";
 import type { CartItem } from "../types";
 
 interface CartDrawerProps {
@@ -12,6 +12,7 @@ interface CartDrawerProps {
   onAddToCart: (id: string) => void;
   onRemoveFromCart: (id: string) => void;
   onDeleteFromCart: (id: string) => void;
+  onSelectCategory?: (category: string) => void;
 }
 
 export function CartDrawer({
@@ -25,6 +26,7 @@ export function CartDrawer({
   onAddToCart,
   onRemoveFromCart,
   onDeleteFromCart,
+  onSelectCategory,
 }: CartDrawerProps) {
   if (!isOpen) return null;
 
@@ -38,6 +40,19 @@ export function CartDrawer({
   const freeDeliveryThreshold = 300;
   const progressPercent = Math.min(100, Math.round((subtotal / freeDeliveryThreshold) * 100));
   const amountNeeded = Math.max(0, freeDeliveryThreshold - subtotal);
+
+  const handleStartShopping = (categoryName?: string) => {
+    if (categoryName && onSelectCategory) {
+      onSelectCategory(categoryName);
+    }
+    onClose();
+    setTimeout(() => {
+      const el = document.getElementById("products");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+      }
+    }, 100);
+  };
 
   return (
     <div className="cart-backdrop" onClick={onClose} aria-modal="true" role="dialog">
@@ -67,21 +82,53 @@ export function CartDrawer({
         </div>
 
         {cartCount === 0 ? (
-          /* Empty Cart State */
+          /* Enhanced Empty Cart State */
           <div className="drawer-empty-state">
             <div className="empty-cart-graphic">
-              <ShoppingBag size={48} className="empty-bag-icon" />
+              <ShoppingBag size={40} className="empty-bag-icon" />
             </div>
-            <h3>Your cart is empty</h3>
-            <p>Looks like you haven't added any fresh groceries or essentials yet.</p>
+            <h3 className="empty-cart-title">Your cart is empty</h3>
+            <p className="empty-cart-desc">
+              Good food is just minutes away! Explore 126+ fresh groceries, staples, and Mithila's signature specials.
+            </p>
+
             <button
               type="button"
               className="start-shopping-btn"
-              onClick={onClose}
+              onClick={() => handleStartShopping()}
             >
-              <span>Start Shopping Now</span>
+              <span>Explore Catalogue</span>
               <ArrowRight size={16} />
             </button>
+
+            {/* Quick Category Exploration */}
+            <div className="empty-cart-suggestions">
+              <span className="suggestions-title">Popular Categories</span>
+              <div className="suggestion-chips">
+                {[
+                  { name: "Mithila Specials", icon: "🌾" },
+                  { name: "Fruits & Vegetables", icon: "🥦" },
+                  { name: "Dairy & Breakfast", icon: "🥛" },
+                  { name: "Makhana & Dry Fruits", icon: "🥜" },
+                ].map((cat) => (
+                  <button
+                    key={cat.name}
+                    type="button"
+                    className="suggestion-chip"
+                    onClick={() => handleStartShopping(cat.name)}
+                  >
+                    <span>{cat.icon}</span>
+                    <span>{cat.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Fast Delivery Assurance */}
+            <div className="empty-cart-perk">
+              <Zap size={14} className="empty-perk-icon" />
+              <span>Free delivery on orders over ₹300 • 10-15 min delivery</span>
+            </div>
           </div>
         ) : (
           <>
@@ -249,7 +296,7 @@ export function CartDrawer({
                 <button
                   type="button"
                   className="checkout-primary-btn"
-                  title="Checkout flow will be implemented in Phase 5"
+                  title="Doorstep delivery across Mithila in 10-15 mins"
                 >
                   <div className="btn-price-summary">
                     <span className="btn-total">₹{total}</span>
@@ -260,7 +307,7 @@ export function CartDrawer({
                     <ArrowRight size={18} />
                   </div>
                 </button>
-                <span className="phase-note">Checkout flow arrives in Phase 5</span>
+                <span className="phase-note">Doorstep delivery across Mithila in 10-15 mins</span>
               </div>
             </div>
           </>

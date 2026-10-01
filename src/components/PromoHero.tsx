@@ -1,4 +1,5 @@
 import { Zap, Sparkles, ArrowRight, ShieldCheck, Clock, ShoppingBag } from "lucide-react";
+import { DeliveryScooterIllustration } from "./DeliveryScooterIllustration";
 
 interface PromoHeroProps {
   onShopNow: () => void;
@@ -38,13 +39,13 @@ export function PromoHero({
 
             {/* Main Headline */}
             <h1 className="promo-hero-headline">
-              Mithila's everyday shopping,{" "}
-              <span className="promo-hero-headline-highlight">delivered fast.</span>
+              Direct to your{" "}
+              <span className="promo-hero-headline-highlight">kitchen</span>
             </h1>
 
             {/* Supporting Text */}
             <p className="promo-hero-subtext">
-              Fresh essentials, local favourites, and daily needs — all in one place.
+              Fresh essentials, local favourites, and daily needs — delivered fast.
             </p>
 
             {/* CTAs */}
@@ -74,7 +75,7 @@ export function PromoHero({
             <div className="promo-hero-perks">
               <div className="promo-perk-item">
                 <Clock size={14} className="promo-perk-icon" />
-                <span>Instant Local Dispatch</span>
+                <span>10–15 Min Doorstep Drop</span>
               </div>
               <span className="promo-perk-divider" aria-hidden="true">•</span>
               <div className="promo-perk-item">
@@ -89,45 +90,9 @@ export function PromoHero({
             </div>
           </div>
 
-          {/* Right Column: Visual Grocery Showcase Card Composition */}
+          {/* Right Column: Premium Delivery Scooter Showcase */}
           <div className="promo-hero-visual-col" aria-hidden="true">
-            <div className="promo-showcase-container">
-              {/* Feature Floating Card 1: Regional Makhana Special */}
-              <div className="promo-card promo-card-special">
-                <div className="promo-card-icon-box special-icon-box">
-                  <span className="promo-emoji">🌾</span>
-                </div>
-                <div className="promo-card-info">
-                  <span className="promo-card-tag">Signature Selection</span>
-                  <strong className="promo-card-title">Phool Makhana</strong>
-                  <span className="promo-card-sub">Local Farm Direct</span>
-                </div>
-              </div>
-
-              {/* Feature Floating Card 2: Fresh Everyday Staples */}
-              <div className="promo-card promo-card-fresh">
-                <div className="promo-card-icon-box fresh-icon-box">
-                  <span className="promo-emoji">🥛</span>
-                </div>
-                <div className="promo-card-info">
-                  <span className="promo-card-tag">Fresh Daily</span>
-                  <strong className="promo-card-title">Dairy & Staples</strong>
-                  <span className="promo-card-sub">Morning Dispatch</span>
-                </div>
-              </div>
-
-              {/* Feature Floating Card 3: Fast Express Promise */}
-              <div className="promo-card promo-card-express">
-                <div className="promo-card-icon-box express-icon-box">
-                  <Zap size={20} className="express-zap-icon" />
-                </div>
-                <div className="promo-card-info">
-                  <span className="promo-card-tag">Quick Dispatch</span>
-                  <strong className="promo-card-title">10–15 Min Drop</strong>
-                  <span className="promo-card-sub">Dark Store Network</span>
-                </div>
-              </div>
-            </div>
+            <DeliveryScooterIllustration />
           </div>
         </div>
       </div>

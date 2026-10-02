@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import type { Product } from "../types";
 
-interface ProductDetailsModalProps {
+export interface ProductDetailsModalProps {
   isOpen: boolean;
   product: Product | null;
   onClose: () => void;
@@ -31,10 +31,10 @@ interface ProductDetailsModalProps {
  */
 function getProductDescription(product: Product): string {
   if (product.description && product.description.trim()) {
-    return product.description;
+    return product.description.trim();
   }
 
-  return `${product.name} is carefully packed to maintain quality and freshness. A daily kitchen essential in our ${product.category} catalogue, conveniently portioned in a ${product.unit} pack for household use.`;
+  return "Quality everyday essential from the MithilaKart catalogue.";
 }
 
 interface ProductDetailsModalInnerProps {
@@ -59,6 +59,15 @@ function ProductDetailsModalInner({
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
+  // Lock background scrolling while modal is open
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, []);
+
   // Handle Escape key to close modal
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -74,10 +83,10 @@ function ProductDetailsModalInner({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
-  const discount = Math.round(
-    ((product.mrp - product.price) / product.mrp) * 100
-  );
-  const savings = Math.max(0, product.mrp - product.price);
+  const discount =
+    product.mrp > product.price
+      ? Math.round(((product.mrp - product.price) / product.mrp) * 100)
+      : 0;
   const description = getProductDescription(product);
 
   return (
@@ -165,9 +174,17 @@ function ProductDetailsModalInner({
 
           {/* Details & Action Column */}
           <div className="product-modal-info-col">
-            {/* Category & Rating & Wishlist Toggle */}
+            {/* Top Row: Mithila Special & Category & Rating & Wishlist Toggle */}
             <div className="product-modal-meta-top">
-              <span className="product-modal-category">{product.category}</span>
+              <div className="product-modal-tags-left">
+                {product.isMithilaSpecial && (
+                  <span className="product-modal-special-badge">
+                    <Sparkles size={11} /> Mithila Special
+                  </span>
+                )}
+                <span className="product-modal-category">{product.category}</span>
+              </div>
+
               <div className="product-modal-meta-right">
                 <div
                   className="product-modal-rating"
@@ -212,7 +229,7 @@ function ProductDetailsModalInner({
               <span className="product-modal-unit-tag">{product.unit}</span>
             </div>
 
-            {/* Pricing Section */}
+            {/* Pricing Section (₹99  ₹120  17% OFF) */}
             <div className="product-modal-price-box">
               <div className="product-modal-price-main">
                 <span className="product-modal-price-current">
@@ -223,18 +240,26 @@ function ProductDetailsModalInner({
                     ₹{product.mrp}
                   </span>
                 )}
+                {discount > 0 && (
+                  <span className="product-modal-discount-pill">
+                    {discount}% OFF
+                  </span>
+                )}
               </div>
-              {savings > 0 && (
-                <span className="product-modal-savings">
-                  You Save ₹{savings} ({discount}% OFF)
-                </span>
-              )}
             </div>
 
-            {/* Product Description */}
+            {/* Availability */}
+            <div className="product-modal-availability-row">
+              <span className="availability-dot" aria-hidden="true" />
+              <span className="availability-label">
+                Available in stock • Delivery in {product.delivery}
+              </span>
+            </div>
+
+            {/* About this product */}
             <div className="product-modal-description-card">
               <h3 className="product-modal-description-heading">
-                Product Details
+                About this product
               </h3>
               <p className="product-modal-description-text">{description}</p>
             </div>
@@ -289,6 +314,7 @@ function ProductDetailsModalInner({
                       type="button"
                       className="modal-stepper-btn modal-stepper-inc"
                       onClick={() => onAddToCart(product.id)}
+                      disabled={cartQuantity >= 99}
                       aria-label={`Increase quantity of ${product.name}`}
                     >
                       <Plus size={16} />
@@ -303,7 +329,8 @@ function ProductDetailsModalInner({
                   aria-label={`Add ${product.name} to cart for ₹${product.price}`}
                 >
                   <ShoppingBag size={18} />
-                  <span>Add to Cart • ₹{product.price}</span>
+                  <span>ADD TO CART</span>
+                  <span className="modal-add-btn-price">₹{product.price}</span>
                 </button>
               )}
             </div>
@@ -332,3 +359,5 @@ export function ProductDetailsModal(props: ProductDetailsModalProps) {
     />
   );
 }
+
+export const ProductDetails = ProductDetailsModal;

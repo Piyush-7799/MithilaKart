@@ -28,7 +28,6 @@ function ProductCardInner({
     product.mrp > product.price
       ? Math.round(((product.mrp - product.price) / product.mrp) * 100)
       : 0;
-  const savings = Math.max(0, product.mrp - product.price);
 
   return (
     <article
@@ -121,19 +120,21 @@ function ProductCardInner({
 
         {/* Details Area */}
         <div className="product-details">
-          <div className="product-meta-row">
-            <span className="product-unit-text">{product.unit}</span>
-            <div className="product-rating-pill" title={`Rated ${product.rating} out of 5 stars`}>
-              <Star size={12} className="star-icon" />
-              <span>{product.rating}</span>
-            </div>
-          </div>
-
+          {/* 1. Product Name */}
           <h3 className="product-name" title={product.name}>
             {product.name}
           </h3>
 
-          {/* Pricing & Cart Action Row */}
+          {/* 2. Quantity / Unit & Rating Row */}
+          <div className="product-meta-row">
+            <span className="product-unit-text">{product.unit}</span>
+            <div className="product-rating-pill" title={`Rated ${product.rating} out of 5 stars`}>
+              <Star size={11} className="star-icon" />
+              <span>{product.rating}</span>
+            </div>
+          </div>
+
+          {/* 3. Pricing & 4. Add Button Row */}
           <div className="product-action-row">
             <div className="product-pricing">
               <div className="price-main-group">
@@ -141,10 +142,10 @@ function ProductCardInner({
                 {product.mrp > product.price && (
                   <span className="price-mrp">₹{product.mrp}</span>
                 )}
+                {discount > 0 && (
+                  <span className="price-discount-pill">{discount}% OFF</span>
+                )}
               </div>
-              {savings > 0 && (
-                <span className="price-savings">Save ₹{savings}</span>
-              )}
             </div>
 
             <div

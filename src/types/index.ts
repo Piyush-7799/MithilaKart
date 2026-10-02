@@ -34,3 +34,21 @@ export interface DeliveryLocation {
   displayName: string;
   isCurrentLocation?: boolean;
 }
+
+export type PriceRange = "all" | "under-100" | "100-250" | "250-500" | "500-plus";
+
+export type DiscountThreshold = 0 | 10 | 20 | 30;
+
+export type SortOption =
+  | "relevance"
+  | "price-asc"
+  | "price-desc"
+  | "discount-desc"
+  | "name-asc";
+
+export interface FilterState {
+  priceRange: PriceRange;
+  discountThreshold: DiscountThreshold;
+  specialOnly: boolean;
+}
+

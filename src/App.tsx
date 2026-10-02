@@ -11,7 +11,7 @@ import { WishlistDrawer } from "./components/WishlistDrawer";
 import { LocationModal } from "./components/LocationModal";
 import { ProductDetailsModal } from "./components/ProductDetailsModal";
 import { CATEGORIES, PRODUCTS } from "./data/products";
-import type { CartItem, DeliveryLocation, Product } from "./types";
+import type { CartItem, DeliveryLocation, FilterState, Product, SortOption } from "./types";
 import { loadSavedCart, saveCart } from "./utils/cartStorage";
 import { loadSavedLocation, saveLocation, clearSavedLocation } from "./utils/locationStorage";
 import { loadWishlist, saveWishlist } from "./utils/wishlistStorage";
@@ -43,9 +43,34 @@ const EVERYDAY_ESSENTIALS_IDS = [
   "prod-ars-sooji",
 ];
 
+const DEFAULT_FILTERS: FilterState = {
+  priceRange: "all",
+  discountThreshold: 0,
+  specialOnly: false,
+};
+
 function App() {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+
+  // Phase 12: Smart filter and sort state (resets on refresh, no URL/storage persistence)
+  const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
+  const [sortBy, setSortBy] = useState<SortOption>("relevance");
+
+  const handleUpdateFilter = <K extends keyof FilterState>(
+    key: K,
+    value: FilterState[K]
+  ) => {
+    setFilters((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
+  const handleClearAllFilters = () => {
+    setFilters(DEFAULT_FILTERS);
+    setSelectedCategory("All");
+  };
 
   // Restore cart from localStorage on mount, validated against valid product IDs
   const [cart, setCart] = useState<Record<string, number>>(() => {
@@ -151,6 +176,8 @@ function App() {
   const resetFilters = () => {
     setSearch("");
     setSelectedCategory("All");
+    setFilters(DEFAULT_FILTERS);
+    setSortBy("relevance");
   };
 
   const clearSearch = () => {
@@ -161,36 +188,105 @@ function App() {
     const trimmed = search.trim().toLowerCase();
 
     return PRODUCTS.filter((product) => {
-      // Category filter check
+      // 1. Category filter check
       const matchesCategory =
         selectedCategory === "All" || product.category === selectedCategory;
+      if (!matchesCategory) return false;
 
-      if (!trimmed) {
-        return matchesCategory;
+      // 2. Search match across name, category, unit, badge, description, and Mithila Special metadata
+      if (trimmed) {
+        const nameMatch = product.name.toLowerCase().includes(trimmed);
+        const categoryMatch = product.category.toLowerCase().includes(trimmed);
+        const unitMatch = product.unit.toLowerCase().includes(trimmed);
+        const badgeMatch = product.badge
+          ? product.badge.toLowerCase().includes(trimmed)
+          : false;
+        const descMatch = product.description
+          ? product.description.toLowerCase().includes(trimmed)
+          : false;
+        const specialMatch =
+          Boolean(product.isMithilaSpecial) &&
+          (trimmed.includes("special") ||
+            trimmed.includes("mithila") ||
+            trimmed.includes("regional"));
+
+        const matchesSearch =
+          nameMatch ||
+          categoryMatch ||
+          unitMatch ||
+          badgeMatch ||
+          descMatch ||
+          specialMatch;
+        if (!matchesSearch) return false;
       }
 
-      // Search match across name, category, unit, badge, description, and Mithila Special metadata
-      const nameMatch = product.name.toLowerCase().includes(trimmed);
-      const categoryMatch = product.category.toLowerCase().includes(trimmed);
-      const unitMatch = product.unit.toLowerCase().includes(trimmed);
-      const badgeMatch = product.badge
-        ? product.badge.toLowerCase().includes(trimmed)
-        : false;
-      const descMatch = product.description
-        ? product.description.toLowerCase().includes(trimmed)
-        : false;
-      const specialMatch =
-        Boolean(product.isMithilaSpecial) &&
-        (trimmed.includes("special") ||
-          trimmed.includes("mithila") ||
-          trimmed.includes("regional"));
+      // 3. Price filter check
+      if (filters.priceRange !== "all") {
+        switch (filters.priceRange) {
+          case "under-100":
+            if (product.price >= 100) return false;
+            break;
+          case "100-250":
+            if (product.price < 100 || product.price > 250) return false;
+            break;
+          case "250-500":
+            if (product.price <= 250 || product.price > 500) return false;
+            break;
+          case "500-plus":
+            if (product.price <= 500) return false;
+            break;
+        }
+      }
 
-      const matchesSearch =
-        nameMatch || categoryMatch || unitMatch || badgeMatch || descMatch || specialMatch;
+      // 4. Discount filter check
+      if (filters.discountThreshold > 0) {
+        if (!product.mrp || product.mrp <= product.price) {
+          return false;
+        }
+        const discountPercent = Math.round(
+          ((product.mrp - product.price) / product.mrp) * 100
+        );
+        if (discountPercent < filters.discountThreshold) {
+          return false;
+        }
+      }
 
-      return matchesCategory && matchesSearch;
+      // 5. Special Mithila regional filter check
+      if (filters.specialOnly) {
+        if (!product.isMithilaSpecial && product.category !== "Mithila Specials") {
+          return false;
+        }
+      }
+
+      return true;
     });
-  }, [search, selectedCategory]);
+  }, [search, selectedCategory, filters]);
+
+  // Derived sorted catalogue products
+  const sortedProducts = useMemo(() => {
+    if (sortBy === "relevance") {
+      return filteredProducts;
+    }
+
+    const list = [...filteredProducts];
+
+    switch (sortBy) {
+      case "price-asc":
+        return list.sort((a, b) => a.price - b.price);
+      case "price-desc":
+        return list.sort((a, b) => b.price - a.price);
+      case "discount-desc":
+        return list.sort((a, b) => {
+          const discA = a.mrp > a.price ? (a.mrp - a.price) / a.mrp : 0;
+          const discB = b.mrp > b.price ? (b.mrp - b.price) / b.mrp : 0;
+          return discB - discA;
+        });
+      case "name-asc":
+        return list.sort((a, b) => a.name.localeCompare(b.name));
+      default:
+        return list;
+    }
+  }, [filteredProducts, sortBy]);
 
   const mithilaSpecialsProducts = useMemo(
     () => PRODUCTS.filter((p) => p.category === "Mithila Specials"),
@@ -325,9 +421,9 @@ function App() {
           onToggleWishlist={handleToggleWishlist}
         />
 
-        {/* 6. Full Product Catalogue with Search & Category Filtering */}
+        {/* 6. Full Product Catalogue with Search, Category & Smart Filters */}
         <ProductGrid
-          products={filteredProducts}
+          products={sortedProducts}
           cart={cart}
           onAddToCart={addToCart}
           onRemoveFromCart={removeFromCart}
@@ -335,9 +431,16 @@ function App() {
           onResetFilters={resetFilters}
           onClearSearch={clearSearch}
           selectedCategory={selectedCategory}
+          onSelectCategory={setSelectedCategory}
           searchQuery={search}
           wishlistSet={wishlistSet}
           onToggleWishlist={handleToggleWishlist}
+          filters={filters}
+          onUpdateFilter={handleUpdateFilter}
+          sortBy={sortBy}
+          onUpdateSort={setSortBy}
+          categories={CATEGORIES}
+          onClearAllFilters={handleClearAllFilters}
         />
       </main>
 

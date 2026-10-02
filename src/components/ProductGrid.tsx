@@ -1,6 +1,7 @@
 import { PackageSearch, RotateCcw, Sparkles, SearchX, X } from "lucide-react";
-import type { Product } from "../types";
+import type { Category, FilterState, Product, SortOption } from "../types";
 import { ProductCard } from "./ProductCard";
+import { FilterBar } from "./FilterBar";
 
 interface ProductGridProps {
   products: Product[];
@@ -11,9 +12,16 @@ interface ProductGridProps {
   onResetFilters?: () => void;
   onClearSearch?: () => void;
   selectedCategory?: string;
+  onSelectCategory?: (category: string) => void;
   searchQuery?: string;
   wishlistSet?: Set<string>;
   onToggleWishlist?: (id: string) => void;
+  filters?: FilterState;
+  onUpdateFilter?: <K extends keyof FilterState>(key: K, value: FilterState[K]) => void;
+  sortBy?: SortOption;
+  onUpdateSort?: (sortBy: SortOption) => void;
+  categories?: Category[];
+  onClearAllFilters?: () => void;
 }
 
 export function ProductGrid({
@@ -25,13 +33,26 @@ export function ProductGrid({
   onResetFilters,
   onClearSearch,
   selectedCategory = "All",
+  onSelectCategory,
   searchQuery = "",
   wishlistSet,
   onToggleWishlist,
+  filters = { priceRange: "all", discountThreshold: 0, specialOnly: false },
+  onUpdateFilter,
+  sortBy = "relevance",
+  onUpdateSort,
+  categories = [],
+  onClearAllFilters,
 }: ProductGridProps) {
   const isMithilaSpecials = selectedCategory === "Mithila Specials";
   const trimmedSearch = searchQuery.trim();
   const isSearching = Boolean(trimmedSearch);
+
+  const hasFilterActive =
+    filters.priceRange !== "all" ||
+    filters.discountThreshold > 0 ||
+    filters.specialOnly ||
+    selectedCategory !== "All";
 
   const sectionTitle = isSearching
     ? `Search Results for "${trimmedSearch}"`
@@ -49,15 +70,24 @@ export function ProductGrid({
     ? `Showing ${products.length} matching ${
         products.length === 1 ? "product" : "products"
       }${selectedCategory !== "All" ? ` in ${selectedCategory}` : " across catalogue"}`
+    : hasFilterActive
+    ? `Showing ${products.length} filtered ${
+        products.length === 1 ? "product" : "products"
+      }`
     : isMithilaSpecials
     ? "Authentic regional staples, traditional Makhana varieties & regional essentials"
     : "Guaranteed 10-15 minute delivery from your nearest dark store";
 
   return (
     <section className="products-section" id="products" aria-label="Product catalog">
+      {/* Section Header */}
       <div className="section-header">
         <div>
-          <div className={`section-badge ${isMithilaSpecials ? "section-badge-special" : ""} ${isSearching ? "section-badge-searching" : ""}`}>
+          <div
+            className={`section-badge ${
+              isMithilaSpecials ? "section-badge-special" : ""
+            } ${isSearching ? "section-badge-searching" : ""}`}
+          >
             <Sparkles size={13} />
             <span>{sectionBadge}</span>
           </div>
@@ -65,14 +95,41 @@ export function ProductGrid({
           <p className="section-subtitle">{sectionSubtitle}</p>
         </div>
 
-        <div className={`product-count-badge ${isSearching ? "product-count-search-active" : ""}`}>
+        <div
+          className={`product-count-badge ${
+            isSearching || hasFilterActive ? "product-count-search-active" : ""
+          }`}
+        >
           <span>
             {isSearching
-              ? `Showing ${products.length} ${products.length === 1 ? "product" : "products"}`
-              : `${products.length} ${products.length === 1 ? "Product" : "Products"}`}
+              ? `Showing ${products.length} ${
+                  products.length === 1 ? "product" : "products"
+                }`
+              : hasFilterActive
+              ? `${products.length} ${
+                  products.length === 1 ? "product found" : "products found"
+                }`
+              : `${products.length} ${
+                  products.length === 1 ? "Product" : "Products"
+                }`}
           </span>
         </div>
       </div>
+
+      {/* Phase 12: Smart Filters & Sort Controls Bar */}
+      {onUpdateFilter && onUpdateSort && onSelectCategory && onClearAllFilters && (
+        <FilterBar
+          filters={filters}
+          onUpdateFilter={onUpdateFilter}
+          sortBy={sortBy}
+          onUpdateSort={onUpdateSort}
+          selectedCategory={selectedCategory}
+          onSelectCategory={onSelectCategory}
+          categories={categories}
+          onClearAllFilters={onClearAllFilters}
+          resultCount={products.length}
+        />
+      )}
 
       {products.length === 0 ? (
         <div className="no-products-state">
@@ -91,12 +148,12 @@ export function ProductGrid({
                 {selectedCategory !== "All" && (
                   <> in <strong>{selectedCategory}</strong></>
                 )}
-                . Try searching for another product or category.
+                . Try removing a filter or changing your search.
               </>
+            ) : hasFilterActive ? (
+              <>Try removing a filter or changing your search criteria.</>
             ) : (
-              <>
-                No products currently available in <strong>{selectedCategory}</strong>.
-              </>
+              <>No products currently available in <strong>{selectedCategory}</strong>.</>
             )}
           </p>
 
@@ -109,11 +166,23 @@ export function ProductGrid({
                 aria-label="Clear current search query"
               >
                 <X size={15} />
-                <span>Clear search</span>
+                <span>Clear Search</span>
               </button>
             )}
 
-            {selectedCategory !== "All" && onResetFilters && (
+            {hasFilterActive && onClearAllFilters && (
+              <button
+                type="button"
+                className="reset-filters-btn"
+                onClick={onClearAllFilters}
+                aria-label="Clear all applied filters"
+              >
+                <RotateCcw size={15} />
+                <span>Clear Filters</span>
+              </button>
+            )}
+
+            {!isSearching && !hasFilterActive && selectedCategory !== "All" && onResetFilters && (
               <button
                 type="button"
                 className="reset-filters-btn"

@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { PackageSearch, RotateCcw, Sparkles, SearchX, X } from "lucide-react";
 import type { Category, FilterState, Product, SortOption } from "../types";
 import { ProductCard } from "./ProductCard";
@@ -24,7 +25,7 @@ interface ProductGridProps {
   onClearAllFilters?: () => void;
 }
 
-export function ProductGrid({
+function ProductGridInner({
   products,
   cart,
   onAddToCart,
@@ -148,10 +149,10 @@ export function ProductGrid({
                 {selectedCategory !== "All" && (
                   <> in <strong>{selectedCategory}</strong></>
                 )}
-                . Try removing a filter or changing your search.
+                . Try another search or change your filters.
               </>
             ) : hasFilterActive ? (
-              <>Try removing a filter or changing your search criteria.</>
+              <>Try another search or change your filters.</>
             ) : (
               <>No products currently available in <strong>{selectedCategory}</strong>.</>
             )}
@@ -213,3 +214,6 @@ export function ProductGrid({
     </section>
   );
 }
+
+export const ProductGrid = memo(ProductGridInner);
+

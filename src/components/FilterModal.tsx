@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, memo } from "react";
 import { X, Sparkles, RotateCcw, Check } from "lucide-react";
 import type { Category, DiscountThreshold, FilterState, PriceRange } from "../types";
 
@@ -29,7 +29,7 @@ const DISCOUNT_OPTIONS: { id: DiscountThreshold; label: string }[] = [
   { id: 30, label: "30%+ OFF" },
 ];
 
-export function FilterModal({
+function FilterModalInner({
   isOpen,
   onClose,
   categories,
@@ -224,3 +224,6 @@ export function FilterModal({
     </div>
   );
 }
+
+export const FilterModal = memo(FilterModalInner);
+

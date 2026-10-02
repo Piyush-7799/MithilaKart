@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import { Star, Zap, Plus, Minus, Sparkles, Package, Heart } from "lucide-react";
 import type { Product } from "../types";
 
@@ -12,7 +12,7 @@ interface ProductCardProps {
   onToggleWishlist?: (id: string) => void;
 }
 
-export function ProductCard({
+function ProductCardInner({
   product,
   quantity,
   onAddToCart,
@@ -24,10 +24,11 @@ export function ProductCard({
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
-  const discount = Math.round(
-    ((product.mrp - product.price) / product.mrp) * 100
-  );
-  const savings = product.mrp - product.price;
+  const discount =
+    product.mrp > product.price
+      ? Math.round(((product.mrp - product.price) / product.mrp) * 100)
+      : 0;
+  const savings = Math.max(0, product.mrp - product.price);
 
   return (
     <article
@@ -170,6 +171,7 @@ export function ProductCard({
                     type="button"
                     className="stepper-btn stepper-btn-increment"
                     onClick={() => onAddToCart(product.id)}
+                    disabled={quantity >= 99}
                     aria-label={`Increase quantity of ${product.name}`}
                   >
                     <Plus size={14} />
@@ -193,3 +195,6 @@ export function ProductCard({
     </article>
   );
 }
+
+export const ProductCard = memo(ProductCardInner);
+

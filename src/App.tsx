@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { ShoppingBag, ArrowRight } from "lucide-react";
 import "./App.css";
 import { Header } from "./components/Header";
@@ -57,7 +57,7 @@ function App() {
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [sortBy, setSortBy] = useState<SortOption>("relevance");
 
-  const handleUpdateFilter = <K extends keyof FilterState>(
+  const handleUpdateFilter = useCallback(<K extends keyof FilterState>(
     key: K,
     value: FilterState[K]
   ) => {
@@ -65,12 +65,12 @@ function App() {
       ...prev,
       [key]: value,
     }));
-  };
+  }, []);
 
-  const handleClearAllFilters = () => {
+  const handleClearAllFilters = useCallback(() => {
     setFilters(DEFAULT_FILTERS);
     setSelectedCategory("All");
-  };
+  }, []);
 
   // Restore cart from localStorage on mount, validated against valid product IDs
   const [cart, setCart] = useState<Record<string, number>>(() => {
@@ -86,6 +86,10 @@ function App() {
 
   // Product Details Modal state
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
+  const handleSelectProduct = useCallback((product: Product) => {
+    setSelectedProduct(product);
+  }, []);
 
   // Restore wishlist from localStorage on mount, validated against valid product IDs
   const [wishlist, setWishlist] = useState<string[]>(() => {
@@ -111,7 +115,7 @@ function App() {
     saveWishlist(wishlist);
   }, [wishlist]);
 
-  const handleToggleWishlist = (productId: string) => {
+  const handleToggleWishlist = useCallback((productId: string) => {
     setWishlist((prev) => {
       if (prev.includes(productId)) {
         return prev.filter((id) => id !== productId);
@@ -119,34 +123,34 @@ function App() {
         return [...prev, productId];
       }
     });
-  };
+  }, []);
 
-  const handleRemoveFromWishlist = (productId: string) => {
+  const handleRemoveFromWishlist = useCallback((productId: string) => {
     setWishlist((prev) => prev.filter((id) => id !== productId));
-  };
+  }, []);
 
-  const handleClearWishlist = () => {
+  const handleClearWishlist = useCallback(() => {
     setWishlist([]);
-  };
+  }, []);
 
-  const handleSelectLocation = (location: DeliveryLocation) => {
+  const handleSelectLocation = useCallback((location: DeliveryLocation) => {
     setSelectedLocation(location);
     saveLocation(location);
-  };
+  }, []);
 
-  const handleClearLocation = () => {
+  const handleClearLocation = useCallback(() => {
     setSelectedLocation(null);
     clearSavedLocation();
-  };
+  }, []);
 
-  const addToCart = (id: string) => {
+  const addToCart = useCallback((id: string) => {
     setCart((prev) => ({
       ...prev,
       [id]: Math.min(99, (prev[id] || 0) + 1),
     }));
-  };
+  }, []);
 
-  const removeFromCart = (id: string) => {
+  const removeFromCart = useCallback((id: string) => {
     setCart((prev) => {
       const updated = { ...prev };
       if (updated[id] > 1) {
@@ -156,36 +160,37 @@ function App() {
       }
       return updated;
     });
-  };
+  }, []);
 
-  const deleteFromCart = (id: string) => {
+  const deleteFromCart = useCallback((id: string) => {
     setCart((prev) => {
       const updated = { ...prev };
       delete updated[id];
       return updated;
     });
-  };
+  }, []);
 
-  const restoreCartItem = (id: string, quantity: number) => {
+  const restoreCartItem = useCallback((id: string, quantity: number) => {
     setCart((prev) => ({
       ...prev,
       [id]: Math.min(99, Math.max(1, quantity)),
     }));
-  };
+  }, []);
 
-  const resetFilters = () => {
+  const resetFilters = useCallback(() => {
     setSearch("");
     setSelectedCategory("All");
     setFilters(DEFAULT_FILTERS);
     setSortBy("relevance");
-  };
+  }, []);
 
-  const clearSearch = () => {
+  const clearSearch = useCallback(() => {
     setSearch("");
-  };
+  }, []);
 
   const filteredProducts = useMemo(() => {
     const trimmed = search.trim().toLowerCase();
+    const searchTokens = trimmed ? trimmed.split(/\s+/).filter(Boolean) : [];
 
     return PRODUCTS.filter((product) => {
       // 1. Category filter check
@@ -194,30 +199,31 @@ function App() {
       if (!matchesCategory) return false;
 
       // 2. Search match across name, category, unit, badge, description, and Mithila Special metadata
-      if (trimmed) {
-        const nameMatch = product.name.toLowerCase().includes(trimmed);
-        const categoryMatch = product.category.toLowerCase().includes(trimmed);
-        const unitMatch = product.unit.toLowerCase().includes(trimmed);
-        const badgeMatch = product.badge
-          ? product.badge.toLowerCase().includes(trimmed)
-          : false;
-        const descMatch = product.description
-          ? product.description.toLowerCase().includes(trimmed)
-          : false;
-        const specialMatch =
-          Boolean(product.isMithilaSpecial) &&
-          (trimmed.includes("special") ||
-            trimmed.includes("mithila") ||
-            trimmed.includes("regional"));
+      if (searchTokens.length > 0) {
+        const matchesAllTokens = searchTokens.every((token) => {
+          const nameMatch = product.name.toLowerCase().includes(token);
+          const categoryMatch = product.category.toLowerCase().includes(token);
+          const unitMatch = product.unit.toLowerCase().includes(token);
+          const badgeMatch = product.badge
+            ? product.badge.toLowerCase().includes(token)
+            : false;
+          const descMatch = product.description
+            ? product.description.toLowerCase().includes(token)
+            : false;
+          const specialMatch =
+            Boolean(product.isMithilaSpecial) &&
+            (token === "special" || token === "mithila" || token === "regional");
 
-        const matchesSearch =
-          nameMatch ||
-          categoryMatch ||
-          unitMatch ||
-          badgeMatch ||
-          descMatch ||
-          specialMatch;
-        if (!matchesSearch) return false;
+          return (
+            nameMatch ||
+            categoryMatch ||
+            unitMatch ||
+            badgeMatch ||
+            descMatch ||
+            specialMatch
+          );
+        });
+        if (!matchesAllTokens) return false;
       }
 
       // 3. Price filter check
@@ -353,7 +359,7 @@ function App() {
         selectedLocation={selectedLocation}
         onOpenLocationModal={() => setShowLocationModal(true)}
         products={PRODUCTS}
-        onSelectProduct={(product) => setSelectedProduct(product)}
+        onSelectProduct={handleSelectProduct}
         selectedCategory={selectedCategory}
         onSelectCategory={setSelectedCategory}
         wishlistCount={wishlist.length}
@@ -385,7 +391,7 @@ function App() {
           cart={cart}
           onAddToCart={addToCart}
           onRemoveFromCart={removeFromCart}
-          onSelectProduct={(product) => setSelectedProduct(product)}
+          onSelectProduct={handleSelectProduct}
           onSeeAll={handleExploreMithilaSpecials}
           wishlistSet={wishlistSet}
           onToggleWishlist={handleToggleWishlist}
@@ -400,7 +406,7 @@ function App() {
           cart={cart}
           onAddToCart={addToCart}
           onRemoveFromCart={removeFromCart}
-          onSelectProduct={(product) => setSelectedProduct(product)}
+          onSelectProduct={handleSelectProduct}
           onSeeAll={handleShopNow}
           wishlistSet={wishlistSet}
           onToggleWishlist={handleToggleWishlist}
@@ -415,7 +421,7 @@ function App() {
           cart={cart}
           onAddToCart={addToCart}
           onRemoveFromCart={removeFromCart}
-          onSelectProduct={(product) => setSelectedProduct(product)}
+          onSelectProduct={handleSelectProduct}
           onSeeAll={handleShopNow}
           wishlistSet={wishlistSet}
           onToggleWishlist={handleToggleWishlist}
@@ -427,7 +433,7 @@ function App() {
           cart={cart}
           onAddToCart={addToCart}
           onRemoveFromCart={removeFromCart}
-          onSelectProduct={(product) => setSelectedProduct(product)}
+          onSelectProduct={handleSelectProduct}
           onResetFilters={resetFilters}
           onClearSearch={clearSearch}
           selectedCategory={selectedCategory}
@@ -494,7 +500,7 @@ function App() {
         selectedLocation={selectedLocation}
         onOpenLocationModal={() => setShowLocationModal(true)}
         allProducts={PRODUCTS}
-        onSelectProduct={(product) => setSelectedProduct(product)}
+        onSelectProduct={handleSelectProduct}
         wishlistSet={wishlistSet}
         onToggleWishlist={handleToggleWishlist}
       />
@@ -509,7 +515,7 @@ function App() {
         onRemoveFromCart={removeFromCart}
         onRemoveFromWishlist={handleRemoveFromWishlist}
         onClearWishlist={handleClearWishlist}
-        onSelectProduct={(product) => setSelectedProduct(product)}
+        onSelectProduct={handleSelectProduct}
         onExploreCatalogue={() => {
           setShowWishlist(false);
           handleShopNow();

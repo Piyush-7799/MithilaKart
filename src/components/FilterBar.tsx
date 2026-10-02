@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback, memo } from "react";
 import { SlidersHorizontal, ArrowUpDown, Sparkles, X, ChevronDown } from "lucide-react";
 import type { Category, FilterState, SortOption } from "../types";
 import { FilterModal } from "./FilterModal";
@@ -22,7 +22,7 @@ const PRICE_LABELS: Record<string, string> = {
   "500-plus": "₹500+",
 };
 
-export function FilterBar({
+function FilterBarInner({
   filters,
   onUpdateFilter,
   sortBy,
@@ -34,6 +34,9 @@ export function FilterBar({
   resultCount,
 }: FilterBarProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleOpenModal = useCallback(() => setIsModalOpen(true), []);
+  const handleCloseModal = useCallback(() => setIsModalOpen(false), []);
 
   // Calculate active filter count (excluding default state)
   const activeFilterCount = useMemo(() => {
@@ -93,7 +96,7 @@ export function FilterBar({
           <button
             type="button"
             className={`filter-trigger-btn ${activeFilterCount > 0 ? "filter-trigger-active" : ""}`}
-            onClick={() => setIsModalOpen(true)}
+            onClick={handleOpenModal}
             aria-label={`Open filter options. ${activeFilterCount} active filters`}
             aria-expanded={isModalOpen}
           >
@@ -179,19 +182,18 @@ export function FilterBar({
       {/* Mobile/Desktop Filter Drawer & Modal */}
       <FilterModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleCloseModal}
         categories={categories}
         selectedCategory={selectedCategory}
-        onSelectCategory={(cat) => {
-          onSelectCategory(cat);
-        }}
+        onSelectCategory={onSelectCategory}
         filters={filters}
         onUpdateFilter={onUpdateFilter}
-        onClearFilters={() => {
-          onClearAllFilters();
-        }}
+        onClearFilters={onClearAllFilters}
         resultCount={resultCount}
       />
     </div>
   );
 }
+
+export const FilterBar = memo(FilterBarInner);
+

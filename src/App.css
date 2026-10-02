@@ -56,20 +56,28 @@
   text-decoration: none;
   padding: 2px 0;
   transition: opacity var(--transition-fast), transform var(--transition-fast);
+  flex-shrink: 0;
 }
 
 .logo:hover {
-  opacity: 0.92;
+  opacity: 0.94;
   transform: translateY(-1px);
+}
+
+.logo:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 4px;
+  border-radius: var(--radius-xs);
 }
 
 .logo-name {
   font-family: var(--font-sans);
-  font-size: 24px;
+  font-size: 25px;
   font-weight: 800;
   color: var(--color-primary-dark);
   letter-spacing: -0.7px;
   line-height: 1.05;
+  white-space: nowrap;
 }
 
 .logo-accent {
@@ -716,6 +724,28 @@
   pointer-events: none;
 }
 
+.promo-hero-sun-watermark {
+  position: absolute;
+  top: -40px;
+  right: 50px;
+  opacity: 0.16;
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity var(--transition-normal);
+}
+
+.promo-hero-bottom-border {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 10px;
+  overflow: hidden;
+  opacity: 0.85;
+  pointer-events: none;
+  z-index: 2;
+}
+
 .promo-hero-layout {
   position: relative;
   z-index: 2;
@@ -1323,6 +1353,109 @@
 }
 
 /* --------------------------------------------------------------------------
+   Mithila Section Divider (Phase 14)
+   -------------------------------------------------------------------------- */
+.mithila-section-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 1280px;
+  margin: 28px auto 26px;
+  padding: 0 16px;
+  user-select: none;
+}
+
+.divider-flourish-left,
+.divider-flourish-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.divider-flourish-left {
+  justify-content: flex-end;
+}
+
+.divider-flourish-right {
+  justify-content: flex-start;
+}
+
+.flourish-line {
+  flex: 1;
+  height: 1px;
+  max-width: 240px;
+}
+
+.divider-flourish-left .flourish-line {
+  background: linear-gradient(90deg, transparent, rgba(5, 150, 105, 0.32));
+}
+
+.divider-flourish-right .flourish-line {
+  background: linear-gradient(90deg, rgba(5, 150, 105, 0.32), transparent);
+}
+
+.flourish-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  opacity: 0.45;
+}
+
+.flourish-dot-outer {
+  opacity: 0.22;
+  transform: scale(0.8);
+}
+
+.divider-motif-center {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  color: var(--color-primary);
+  flex-shrink: 0;
+  transition: transform var(--transition-fast);
+}
+
+.divider-motif-center:hover {
+  transform: scale(1.08);
+}
+
+.divider-diamond-cluster {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.diamond-main {
+  width: 8px;
+  height: 8px;
+  background: var(--color-mithila-gold);
+  transform: rotate(45deg);
+  border-radius: 1px;
+}
+
+.diamond-side {
+  width: 5px;
+  height: 5px;
+  background: var(--color-primary);
+  opacity: 0.6;
+  transform: rotate(45deg);
+  border-radius: 1px;
+}
+
+.divider-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--color-primary-muted);
+}
+
+/* --------------------------------------------------------------------------
    Categories Section
    -------------------------------------------------------------------------- */
 .categories-section {
@@ -1822,10 +1955,24 @@
 .product-card-signature {
   border-color: #fde68a;
   background: linear-gradient(180deg, #fffdf8 0%, #ffffff 100%);
+  position: relative;
+}
+
+.product-card-signature::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 14px;
+  right: 14px;
+  height: 2px;
+  background: linear-gradient(90deg, #d97706, #10b981, #d97706);
+  border-radius: var(--radius-full);
+  opacity: 0.85;
 }
 
 .product-card-signature:hover {
   border-color: #f59e0b;
+  box-shadow: 0 14px 28px -4px rgba(217, 119, 6, 0.12), 0 4px 10px -2px rgba(0, 0, 0, 0.04);
 }
 
 .product-delivery-badge {
@@ -2161,6 +2308,14 @@
   margin: 20px auto;
 }
 
+.no-products-art-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
 .no-products-icon-circle {
   width: 76px;
   height: 76px;
@@ -2170,7 +2325,20 @@
   align-items: center;
   justify-content: center;
   color: var(--color-text-muted);
-  margin-bottom: 16px;
+}
+
+.no-products-motif-accent {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  background: #ffffff;
+  border-radius: var(--radius-full);
+  padding: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--color-border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .no-products-state h3 {
@@ -4761,8 +4929,9 @@
   }
 
   .logo-name {
-    font-size: 20px;
-    letter-spacing: -0.5px;
+    font-size: 21px;
+    letter-spacing: -0.6px;
+    white-space: nowrap;
   }
 
   .location-pill {
@@ -4903,6 +5072,24 @@
   .scooter-sub-label {
     font-size: 11px;
     padding: 5px 13px;
+  }
+
+  .promo-hero-sun-watermark {
+    top: -20px;
+    right: -20px;
+    opacity: 0.12;
+    transform: scale(0.65);
+    transform-origin: top right;
+  }
+
+  .mithila-section-divider {
+    margin: 20px auto 16px;
+    gap: 10px;
+    padding: 0 10px;
+  }
+
+  .flourish-line {
+    max-width: 80px;
   }
 
   .product-rail-section {

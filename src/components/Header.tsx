@@ -55,6 +55,12 @@ export function Header({
           <div
             className="logo"
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }
+            }}
             role="button"
             tabIndex={0}
             aria-label="MithilaKart Home"

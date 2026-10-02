@@ -1,31 +1,44 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 :root {
-  /* Color Palette - Forest & Emerald Quick-Commerce Identity */
-  --color-primary-dark: #064e3b;
-  --color-primary: #059669;
-  --color-primary-hover: #047857;
-  --color-primary-light: #10b981;
-  --color-primary-tint: #ecfdf5;
+  /* Color Palette - MithilaKart Heritage & Quick-Commerce Identity */
+  --color-primary-dark: #064e3b;       /* Deep Forest Green */
+  --color-primary: #059669;            /* Refined Emerald */
+  --color-primary-hover: #047857;      /* Muted Green */
+  --color-primary-light: #10b981;      /* Bright Emerald Accent */
+  --color-primary-tint: #ecfdf5;       /* Soft Mint Tint */
   --color-primary-tint-hover: #d1fae5;
+  --color-primary-muted: #047857;
+
+  /* Mithila Heritage Colors */
+  --color-mithila-red: #b91c1c;        /* Rich Earthy Red / Sindoor */
+  --color-mithila-red-tint: #fef2f2;
+  --color-mithila-terracotta: #c2410c; /* Subtle Terracotta */
+  --color-mithila-terracotta-tint: #fff7ed;
+  --color-mithila-gold: #d97706;       /* Warm Mustard / Golden Yellow */
+  --color-mithila-gold-light: #fef3c7;
+  --color-mithila-gold-border: #fde68a;
   
   --color-accent-gold: #d97706;
   --color-accent-gold-light: #fef3c7;
   --color-accent-gold-border: #fde68a;
 
-  --color-bg-page: #f8faf7;
+  /* Surfaces - Warm Ivory / Handcrafted Canvas & Charcoal */
+  --color-bg-page: #fbfbf9;            /* Handcrafted Warm Ivory Canvas */
   --color-surface: #ffffff;
-  --color-surface-subtle: #f3f4f6;
-  --color-surface-hover: #f9fafb;
+  --color-surface-cream: #fffdf8;      /* Warm Ivory/Cream Card Surface */
+  --color-surface-subtle: #f3f5f0;
+  --color-surface-hover: #f9faf8;
 
-  --color-border: #e5e7eb;
-  --color-border-subtle: #f1f5f9;
+  --color-border: #e4e7e1;
+  --color-border-subtle: #f0f2ed;
   --color-border-focus: #10b981;
+  --color-border-mithila: #fed7aa;
 
-  --color-text-main: #111827;
-  --color-text-secondary: #374151;
-  --color-text-muted: #6b7280;
-  --color-text-light: #9ca3af;
+  --color-text-main: #18181b;          /* Charcoal / Near-Black */
+  --color-text-secondary: #3f3f46;
+  --color-text-muted: #71717a;
+  --color-text-light: #a1a1aa;
 
   --color-danger: #ef4444;
   --color-danger-hover: #dc2626;
@@ -138,4 +151,16 @@ input {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+/* Accessibility: Respect Reduced Motion Preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

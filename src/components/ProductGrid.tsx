@@ -3,6 +3,7 @@ import { PackageSearch, RotateCcw, Sparkles, SearchX, X } from "lucide-react";
 import type { Category, FilterState, Product, SortOption } from "../types";
 import { ProductCard } from "./ProductCard";
 import { FilterBar } from "./FilterBar";
+import { MithilaLotus } from "./MithilaMotif";
 
 interface ProductGridProps {
   products: Product[];
@@ -134,12 +135,17 @@ function ProductGridInner({
 
       {products.length === 0 ? (
         <div className="no-products-state">
-          <div className="no-products-icon-circle">
-            {isSearching ? (
-              <SearchX size={44} className="empty-search-icon" />
-            ) : (
-              <PackageSearch size={44} className="empty-search-icon" />
-            )}
+          <div className="no-products-art-container" aria-hidden="true">
+            <div className="no-products-icon-circle">
+              {isSearching ? (
+                <SearchX size={36} className="empty-search-icon" />
+              ) : (
+                <PackageSearch size={36} className="empty-search-icon" />
+              )}
+            </div>
+            <div className="no-products-motif-accent">
+              <MithilaLotus size={24} color="#059669" secondaryColor="#d97706" />
+            </div>
           </div>
           <h3>No products found</h3>
           <p className="no-products-subtext">
@@ -149,12 +155,12 @@ function ProductGridInner({
                 {selectedCategory !== "All" && (
                   <> in <strong>{selectedCategory}</strong></>
                 )}
-                . Try another search or change your filters.
+                . Try another search or explore a different category.
               </>
             ) : hasFilterActive ? (
-              <>Try another search or change your filters.</>
+              <>Try another search or explore a different category.</>
             ) : (
-              <>No products currently available in <strong>{selectedCategory}</strong>.</>
+              <>No products currently available in <strong>{selectedCategory}</strong>. Try another search or explore a different category.</>
             )}
           </p>
 

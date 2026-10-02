@@ -10,6 +10,7 @@ import { CartDrawer } from "./components/CartDrawer";
 import { WishlistDrawer } from "./components/WishlistDrawer";
 import { LocationModal } from "./components/LocationModal";
 import { ProductDetailsModal } from "./components/ProductDetailsModal";
+import { SectionDivider } from "./components/SectionDivider";
 import { CATEGORIES, PRODUCTS } from "./data/products";
 import type { CartItem, DeliveryLocation, FilterState, Product, SortOption } from "./types";
 import { loadSavedCart, saveCart } from "./utils/cartStorage";
@@ -375,12 +376,18 @@ function App() {
           onExploreMithilaSpecials={handleExploreMithilaSpecials}
         />
 
+        {/* Section Divider: Hero to Categories */}
+        <SectionDivider motif="lotus" />
+
         {/* 2. Category Navigation */}
         <CategoryList
           categories={CATEGORIES}
           selectedCategory={selectedCategory}
           onSelectCategory={setSelectedCategory}
         />
+
+        {/* Section Divider: Categories to Showcase Rails */}
+        <SectionDivider motif="fish" />
 
         {/* 3. Mithila Specials Showcase Rail */}
         <ProductRail
@@ -426,6 +433,9 @@ function App() {
           wishlistSet={wishlistSet}
           onToggleWishlist={handleToggleWishlist}
         />
+
+        {/* Section Divider: Rails to Full Catalogue */}
+        <SectionDivider motif="sun" />
 
         {/* 6. Full Product Catalogue with Search, Category & Smart Filters */}
         <ProductGrid

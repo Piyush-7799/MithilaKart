@@ -1,5 +1,6 @@
 import { Zap, Sparkles, ArrowRight, ShieldCheck, Clock, ShoppingBag } from "lucide-react";
 import { DeliveryScooterIllustration } from "./DeliveryScooterIllustration";
+import { MithilaSun, MithilaAripanLine } from "./MithilaMotif";
 
 interface PromoHeroProps {
   onShopNow: () => void;
@@ -13,10 +14,13 @@ export function PromoHero({
   return (
     <section className="promo-hero-section" aria-label="Promotional Announcement">
       <div className="promo-hero-banner">
-        {/* Subtle Decorative Background Geometry */}
+        {/* Subtle Decorative Background Geometry & Mithila Sun Aura */}
         <div className="promo-hero-glow promo-hero-glow-1" aria-hidden="true" />
         <div className="promo-hero-glow promo-hero-glow-2" aria-hidden="true" />
         <div className="promo-hero-pattern" aria-hidden="true" />
+        <div className="promo-hero-sun-watermark" aria-hidden="true">
+          <MithilaSun size={320} color="#fde68a" secondaryColor="#f59e0b" />
+        </div>
 
         <div className="promo-hero-layout">
           {/* Left Column: Copy, Badges & CTAs */}
@@ -45,7 +49,7 @@ export function PromoHero({
 
             {/* Supporting Text */}
             <p className="promo-hero-subtext">
-              Fresh essentials, local favourites, and daily needs — delivered fast.
+              Daily essentials, local favourites, delivered to your doorstep.
             </p>
 
             {/* CTAs */}
@@ -94,6 +98,11 @@ export function PromoHero({
           <div className="promo-hero-visual-col" aria-hidden="true">
             <DeliveryScooterIllustration />
           </div>
+        </div>
+
+        {/* Subtle Bottom Madhubani Aripan Trim */}
+        <div className="promo-hero-bottom-border" aria-hidden="true">
+          <MithilaAripanLine color="#fde68a" secondaryColor="#f59e0b" height={10} />
         </div>
       </div>
     </section>

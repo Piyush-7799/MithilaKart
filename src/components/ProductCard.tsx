@@ -58,7 +58,7 @@ function ProductCardInner({
 
           {product.isMithilaSpecial && (
             <span className="product-signature-tag" title="Mithila Regional Special">
-              <Sparkles size={10} /> Special
+              <Sparkles size={10} /> Mithila Special
             </span>
           )}
 

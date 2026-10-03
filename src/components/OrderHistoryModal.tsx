@@ -82,6 +82,7 @@ export function OrderHistoryModal({
         className="order-history-panel"
         onClick={(e) => e.stopPropagation()}
       >
+        <div className="order-history-sheet-handle" aria-hidden="true" />
         {/* Header */}
         <div className="order-history-header">
           <div className="order-history-title-group">

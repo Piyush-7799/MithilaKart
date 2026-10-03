@@ -74,6 +74,7 @@ function FilterModalInner({
         className="filter-modal-panel"
         onClick={(e) => e.stopPropagation()}
       >
+        <div className="filter-sheet-handle" aria-hidden="true" />
         {/* Modal Header */}
         <div className="filter-modal-header">
           <div className="filter-modal-title-group">

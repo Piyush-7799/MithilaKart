@@ -166,6 +166,7 @@ export function AccountModal({
         className="account-modal-panel"
         onClick={(e) => e.stopPropagation()}
       >
+        <div className="account-sheet-handle" aria-hidden="true" />
         {/* Header */}
         <div className="account-modal-header">
           <div className="account-header-title-wrap">

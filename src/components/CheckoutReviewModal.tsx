@@ -86,6 +86,7 @@ export function CheckoutReviewModal({
         className="checkout-review-panel"
         onClick={(e) => e.stopPropagation()}
       >
+        <div className="checkout-sheet-handle" aria-hidden="true" />
         {/* Header */}
         <div className="checkout-review-header">
           <div>

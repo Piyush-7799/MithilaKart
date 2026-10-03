@@ -95,6 +95,7 @@ export function OrderDetailsModal({
         className="order-details-panel"
         onClick={(e) => e.stopPropagation()}
       >
+        <div className="order-details-sheet-handle" aria-hidden="true" />
         {/* Header */}
         <div className="order-details-header">
           <div className="order-details-header-left">

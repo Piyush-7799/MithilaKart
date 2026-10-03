@@ -25,6 +25,21 @@ export interface CartItem {
   quantity: number;
 }
 
+export type AddressLabel = "Home" | "Work" | "Other";
+
+export interface Address {
+  id: string;
+  fullName: string;
+  phone: string;
+  house: string;
+  street: string;
+  city: string;
+  state: string;
+  pincode: string;
+  landmark?: string;
+  label: AddressLabel;
+}
+
 export interface DeliveryLocation {
   id: string;
   label: string;
@@ -33,6 +48,7 @@ export interface DeliveryLocation {
   pincode?: string;
   displayName: string;
   isCurrentLocation?: boolean;
+  address?: Address;
 }
 
 export type PriceRange = "all" | "under-100" | "100-250" | "250-500" | "500-plus";

@@ -207,6 +207,14 @@ export function CartDrawer({
   };
 
   const handleContinueToCheckout = () => {
+    // Phase 18: If no delivery address/location is selected, open the address selection modal
+    if (!selectedLocation) {
+      if (onOpenLocationModal) {
+        onOpenLocationModal();
+      }
+      return;
+    }
+
     setShowCheckoutNotice(true);
     if (checkoutNoticeTimeoutRef.current) {
       clearTimeout(checkoutNoticeTimeoutRef.current);
@@ -297,6 +305,11 @@ export function CartDrawer({
                 <span className="cart-delivery-info-address">
                   {selectedLocation.displayName}
                 </span>
+                {selectedLocation.address && (
+                  <span className="cart-delivery-info-subaddress">
+                    {selectedLocation.address.house} • {selectedLocation.address.fullName}
+                  </span>
+                )}
               </div>
             ) : (
               <div className="cart-delivery-text-group">

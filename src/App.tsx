@@ -15,6 +15,12 @@ import { CATEGORIES, PRODUCTS } from "./data/products";
 import type { CartItem, DeliveryLocation, FilterState, Product, SortOption } from "./types";
 import { loadSavedCart, saveCart } from "./utils/cartStorage";
 import { loadSavedLocation, saveLocation, clearSavedLocation } from "./utils/locationStorage";
+import {
+  loadSavedAddresses,
+  getSelectedAddressId,
+  saveSelectedAddressId,
+  addressToDeliveryLocation,
+} from "./utils/addressStorage";
 import { loadWishlist, saveWishlist } from "./utils/wishlistStorage";
 
 // Curated deterministic product IDs for homepage promotional rails
@@ -79,9 +85,20 @@ function App() {
   });
   const [showCart, setShowCart] = useState(false);
 
-  // Restore delivery location from localStorage on mount
+  // Restore delivery location from localStorage on mount, fall back to selected address if available
   const [selectedLocation, setSelectedLocation] = useState<DeliveryLocation | null>(() => {
-    return loadSavedLocation();
+    const loc = loadSavedLocation();
+    if (loc) return loc;
+    const addresses = loadSavedAddresses();
+    if (addresses.length > 0) {
+      const selectedId = getSelectedAddressId();
+      const active = addresses.find((a) => a.id === selectedId) || addresses[0];
+      const deliveryLoc = addressToDeliveryLocation(active);
+      saveLocation(deliveryLoc);
+      saveSelectedAddressId(active.id);
+      return deliveryLoc;
+    }
+    return null;
   });
   const [showLocationModal, setShowLocationModal] = useState(false);
 
@@ -137,11 +154,15 @@ function App() {
   const handleSelectLocation = useCallback((location: DeliveryLocation) => {
     setSelectedLocation(location);
     saveLocation(location);
+    if (location.address) {
+      saveSelectedAddressId(location.address.id);
+    }
   }, []);
 
   const handleClearLocation = useCallback(() => {
     setSelectedLocation(null);
     clearSavedLocation();
+    saveSelectedAddressId(null);
   }, []);
 
   const addToCart = useCallback((id: string) => {

@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Search, ShoppingBag, MapPin, ChevronDown, X, Zap, Heart } from "lucide-react";
+import { Search, ShoppingBag, MapPin, ChevronDown, X, Zap, Heart, Package } from "lucide-react";
 import type { DeliveryLocation, Product } from "../types";
 import { SearchSuggestions } from "./SearchSuggestions";
 
@@ -19,6 +19,8 @@ interface HeaderProps {
   onOpenWishlist?: () => void;
   wishlistSet?: Set<string>;
   onToggleWishlist?: (id: string) => void;
+  orderCount?: number;
+  onOpenOrders?: () => void;
 }
 
 export function Header({
@@ -37,6 +39,8 @@ export function Header({
   onOpenWishlist,
   wishlistSet,
   onToggleWishlist,
+  orderCount = 0,
+  onOpenOrders,
 }: HeaderProps) {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -171,6 +175,23 @@ export function Header({
                 )}
               </div>
               <span className="wishlist-btn-label">Wishlist</span>
+            </button>
+          )}
+
+          {onOpenOrders && (
+            <button
+              type="button"
+              className={`orders-header-btn ${orderCount > 0 ? "orders-header-btn-active" : ""}`}
+              onClick={onOpenOrders}
+              aria-label={`Open orders (${orderCount} placed)`}
+            >
+              <div className="orders-icon-box">
+                <Package size={19} className="orders-header-icon" />
+                {orderCount > 0 && (
+                  <span className="orders-badge">{orderCount}</span>
+                )}
+              </div>
+              <span className="orders-btn-label">Orders</span>
             </button>
           )}
 

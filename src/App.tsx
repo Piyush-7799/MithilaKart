@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { ShoppingBag, ArrowRight } from "lucide-react";
+import { ShoppingBag, ArrowRight, Sparkles } from "lucide-react";
 import "./App.css";
 import { Header } from "./components/Header";
 import { PromoHero } from "./components/PromoHero";
@@ -10,9 +10,21 @@ import { CartDrawer } from "./components/CartDrawer";
 import { WishlistDrawer } from "./components/WishlistDrawer";
 import { LocationModal } from "./components/LocationModal";
 import { ProductDetailsModal } from "./components/ProductDetailsModal";
+import { CheckoutReviewModal } from "./components/CheckoutReviewModal";
+import { OrderConfirmationModal } from "./components/OrderConfirmationModal";
+import { OrderHistoryModal } from "./components/OrderHistoryModal";
+import { OrderDetailsModal } from "./components/OrderDetailsModal";
 import { SectionDivider } from "./components/SectionDivider";
 import { CATEGORIES, PRODUCTS } from "./data/products";
-import type { CartItem, DeliveryLocation, FilterState, Product, SortOption } from "./types";
+import type {
+  CartItem,
+  DeliveryLocation,
+  FilterState,
+  Product,
+  SortOption,
+  Order,
+  OrderItem,
+} from "./types";
 import { loadSavedCart, saveCart } from "./utils/cartStorage";
 import { loadSavedLocation, saveLocation, clearSavedLocation } from "./utils/locationStorage";
 import {
@@ -22,6 +34,13 @@ import {
   addressToDeliveryLocation,
 } from "./utils/addressStorage";
 import { loadWishlist, saveWishlist } from "./utils/wishlistStorage";
+import {
+  getOrders,
+  getOrderById,
+  createOrder,
+  createAddressSnapshot,
+} from "./utils/orderStorage";
+import { calculateCartDeliveryEta } from "./utils/deliveryEta";
 
 // Curated deterministic product IDs for homepage promotional rails
 const POPULAR_PICKS_IDS = [
@@ -132,6 +151,23 @@ function App() {
   useEffect(() => {
     saveWishlist(wishlist);
   }, [wishlist]);
+
+  // Phase 20: Orders and order history state
+  const [orders, setOrders] = useState<Order[]>(() => getOrders());
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [confirmedOrder, setConfirmedOrder] = useState<Order | null>(null);
+  const [showCheckoutReview, setShowCheckoutReview] = useState(false);
+  const [showOrderHistory, setShowOrderHistory] = useState(false);
+  const [showOrderDetails, setShowOrderDetails] = useState(false);
+  const [showOrderConfirmation, setShowOrderConfirmation] = useState(false);
+  const [orderToast, setOrderToast] = useState<string | null>(null);
+
+  // Auto-dismiss floating order toasts
+  useEffect(() => {
+    if (!orderToast) return;
+    const t = setTimeout(() => setOrderToast(null), 3500);
+    return () => clearTimeout(t);
+  }, [orderToast]);
 
   const handleToggleWishlist = useCallback((productId: string) => {
     setWishlist((prev) => {
@@ -367,8 +403,133 @@ function App() {
     0
   );
 
-  const deliveryFee = subtotal > 0 && subtotal < 300 ? 30 : 0;
+  const deliveryFee = subtotal > 0 && subtotal <= 300 ? 30 : 0;
   const total = subtotal + deliveryFee;
+
+  const mrpTotal = cartItems.reduce(
+    (acc, item) => acc + (item.product.mrp || item.product.price) * item.quantity,
+    0
+  );
+  const productSavings = Math.max(0, mrpTotal - subtotal);
+
+  const etaInfo = useMemo(() => {
+    return calculateCartDeliveryEta(cartItems, selectedLocation);
+  }, [cartItems, selectedLocation]);
+
+  const handleProceedToCheckout = useCallback(() => {
+    if (!selectedLocation) {
+      setShowLocationModal(true);
+      return;
+    }
+    if (cartItems.length === 0) {
+      return;
+    }
+    setShowCheckoutReview(true);
+  }, [selectedLocation, cartItems.length]);
+
+  const handlePlaceOrder = useCallback(() => {
+    if (!selectedLocation) {
+      setShowLocationModal(true);
+      return;
+    }
+    if (cartItems.length === 0) {
+      return;
+    }
+
+    const orderItems: OrderItem[] = cartItems.map(({ product, quantity }) => ({
+      productId: product.id,
+      name: product.name,
+      image: product.image,
+      quantity,
+      price: product.price,
+      mrp: product.mrp,
+      unit: product.unit,
+      lineTotal: product.price * quantity,
+    }));
+
+    const addressSnapshot = createAddressSnapshot(selectedLocation);
+    const calculatedEta = calculateCartDeliveryEta(cartItems, selectedLocation);
+
+    const mrpSum = cartItems.reduce(
+      (sum, { product, quantity }) => sum + (product.mrp || product.price) * quantity,
+      0
+    );
+    const savings = Math.max(0, mrpSum - subtotal);
+
+    const newOrder = createOrder({
+      items: orderItems,
+      subtotal,
+      deliveryFee,
+      total,
+      savings,
+      deliveryEta: calculatedEta.etaText,
+      address: addressSnapshot,
+      paymentMethod: "Cash on Delivery",
+    });
+
+    // Refresh orders list
+    setOrders(getOrders());
+
+    // Clear cart (only after successful creation)
+    setCart({});
+
+    // Close review and cart drawer
+    setShowCheckoutReview(false);
+    setShowCart(false);
+
+    // Show confirmation modal
+    setConfirmedOrder(newOrder);
+    setShowOrderConfirmation(true);
+  }, [selectedLocation, cartItems, subtotal, deliveryFee, total]);
+
+  const handleReorder = useCallback((orderToReorder: Order) => {
+    const availableItems: { id: string; quantity: number }[] = [];
+    let skippedCount = 0;
+
+    orderToReorder.items.forEach((item) => {
+      const exists = PRODUCTS.some((p) => p.id === item.productId);
+      if (exists) {
+        availableItems.push({ id: item.productId, quantity: item.quantity });
+      } else {
+        skippedCount++;
+      }
+    });
+
+    if (availableItems.length === 0) {
+      setOrderToast("None of the items in this order are currently available in the catalogue.");
+      return;
+    }
+
+    setCart((prev) => {
+      const updated = { ...prev };
+      availableItems.forEach(({ id, quantity }) => {
+        updated[id] = Math.min(99, (updated[id] || 0) + quantity);
+      });
+      return updated;
+    });
+
+    if (skippedCount > 0) {
+      setOrderToast(
+        `Added ${availableItems.length} items to cart (${skippedCount} discontinued item skipped).`
+      );
+    } else {
+      setOrderToast("Items added to cart!");
+    }
+
+    setShowOrderDetails(false);
+    setShowOrderHistory(false);
+    setShowOrderConfirmation(false);
+    setShowCart(true);
+  }, []);
+
+  const handleViewOrder = useCallback((orderId: string) => {
+    const ord = getOrderById(orderId);
+    if (ord) {
+      setSelectedOrder(ord);
+      setShowOrderConfirmation(false);
+      setShowOrderDetails(true);
+    }
+  }, []);
 
   return (
     <div className="app-container">
@@ -388,6 +549,8 @@ function App() {
         onOpenWishlist={() => setShowWishlist(true)}
         wishlistSet={wishlistSet}
         onToggleWishlist={handleToggleWishlist}
+        orderCount={orders.length}
+        onOpenOrders={() => setShowOrderHistory(true)}
       />
 
       <main className="main-content">
@@ -534,6 +697,11 @@ function App() {
         onSelectProduct={handleSelectProduct}
         wishlistSet={wishlistSet}
         onToggleWishlist={handleToggleWishlist}
+        onProceedToCheckout={handleProceedToCheckout}
+        onOpenOrders={() => {
+          setShowCart(false);
+          setShowOrderHistory(true);
+        }}
       />
 
       {/* Wishlist Drawer */}
@@ -573,6 +741,70 @@ function App() {
         isWishlisted={selectedProduct ? wishlistSet.has(selectedProduct.id) : false}
         onToggleWishlist={handleToggleWishlist}
       />
+
+      {/* Checkout Review Modal */}
+      <CheckoutReviewModal
+        isOpen={showCheckoutReview}
+        onClose={() => setShowCheckoutReview(false)}
+        cartItems={cartItems}
+        cartCount={cartCount}
+        subtotal={subtotal}
+        deliveryFee={deliveryFee}
+        productSavings={productSavings}
+        total={total}
+        selectedLocation={selectedLocation}
+        etaInfo={etaInfo}
+        onPlaceOrder={handlePlaceOrder}
+        onChangeAddress={() => {
+          setShowCheckoutReview(false);
+          setShowLocationModal(true);
+        }}
+      />
+
+      {/* Order Confirmation Modal */}
+      <OrderConfirmationModal
+        isOpen={showOrderConfirmation}
+        order={confirmedOrder}
+        onClose={() => setShowOrderConfirmation(false)}
+        onViewOrder={handleViewOrder}
+        onContinueShopping={() => setShowOrderConfirmation(false)}
+      />
+
+      {/* Order History Modal */}
+      <OrderHistoryModal
+        isOpen={showOrderHistory}
+        onClose={() => setShowOrderHistory(false)}
+        orders={orders}
+        onSelectOrder={(order) => {
+          setSelectedOrder(order);
+          setShowOrderDetails(true);
+        }}
+        onReorder={handleReorder}
+        onStartShopping={() => {
+          setShowOrderHistory(false);
+          handleShopNow();
+        }}
+      />
+
+      {/* Order Details Modal */}
+      <OrderDetailsModal
+        isOpen={showOrderDetails}
+        order={selectedOrder}
+        onClose={() => setShowOrderDetails(false)}
+        onReorder={handleReorder}
+        onBackToOrders={() => {
+          setShowOrderDetails(false);
+          setShowOrderHistory(true);
+        }}
+      />
+
+      {/* Order / Reorder Floating Toast */}
+      {orderToast && (
+        <div className="order-floating-toast" role="status" aria-live="polite">
+          <Sparkles size={16} />
+          <span>{orderToast}</span>
+        </div>
+      )}
     </div>
   );
 }

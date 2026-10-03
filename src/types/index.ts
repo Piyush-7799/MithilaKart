@@ -76,4 +76,53 @@ export interface DeliveryEtaInfo {
   reason: string;
 }
 
+export type OrderStatus =
+  | "Placed"
+  | "Confirmed"
+  | "Preparing"
+  | "Out for Delivery"
+  | "Delivered"
+  | "Cancelled";
+
+export interface OrderItem {
+  productId: string;
+  name: string;
+  image: string;
+  quantity: number;
+  price: number;
+  mrp?: number;
+  unit?: string;
+  lineTotal: number;
+}
+
+export interface AddressSnapshot {
+  id?: string;
+  fullName: string;
+  phone: string;
+  house: string;
+  street: string;
+  city: string;
+  state: string;
+  pincode: string;
+  landmark?: string;
+  label: AddressLabel | string;
+  displayName?: string;
+}
+
+export interface Order {
+  id: string;
+  createdAt: string; // ISO 8601 string
+  status: OrderStatus;
+  items: OrderItem[];
+  subtotal: number;
+  deliveryFee: number;
+  total: number;
+  savings: number;
+  deliveryEta: string;
+  address: AddressSnapshot;
+  paymentMethod: string;
+  estimatedDelivery: string;
+  notes?: string;
+}
+
 

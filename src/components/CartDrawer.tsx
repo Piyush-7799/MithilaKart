@@ -39,6 +39,8 @@ interface CartDrawerProps {
   onSelectProduct?: (product: Product) => void;
   wishlistSet?: Set<string>;
   onToggleWishlist?: (id: string) => void;
+  onProceedToCheckout?: () => void;
+  onOpenOrders?: () => void;
 }
 
 export function CartDrawer({
@@ -60,6 +62,8 @@ export function CartDrawer({
   onSelectProduct,
   wishlistSet,
   onToggleWishlist,
+  onProceedToCheckout,
+  onOpenOrders,
 }: CartDrawerProps) {
   // Temporary accessible Undo toast state
   const [removedItem, setRemovedItem] = useState<{
@@ -230,6 +234,10 @@ export function CartDrawer({
       setShowCheckoutNotice(false);
       checkoutNoticeTimeoutRef.current = null;
     }, 5000);
+
+    if (onProceedToCheckout) {
+      onProceedToCheckout();
+    }
   };
 
   const handleStartShopping = (categoryName?: string) => {
@@ -458,6 +466,21 @@ export function CartDrawer({
               <Zap size={14} className="empty-perk-icon" />
               <span>Free delivery on orders over ₹300 • 10-15 min delivery</span>
             </div>
+
+            {onOpenOrders && (
+              <button
+                type="button"
+                className="empty-cart-orders-btn"
+                onClick={() => {
+                  onClose();
+                  onOpenOrders();
+                }}
+                aria-label="View past orders"
+              >
+                <span>View Past Orders</span>
+                <ChevronRight size={14} />
+              </button>
+            )}
           </div>
         ) : (
           <>

@@ -254,7 +254,7 @@ export function CartDrawer({
             <div>
               <h2 className="drawer-heading">Your Cart</h2>
               <span className="drawer-subheading">
-                {cartCount} {cartCount === 1 ? "item" : "items"} in basket
+                {cartCount} {cartCount === 1 ? "item" : "items"}
               </span>
             </div>
           </div>
@@ -278,7 +278,7 @@ export function CartDrawer({
           aria-label={
             selectedLocation
               ? `Delivering to ${selectedLocation.displayName}. Click to change delivery location`
-              : "Select a delivery location"
+              : "Select delivery location"
           }
           onKeyDown={(e) => {
             if ((e.key === "Enter" || e.key === " ") && onOpenLocationModal) {
@@ -292,25 +292,36 @@ export function CartDrawer({
           </div>
           <div className="cart-delivery-info-content">
             {selectedLocation ? (
-              <>
+              <div className="cart-delivery-text-group">
                 <span className="cart-delivery-info-title">Delivering to</span>
                 <span className="cart-delivery-info-address">
                   {selectedLocation.displayName}
                 </span>
-              </>
+              </div>
             ) : (
-              <>
+              <div className="cart-delivery-text-group">
                 <span className="cart-delivery-info-prompt">
-                  Select a delivery location
+                  Select delivery location
                 </span>
                 <span className="cart-delivery-info-sub">
-                  Tap to choose your doorstep address
+                  Tap to set doorstep address
                 </span>
-              </>
+              </div>
             )}
           </div>
           {onOpenLocationModal && (
-            <ChevronRight size={16} className="cart-delivery-info-arrow" />
+            <button
+              type="button"
+              className="cart-delivery-change-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpenLocationModal();
+              }}
+              aria-label={selectedLocation ? "Change delivery location" : "Select delivery location"}
+            >
+              <span>{selectedLocation ? "Change" : "Select"}</span>
+              <ChevronRight size={13} />
+            </button>
           )}
         </div>
 
@@ -322,15 +333,16 @@ export function CartDrawer({
             </div>
             <h3 className="empty-cart-title">Your cart is empty</h3>
             <p className="empty-cart-desc">
-              Add products to your cart and they’ll appear here.
+              Your basket is waiting for some fresh essentials and Mithila delicacies!
             </p>
 
             <button
               type="button"
               className="start-shopping-btn"
               onClick={() => handleStartShopping()}
+              aria-label="Continue Shopping"
             >
-              <span>Explore Catalogue</span>
+              <span>Continue Shopping</span>
               <ArrowRight size={16} />
             </button>
 
@@ -372,12 +384,11 @@ export function CartDrawer({
                 <div className="progress-text-row">
                   {subtotal >= freeDeliveryThreshold ? (
                     <span className="free-delivery-unlocked">
-                      <Sparkles size={14} className="free-delivery-sparkle" />{" "}
-                      Free delivery unlocked
+                      🎉 You've unlocked FREE delivery
                     </span>
                   ) : (
                     <span className="free-delivery-needed">
-                      You’re <strong>₹{freeDeliveryRemaining}</strong> away from{" "}
+                      Add <strong>₹{freeDeliveryRemaining}</strong> more for{" "}
                       <strong>FREE delivery</strong>
                     </span>
                   )}
@@ -669,7 +680,10 @@ export function CartDrawer({
 
               {/* 7. Order Summary */}
               <div className="bill-card">
-                <h4 className="bill-heading">Order Summary</h4>
+                <div className="bill-header-row">
+                  <h4 className="bill-heading">Order Summary</h4>
+                  <span className="bill-delivery-note">Free delivery above ₹300</span>
+                </div>
 
                 <div className="bill-row">
                   <span className="bill-label">Subtotal</span>
@@ -682,7 +696,7 @@ export function CartDrawer({
                     <span className="fee-hint">
                       {deliveryFee === 0
                         ? "Free delivery unlocked"
-                        : "Standard 10-15 min drop"}
+                        : "Orders below/equal to ₹300"}
                     </span>
                   </div>
                   <span
@@ -759,7 +773,7 @@ export function CartDrawer({
                 >
                   <div className="checkout-notice-header">
                     <div className="checkout-notice-badge">
-                      <Sparkles size={12} /> Catalogue Preview
+                      <Sparkles size={12} /> Checkout Ready
                     </div>
                     <button
                       type="button"
@@ -771,29 +785,29 @@ export function CartDrawer({
                     </button>
                   </div>
                   <strong className="checkout-notice-title">
-                    Checkout is coming soon.
+                    Order Summary Verified
                   </strong>
                   <p className="checkout-notice-desc">
-                    MithilaKart is in catalogue preview mode. No order or payment
-                    has been processed.
+                    Your basket of {cartCount} {cartCount === 1 ? "item" : "items"} (₹{total}) is verified and ready for checkout.
                   </p>
                 </div>
               )}
 
-              {/* Continue to Checkout CTA */}
+              {/* Proceed to Checkout CTA */}
               <div className="checkout-action-wrapper">
                 <button
                   type="button"
                   className="checkout-primary-btn"
                   onClick={handleContinueToCheckout}
-                  aria-label="Continue to Checkout"
+                  disabled={cartCount === 0}
+                  aria-label={`Proceed to Checkout • Total ₹${total}`}
                 >
                   <div className="btn-price-summary">
                     <span className="btn-total">₹{total}</span>
                     <span className="btn-subtext">TOTAL</span>
                   </div>
                   <div className="btn-cta-text">
-                    <span>Continue to Checkout</span>
+                    <span>Proceed to Checkout</span>
                     <ArrowRight size={18} />
                   </div>
                 </button>

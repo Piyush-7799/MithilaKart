@@ -2678,7 +2678,15 @@
   flex: 1;
   min-width: 0;
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cart-delivery-text-group {
+  display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .cart-delivery-info-title {
@@ -2709,9 +2717,26 @@
   color: var(--color-text-muted);
 }
 
-.cart-delivery-info-arrow {
-  color: var(--color-text-light);
+.cart-delivery-change-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: white;
+  border: 1px solid var(--color-border);
+  color: var(--color-primary-dark);
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--transition-fast);
   flex-shrink: 0;
+}
+
+.cart-delivery-change-btn:hover {
+  background: var(--color-primary-tint);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
 /* Scrollable Cart Content Area */
@@ -2827,7 +2852,8 @@
 .item-thumbnail-photo {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  padding: 4px;
 }
 
 .item-thumbnail-emoji {
@@ -3179,13 +3205,30 @@
   margin: 0 20px 12px;
 }
 
+.bill-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
 .bill-heading {
   font-size: 13px;
   font-weight: 800;
   text-transform: uppercase;
   color: var(--color-text-muted);
   letter-spacing: 0.5px;
-  margin-bottom: 10px;
+  margin: 0;
+}
+
+.bill-delivery-note {
+  font-size: 11px;
+  font-weight: 700;
+  color: #047857;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  padding: 2px 7px;
+  border-radius: var(--radius-xs);
 }
 
 .bill-row {
@@ -3424,9 +3467,21 @@
   cursor: pointer;
 }
 
-.checkout-primary-btn:hover {
+.checkout-primary-btn:hover:not(:disabled) {
   transform: translateY(-1px);
   box-shadow: 0 6px 18px rgba(6, 78, 59, 0.35);
+}
+
+.checkout-primary-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.checkout-primary-btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .btn-price-summary {

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { ShoppingBag, ArrowRight, Sparkles } from "lucide-react";
+import { ShoppingBag, ArrowRight, Sparkles, Layers } from "lucide-react";
 import "./App.css";
 import { Header } from "./components/Header";
 import { PromoHero } from "./components/PromoHero";
@@ -15,6 +15,7 @@ import { OrderConfirmationModal } from "./components/OrderConfirmationModal";
 import { OrderHistoryModal } from "./components/OrderHistoryModal";
 import { OrderDetailsModal } from "./components/OrderDetailsModal";
 import { AccountModal } from "./components/AccountModal";
+import { AdminDashboard } from "./components/AdminDashboard";
 import { SectionDivider } from "./components/SectionDivider";
 import { CATEGORIES, PRODUCTS } from "./data/products";
 import type {
@@ -25,6 +26,7 @@ import type {
   SortOption,
   Order,
   OrderItem,
+  OrderStatus,
   UserProfile,
 } from "./types";
 import { loadSavedCart, saveCart } from "./utils/cartStorage";
@@ -41,9 +43,17 @@ import {
   getOrderById,
   createOrder,
   createAddressSnapshot,
+  updateOrderStatus,
 } from "./utils/orderStorage";
 import { getProfile, saveProfile } from "./utils/profileStorage";
 import { calculateCartDeliveryEta } from "./utils/deliveryEta";
+import {
+  getAdminProductOverrides,
+  setProductAvailability,
+  resetAdminProductOverrides,
+  isProductAvailable,
+  type AdminProductOverrides,
+} from "./utils/adminStorage";
 
 // Curated deterministic product IDs for homepage promotional rails
 const POPULAR_PICKS_IDS = [
@@ -169,6 +179,42 @@ function App() {
   const [profile, setProfile] = useState<UserProfile | null>(() => getProfile());
   const [showAccountModal, setShowAccountModal] = useState(false);
 
+  // Phase 22: Admin Dashboard & Product Availability overrides state
+  const [isAdminMode, setIsAdminMode] = useState(false);
+  const [productOverrides, setProductOverrides] = useState<AdminProductOverrides>(() =>
+    getAdminProductOverrides()
+  );
+
+  const isItemAvailable = useCallback(
+    (id: string) => {
+      return isProductAvailable(id, productOverrides);
+    },
+    [productOverrides]
+  );
+
+  const handleUpdateOrderStatus = useCallback((orderId: string, newStatus: OrderStatus) => {
+    const success = updateOrderStatus(orderId, newStatus);
+    if (success) {
+      setOrders(getOrders());
+      setSelectedOrder((prev) =>
+        prev && prev.id === orderId ? { ...prev, status: newStatus } : prev
+      );
+    }
+  }, []);
+
+  const handleToggleProductAvailability = useCallback(
+    (productId: string, isAvailable: boolean) => {
+      const updated = setProductAvailability(productId, isAvailable);
+      setProductOverrides(updated);
+    },
+    []
+  );
+
+  const handleResetProductOverrides = useCallback(() => {
+    resetAdminProductOverrides();
+    setProductOverrides({});
+  }, []);
+
   const handleSaveProfile = useCallback((updated: UserProfile) => {
     setProfile(updated);
     saveProfile(updated);
@@ -214,12 +260,19 @@ function App() {
     saveSelectedAddressId(null);
   }, []);
 
-  const addToCart = useCallback((id: string) => {
-    setCart((prev) => ({
-      ...prev,
-      [id]: Math.min(99, (prev[id] || 0) + 1),
-    }));
-  }, []);
+  const addToCart = useCallback(
+    (id: string) => {
+      if (!isItemAvailable(id)) {
+        setOrderToast("This item is currently out of stock.");
+        return;
+      }
+      setCart((prev) => ({
+        ...prev,
+        [id]: Math.min(99, (prev[id] || 0) + 1),
+      }));
+    },
+    [isItemAvailable]
+  );
 
   const removeFromCart = useCallback((id: string) => {
     setCart((prev) => {
@@ -550,6 +603,50 @@ function App() {
     }
   }, []);
 
+  // Phase 22: Admin Dashboard dedicated operations view
+  if (isAdminMode) {
+    return (
+      <div className="app-container admin-app-view">
+        <AdminDashboard
+          onBackToStore={() => {
+            window.scrollTo({ top: 0, behavior: "instant" });
+            setIsAdminMode(false);
+          }}
+          orders={orders}
+          onUpdateOrderStatus={handleUpdateOrderStatus}
+          onViewOrderDetails={(order) => {
+            setSelectedOrder(order);
+            setShowOrderDetails(true);
+          }}
+          products={PRODUCTS}
+          productOverrides={productOverrides}
+          onToggleProductAvailability={handleToggleProductAvailability}
+          onResetProductOverrides={handleResetProductOverrides}
+          userProfile={profile}
+          savedAddresses={loadSavedAddresses()}
+          cartCount={cartCount}
+        />
+
+        {/* Order Details Modal reused for Admin Inspection */}
+        <OrderDetailsModal
+          isOpen={showOrderDetails}
+          order={selectedOrder}
+          onClose={() => setShowOrderDetails(false)}
+          onReorder={handleReorder}
+          onBackToOrders={() => setShowOrderDetails(false)}
+        />
+
+        {/* Order / Admin Floating Toast */}
+        {orderToast && (
+          <div className="order-floating-toast" role="status" aria-live="polite">
+            <Sparkles size={16} />
+            <span>{orderToast}</span>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="app-container">
       <Header
@@ -607,6 +704,7 @@ function App() {
           onSeeAll={handleExploreMithilaSpecials}
           wishlistSet={wishlistSet}
           onToggleWishlist={handleToggleWishlist}
+          isProductAvailable={isItemAvailable}
         />
 
         {/* 4. Popular Picks Rail */}
@@ -622,6 +720,7 @@ function App() {
           onSeeAll={handleShopNow}
           wishlistSet={wishlistSet}
           onToggleWishlist={handleToggleWishlist}
+          isProductAvailable={isItemAvailable}
         />
 
         {/* 5. Everyday Essentials Rail */}
@@ -637,6 +736,7 @@ function App() {
           onSeeAll={handleShopNow}
           wishlistSet={wishlistSet}
           onToggleWishlist={handleToggleWishlist}
+          isProductAvailable={isItemAvailable}
         />
 
         {/* Section Divider: Rails to Full Catalogue */}
@@ -662,7 +762,96 @@ function App() {
           onUpdateSort={setSortBy}
           categories={CATEGORIES}
           onClearAllFilters={handleClearAllFilters}
+          isProductAvailable={isItemAvailable}
         />
+
+        {/* Storefront Footer with Local Admin Entry */}
+        <footer className="storefront-footer" aria-label="MithilaKart footer">
+          <div className="storefront-footer-inner">
+            <div className="storefront-footer-brand">
+              <span className="storefront-footer-logo">
+                Mithila<span className="logo-accent">Kart</span>
+              </span>
+              <p className="storefront-footer-tagline">
+                Authentic regional quick-commerce. Fresh daily essentials, seasonal produce and
+                authentic Mithila specialties delivered in 10-15 minutes.
+              </p>
+              <div className="storefront-service-cities">
+                <span>Serving: Darbhanga • Madhubani • Samastipur</span>
+              </div>
+            </div>
+
+            <div className="storefront-footer-nav">
+              <div className="storefront-footer-col">
+                <span className="storefront-footer-col-title">Shop</span>
+                <button
+                  type="button"
+                  className="storefront-footer-link"
+                  onClick={handleShopNow}
+                >
+                  All Products
+                </button>
+                <button
+                  type="button"
+                  className="storefront-footer-link"
+                  onClick={handleExploreMithilaSpecials}
+                >
+                  Mithila Specials
+                </button>
+              </div>
+
+              <div className="storefront-footer-col">
+                <span className="storefront-footer-col-title">Account</span>
+                <button
+                  type="button"
+                  className="storefront-footer-link"
+                  onClick={() => setShowOrderHistory(true)}
+                >
+                  My Orders ({orders.length})
+                </button>
+                <button
+                  type="button"
+                  className="storefront-footer-link"
+                  onClick={() => setShowAccountModal(true)}
+                >
+                  My Profile
+                </button>
+                <button
+                  type="button"
+                  className="storefront-footer-link"
+                  onClick={() => setShowLocationModal(true)}
+                >
+                  Addresses
+                </button>
+              </div>
+
+              <div className="storefront-footer-col storefront-footer-dev-col">
+                <span className="storefront-footer-col-title">Operations</span>
+                <button
+                  type="button"
+                  className="storefront-admin-entry-btn"
+                  onClick={() => {
+                    window.scrollTo({ top: 0, behavior: "instant" });
+                    setIsAdminMode(true);
+                  }}
+                  title="Open Local Operations Admin"
+                  aria-label="Open Local Admin Dashboard (Development)"
+                >
+                  <Layers size={14} />
+                  <span>Local Admin (Dev)</span>
+                </button>
+                <span className="storefront-admin-hint">
+                  Client-side development dashboard
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="storefront-footer-bottom">
+            <p>© {new Date().getFullYear()} MithilaKart. Authentic regional quick-commerce.</p>
+            <span className="storefront-footer-phase-badge">Phase 22 • Local Admin Active</span>
+          </div>
+        </footer>
       </main>
 
       {/* Floating Cart Bar */}
@@ -761,6 +950,7 @@ function App() {
         onRemoveFromCart={removeFromCart}
         isWishlisted={selectedProduct ? wishlistSet.has(selectedProduct.id) : false}
         onToggleWishlist={handleToggleWishlist}
+        isAvailable={selectedProduct ? isItemAvailable(selectedProduct.id) : true}
       />
 
       {/* Checkout Review Modal */}
@@ -844,6 +1034,10 @@ function App() {
         onContinueShopping={() => {
           setShowAccountModal(false);
           handleShopNow();
+        }}
+        onOpenAdmin={() => {
+          window.scrollTo({ top: 0, behavior: "instant" });
+          setIsAdminMode(true);
         }}
       />
 

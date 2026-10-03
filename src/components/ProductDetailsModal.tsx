@@ -23,6 +23,7 @@ export interface ProductDetailsModalProps {
   onRemoveFromCart: (id: string) => void;
   isWishlisted?: boolean;
   onToggleWishlist?: (id: string) => void;
+  isAvailable?: boolean;
 }
 
 /**
@@ -45,6 +46,7 @@ interface ProductDetailsModalInnerProps {
   onRemoveFromCart: (id: string) => void;
   isWishlisted?: boolean;
   onToggleWishlist?: (id: string) => void;
+  isAvailable?: boolean;
 }
 
 function ProductDetailsModalInner({
@@ -55,6 +57,7 @@ function ProductDetailsModalInner({
   onRemoveFromCart,
   isWishlisted = false,
   onToggleWishlist,
+  isAvailable = true,
 }: ProductDetailsModalInnerProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -118,11 +121,15 @@ function ProductDetailsModalInner({
           {/* Visual Showcase */}
           <div className="product-modal-visual-col">
             <div className="product-modal-image-stage">
-              {discount > 0 && (
+              {!isAvailable ? (
+                <span className="product-modal-out-of-stock-tag" title="Currently out of stock">
+                  Out of Stock
+                </span>
+              ) : discount > 0 ? (
                 <span className="product-modal-discount-tag">
                   {discount}% OFF
                 </span>
-              )}
+              ) : null}
 
               {product.isMithilaSpecial && (
                 <span className="product-modal-special-tag">
@@ -282,7 +289,18 @@ function ProductDetailsModalInner({
 
             {/* Sticky/Bottom Cart Action Bar */}
             <div className="product-modal-action-bar">
-              {cartQuantity > 0 ? (
+              {!isAvailable ? (
+                <button
+                  type="button"
+                  className="product-modal-add-btn product-modal-btn-disabled"
+                  disabled
+                  aria-disabled="true"
+                  aria-label={`${product.name} is currently out of stock`}
+                >
+                  <Package size={18} />
+                  <span>CURRENTLY OUT OF STOCK</span>
+                </button>
+              ) : cartQuantity > 0 ? (
                 <div className="product-modal-cart-active">
                   <div className="product-modal-active-summary">
                     <span className="modal-summary-label">In Cart</span>
@@ -356,6 +374,7 @@ export function ProductDetailsModal(props: ProductDetailsModalProps) {
       onRemoveFromCart={props.onRemoveFromCart}
       isWishlisted={props.isWishlisted}
       onToggleWishlist={props.onToggleWishlist}
+      isAvailable={props.isAvailable}
     />
   );
 }

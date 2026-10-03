@@ -15,6 +15,7 @@ export interface ProductRailProps {
   onSeeAll?: () => void;
   wishlistSet?: Set<string>;
   onToggleWishlist?: (id: string) => void;
+  isProductAvailable?: (id: string) => boolean;
 }
 
 export function ProductRail({
@@ -29,6 +30,7 @@ export function ProductRail({
   onSeeAll,
   wishlistSet,
   onToggleWishlist,
+  isProductAvailable,
 }: ProductRailProps) {
   const trackRef = useRef<HTMLDivElement>(null);
 
@@ -112,6 +114,7 @@ export function ProductRail({
             onSelectProduct={onSelectProduct}
             isWishlisted={wishlistSet ? wishlistSet.has(product.id) : false}
             onToggleWishlist={onToggleWishlist}
+            isAvailable={isProductAvailable ? isProductAvailable(product.id) : true}
           />
         ))}
       </div>

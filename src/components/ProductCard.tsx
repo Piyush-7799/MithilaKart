@@ -10,6 +10,7 @@ interface ProductCardProps {
   onSelectProduct: (product: Product) => void;
   isWishlisted?: boolean;
   onToggleWishlist?: (id: string) => void;
+  isAvailable?: boolean;
 }
 
 function ProductCardInner({
@@ -20,6 +21,7 @@ function ProductCardInner({
   onSelectProduct,
   isWishlisted = false,
   onToggleWishlist,
+  isAvailable = true,
 }: ProductCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -31,7 +33,7 @@ function ProductCardInner({
 
   return (
     <article
-      className={`product-card ${product.isMithilaSpecial ? "product-card-signature" : ""}`}
+      className={`product-card ${product.isMithilaSpecial ? "product-card-signature" : ""} ${!isAvailable ? "product-card-unavailable" : ""}`}
       data-product-id={product.id}
     >
       <div
@@ -49,11 +51,15 @@ function ProductCardInner({
       >
         {/* Visual Area */}
         <div className="product-visual-wrapper">
-          {discount > 0 && (
+          {!isAvailable ? (
+            <span className="product-out-of-stock-tag" title="Currently out of stock">
+              Out of Stock
+            </span>
+          ) : discount > 0 ? (
             <span className="product-discount-tag">
               {discount}% OFF
             </span>
-          )}
+          ) : null}
 
           {product.isMithilaSpecial && (
             <span className="product-signature-tag" title="Mithila Regional Special">
@@ -153,7 +159,16 @@ function ProductCardInner({
               onClick={(e) => e.stopPropagation()}
               onKeyDown={(e) => e.stopPropagation()}
             >
-              {quantity > 0 ? (
+              {!isAvailable ? (
+                <button
+                  type="button"
+                  className="out-of-stock-btn"
+                  disabled
+                  aria-label={`${product.name} is currently out of stock`}
+                >
+                  <span>Out of Stock</span>
+                </button>
+              ) : quantity > 0 ? (
                 <div className="quantity-stepper">
                   <button
                     type="button"

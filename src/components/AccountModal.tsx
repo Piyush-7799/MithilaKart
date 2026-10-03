@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   ArrowRight,
   AlertCircle,
+  Layers,
 } from "lucide-react";
 import type { UserProfile, Order } from "../types";
 import { getInitials, validateIndianPhone, validateEmail } from "../utils/profileStorage";
@@ -30,6 +31,7 @@ export interface AccountModalProps {
   onOpenAddresses: () => void;
   onViewOrderDetails: (order: Order) => void;
   onContinueShopping: () => void;
+  onOpenAdmin?: () => void;
 }
 
 function formatDate(isoString: string): string {
@@ -57,6 +59,7 @@ export function AccountModal({
   onOpenAddresses,
   onViewOrderDetails,
   onContinueShopping,
+  onOpenAdmin,
 }: AccountModalProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [fullName, setFullName] = useState("");
@@ -505,6 +508,25 @@ export function AccountModal({
               </div>
             )}
           </div>
+
+          {/* Local Admin Development Entry */}
+          {onOpenAdmin && (
+            <div className="account-dev-admin-box">
+              <button
+                type="button"
+                className="account-dev-admin-btn"
+                onClick={() => {
+                  handleClose();
+                  onOpenAdmin();
+                }}
+                title="Open Local Operations Admin"
+                aria-label="Open Local Admin Dashboard (Development)"
+              >
+                <Layers size={16} />
+                <span>Open Local Admin Dashboard (Dev)</span>
+              </button>
+            </div>
+          )}
 
           {/* Trust Banner */}
           <div className="account-trust-banner">

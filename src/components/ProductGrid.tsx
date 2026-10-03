@@ -24,6 +24,7 @@ interface ProductGridProps {
   onUpdateSort?: (sortBy: SortOption) => void;
   categories?: Category[];
   onClearAllFilters?: () => void;
+  isProductAvailable?: (id: string) => boolean;
 }
 
 function ProductGridInner({
@@ -45,6 +46,7 @@ function ProductGridInner({
   onUpdateSort,
   categories = [],
   onClearAllFilters,
+  isProductAvailable,
 }: ProductGridProps) {
   const isMithilaSpecials = selectedCategory === "Mithila Specials";
   const trimmedSearch = searchQuery.trim();
@@ -213,6 +215,7 @@ function ProductGridInner({
               onSelectProduct={onSelectProduct}
               isWishlisted={wishlistSet ? wishlistSet.has(product.id) : false}
               onToggleWishlist={onToggleWishlist}
+              isAvailable={isProductAvailable ? isProductAvailable(product.id) : true}
             />
           ))}
         </div>

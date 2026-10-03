@@ -14,6 +14,7 @@ import { CheckoutReviewModal } from "./components/CheckoutReviewModal";
 import { OrderConfirmationModal } from "./components/OrderConfirmationModal";
 import { OrderHistoryModal } from "./components/OrderHistoryModal";
 import { OrderDetailsModal } from "./components/OrderDetailsModal";
+import { AccountModal } from "./components/AccountModal";
 import { SectionDivider } from "./components/SectionDivider";
 import { CATEGORIES, PRODUCTS } from "./data/products";
 import type {
@@ -24,6 +25,7 @@ import type {
   SortOption,
   Order,
   OrderItem,
+  UserProfile,
 } from "./types";
 import { loadSavedCart, saveCart } from "./utils/cartStorage";
 import { loadSavedLocation, saveLocation, clearSavedLocation } from "./utils/locationStorage";
@@ -40,6 +42,7 @@ import {
   createOrder,
   createAddressSnapshot,
 } from "./utils/orderStorage";
+import { getProfile, saveProfile } from "./utils/profileStorage";
 import { calculateCartDeliveryEta } from "./utils/deliveryEta";
 
 // Curated deterministic product IDs for homepage promotional rails
@@ -161,6 +164,16 @@ function App() {
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const [showOrderConfirmation, setShowOrderConfirmation] = useState(false);
   const [orderToast, setOrderToast] = useState<string | null>(null);
+
+  // Phase 21: User profile & account modal state
+  const [profile, setProfile] = useState<UserProfile | null>(() => getProfile());
+  const [showAccountModal, setShowAccountModal] = useState(false);
+
+  const handleSaveProfile = useCallback((updated: UserProfile) => {
+    setProfile(updated);
+    saveProfile(updated);
+    setOrderToast("Profile updated");
+  }, []);
 
   // Auto-dismiss floating order toasts
   useEffect(() => {
@@ -448,6 +461,12 @@ function App() {
     }));
 
     const addressSnapshot = createAddressSnapshot(selectedLocation);
+    if (!selectedLocation.address && profile?.fullName) {
+      addressSnapshot.fullName = profile.fullName;
+      if (profile.phone) {
+        addressSnapshot.phone = profile.phone;
+      }
+    }
     const calculatedEta = calculateCartDeliveryEta(cartItems, selectedLocation);
 
     const mrpSum = cartItems.reduce(
@@ -480,7 +499,7 @@ function App() {
     // Show confirmation modal
     setConfirmedOrder(newOrder);
     setShowOrderConfirmation(true);
-  }, [selectedLocation, cartItems, subtotal, deliveryFee, total]);
+  }, [selectedLocation, cartItems, subtotal, deliveryFee, total, profile]);
 
   const handleReorder = useCallback((orderToReorder: Order) => {
     const availableItems: { id: string; quantity: number }[] = [];
@@ -551,6 +570,8 @@ function App() {
         onToggleWishlist={handleToggleWishlist}
         orderCount={orders.length}
         onOpenOrders={() => setShowOrderHistory(true)}
+        userProfile={profile}
+        onOpenAccount={() => setShowAccountModal(true)}
       />
 
       <main className="main-content">
@@ -798,7 +819,35 @@ function App() {
         }}
       />
 
-      {/* Order / Reorder Floating Toast */}
+      {/* Account & Profile Modal */}
+      <AccountModal
+        isOpen={showAccountModal}
+        onClose={() => setShowAccountModal(false)}
+        profile={profile}
+        onSaveProfile={handleSaveProfile}
+        orders={orders}
+        savedAddressesCount={loadSavedAddresses().length}
+        cartCount={cartCount}
+        onOpenOrders={() => {
+          setShowAccountModal(false);
+          setShowOrderHistory(true);
+        }}
+        onOpenAddresses={() => {
+          setShowAccountModal(false);
+          setShowLocationModal(true);
+        }}
+        onViewOrderDetails={(order) => {
+          setSelectedOrder(order);
+          setShowAccountModal(false);
+          setShowOrderDetails(true);
+        }}
+        onContinueShopping={() => {
+          setShowAccountModal(false);
+          handleShopNow();
+        }}
+      />
+
+      {/* Order / Reorder / Profile Floating Toast */}
       {orderToast && (
         <div className="order-floating-toast" role="status" aria-live="polite">
           <Sparkles size={16} />

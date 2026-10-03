@@ -125,4 +125,14 @@ export interface Order {
   notes?: string;
 }
 
+export interface UserProfile {
+  id: string;
+  fullName: string;
+  phone?: string;
+  email?: string;
+  avatarUrl?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 

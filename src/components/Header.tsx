@@ -1,7 +1,8 @@
 import { useState, useRef } from "react";
-import { Search, ShoppingBag, MapPin, ChevronDown, X, Zap, Heart, Package } from "lucide-react";
-import type { DeliveryLocation, Product } from "../types";
+import { Search, ShoppingBag, MapPin, ChevronDown, X, Zap, Heart, Package, User } from "lucide-react";
+import type { DeliveryLocation, Product, UserProfile } from "../types";
 import { SearchSuggestions } from "./SearchSuggestions";
+import { getInitials } from "../utils/profileStorage";
 
 interface HeaderProps {
   search: string;
@@ -21,6 +22,8 @@ interface HeaderProps {
   onToggleWishlist?: (id: string) => void;
   orderCount?: number;
   onOpenOrders?: () => void;
+  userProfile?: UserProfile | null;
+  onOpenAccount?: () => void;
 }
 
 export function Header({
@@ -41,9 +44,13 @@ export function Header({
   onToggleWishlist,
   orderCount = 0,
   onOpenOrders,
+  userProfile,
+  onOpenAccount,
 }: HeaderProps) {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const userInitials = getInitials(userProfile?.fullName);
 
   const showSuggestions =
     isSearchFocused &&
@@ -192,6 +199,26 @@ export function Header({
                 )}
               </div>
               <span className="orders-btn-label">Orders</span>
+            </button>
+          )}
+
+          {onOpenAccount && (
+            <button
+              type="button"
+              className={`account-header-btn ${userProfile?.fullName ? "account-header-btn-active" : ""}`}
+              onClick={onOpenAccount}
+              aria-label={userProfile?.fullName ? `My Account: ${userProfile.fullName}` : "My Account"}
+            >
+              <div className="account-icon-box">
+                {userInitials ? (
+                  <span className="account-header-initials">{userInitials}</span>
+                ) : (
+                  <User size={19} className="account-header-icon" />
+                )}
+              </div>
+              <span className="account-btn-label">
+                {userProfile?.fullName ? userProfile.fullName.trim().split(" ")[0] : "Account"}
+              </span>
             </button>
           )}
 

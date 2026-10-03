@@ -13,8 +13,12 @@ import {
   ChevronRight,
   Heart,
   RotateCcw,
+  Clock,
+  Home,
+  Briefcase,
 } from "lucide-react";
 import type { CartItem, DeliveryLocation, Product } from "../types";
+import { calculateCartDeliveryEta } from "../utils/deliveryEta";
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -113,6 +117,9 @@ export function CartDrawer({
   }, [cartItems]);
 
   const productSavings = Math.max(0, mrpTotal - subtotal);
+  const etaInfo = useMemo(() => {
+    return calculateCartDeliveryEta(cartItems, selectedLocation || null);
+  }, [cartItems, selectedLocation]);
 
   // Curated deterministic basket recommendations (4-6 products, excluded if in cart)
   const recommendedProducts = useMemo(() => {
@@ -277,16 +284,16 @@ export function CartDrawer({
           </button>
         </div>
 
-        {/* 2. Delivery Information Context */}
-        <div
-          className="cart-delivery-info-bar"
+        {/* 2. Delivery Experience & ETA Layer */}
+        <section
+          className="cart-delivery-info-bar cart-delivery-experience-card"
           onClick={onOpenLocationModal}
           role={onOpenLocationModal ? "button" : undefined}
           tabIndex={onOpenLocationModal ? 0 : undefined}
           aria-label={
             selectedLocation
-              ? `Delivering to ${selectedLocation.displayName}. Click to change delivery location`
-              : "Select delivery location"
+              ? `Delivering to ${selectedLocation.displayName}. Estimated delivery ${etaInfo.etaText}. Click to change delivery location`
+              : "Add a delivery address to proceed"
           }
           onKeyDown={(e) => {
             if ((e.key === "Enter" || e.key === " ") && onOpenLocationModal) {
@@ -295,48 +302,112 @@ export function CartDrawer({
             }
           }}
         >
-          <div className="cart-delivery-info-icon">
-            <MapPin size={16} />
-          </div>
-          <div className="cart-delivery-info-content">
-            {selectedLocation ? (
-              <div className="cart-delivery-text-group">
-                <span className="cart-delivery-info-title">Delivering to</span>
-                <span className="cart-delivery-info-address">
-                  {selectedLocation.displayName}
-                </span>
-                {selectedLocation.address && (
-                  <span className="cart-delivery-info-subaddress">
-                    {selectedLocation.address.house} • {selectedLocation.address.fullName}
-                  </span>
-                )}
+          <div className="delivery-card-header-row">
+            <div className="delivery-card-title-group">
+              <div className="cart-delivery-info-icon delivery-card-icon-box">
+                <MapPin size={15} />
               </div>
-            ) : (
-              <div className="cart-delivery-text-group">
-                <span className="cart-delivery-info-prompt">
-                  Select delivery location
-                </span>
-                <span className="cart-delivery-info-sub">
-                  Tap to set doorstep address
-                </span>
-              </div>
+              <span className="cart-delivery-info-title delivery-card-title">
+                Delivering to
+              </span>
+            </div>
+
+            {onOpenLocationModal && (
+              <button
+                type="button"
+                className="cart-delivery-change-btn delivery-card-change-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpenLocationModal();
+                }}
+                aria-label={selectedLocation ? "Change delivery address" : "Select delivery address"}
+              >
+                <span>{selectedLocation ? "Change" : "Select"}</span>
+                <ChevronRight size={13} />
+              </button>
             )}
           </div>
-          {onOpenLocationModal && (
-            <button
-              type="button"
-              className="cart-delivery-change-btn"
-              onClick={(e) => {
-                e.stopPropagation();
-                onOpenLocationModal();
-              }}
-              aria-label={selectedLocation ? "Change delivery location" : "Select delivery location"}
-            >
-              <span>{selectedLocation ? "Change" : "Select"}</span>
-              <ChevronRight size={13} />
-            </button>
+
+          {selectedLocation ? (
+            <div className="delivery-card-main-content">
+              <div className="delivery-destination-details">
+                <div className="delivery-recipient-row">
+                  {selectedLocation.address ? (
+                    <span className="delivery-label-chip">
+                      {selectedLocation.address.label === "Home" && <Home size={11} />}
+                      {selectedLocation.address.label === "Work" && <Briefcase size={11} />}
+                      {selectedLocation.address.label === "Other" && <MapPin size={11} />}
+                      <span>{selectedLocation.address.label}</span>
+                    </span>
+                  ) : (
+                    <span className="delivery-label-chip">
+                      <MapPin size={11} />
+                      <span>{selectedLocation.label || "City"}</span>
+                    </span>
+                  )}
+                  <strong className="delivery-recipient-name">
+                    {selectedLocation.address?.fullName || selectedLocation.label}
+                  </strong>
+                </div>
+
+                <div className="cart-delivery-text-group delivery-address-lines">
+                  <span className="cart-delivery-info-address delivery-line-main">
+                    {selectedLocation.displayName}
+                  </span>
+                  {selectedLocation.address && (
+                    <span className="cart-delivery-info-subaddress delivery-line-sub">
+                      {selectedLocation.address.house} • {selectedLocation.address.city}, {selectedLocation.address.state} - {selectedLocation.address.pincode}
+                    </span>
+                  )}
+                  {selectedLocation.address?.landmark && (
+                    <span className="delivery-line-landmark">
+                      Landmark: {selectedLocation.address.landmark}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Delivery ETA & Serviceability Strip */}
+              <div className="delivery-eta-strip">
+                <div className="delivery-eta-info">
+                  <div className="delivery-eta-time-row">
+                    <Clock size={13} className="delivery-eta-clock-icon" />
+                    <span className="delivery-eta-caption">Estimated delivery:</span>
+                    <strong className="delivery-eta-value">{etaInfo.etaText}</strong>
+                  </div>
+                  <span className="delivery-eta-reason-text">{etaInfo.reason}</span>
+                </div>
+                <div className="delivery-service-tag" title="Express service active">
+                  <span className="service-status-dot" aria-hidden="true" />
+                  <span>{etaInfo.serviceabilityStatus}</span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="cart-delivery-info-content delivery-no-address-box">
+              <div className="cart-delivery-text-group">
+                <span className="cart-delivery-info-prompt delivery-no-address-title">
+                  Add a delivery address
+                </span>
+                <span className="cart-delivery-info-sub delivery-no-address-sub">
+                  Select an address to confirm 10–15 min express delivery and proceed to checkout.
+                </span>
+              </div>
+              <button
+                type="button"
+                className="delivery-select-address-cta"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpenLocationModal?.();
+                }}
+                aria-label="Select delivery address"
+              >
+                <MapPin size={13} />
+                <span>Select address</span>
+              </button>
+            </div>
           )}
-        </div>
+        </section>
 
         {cartCount === 0 ? (
           /* Empty Cart State */
@@ -705,7 +776,18 @@ export function CartDrawer({
 
                 <div className="bill-row">
                   <div className="bill-label-with-hint">
-                    <span>Delivery</span>
+                    <span>Estimated delivery</span>
+                    <span className="fee-hint">{etaInfo.reason}</span>
+                  </div>
+                  <div className="bill-eta-summary-badge">
+                    <Clock size={12} />
+                    <strong>{etaInfo.etaText}</strong>
+                  </div>
+                </div>
+
+                <div className="bill-row">
+                  <div className="bill-label-with-hint">
+                    <span>Delivery fee</span>
                     <span className="fee-hint">
                       {deliveryFee === 0
                         ? "Free delivery unlocked"
@@ -746,7 +828,7 @@ export function CartDrawer({
               {/* Trust Badge */}
               <div className="safe-delivery-note">
                 <ShieldCheck size={16} />
-                <span>Contactless doorstep drop in 10-15 minutes</span>
+                <span>Contactless doorstep drop in {etaInfo.etaText}</span>
               </div>
             </div>
 
@@ -801,7 +883,8 @@ export function CartDrawer({
                     Order Summary Verified
                   </strong>
                   <p className="checkout-notice-desc">
-                    Your basket of {cartCount} {cartCount === 1 ? "item" : "items"} (₹{total}) is verified and ready for checkout.
+                    Your basket of {cartCount} {cartCount === 1 ? "item" : "items"} (₹{total}) is verified for delivery to{" "}
+                    <strong>{selectedLocation?.displayName}</strong> in <strong>{etaInfo.etaText}</strong>.
                   </p>
                 </div>
               )}
@@ -810,22 +893,30 @@ export function CartDrawer({
               <div className="checkout-action-wrapper">
                 <button
                   type="button"
-                  className="checkout-primary-btn"
+                  className={`checkout-primary-btn ${!selectedLocation ? "checkout-btn-need-address" : ""}`}
                   onClick={handleContinueToCheckout}
                   disabled={cartCount === 0}
-                  aria-label={`Proceed to Checkout • Total ₹${total}`}
+                  aria-label={
+                    selectedLocation
+                      ? `Proceed to Checkout • Total ₹${total}`
+                      : "Select delivery address to proceed"
+                  }
                 >
                   <div className="btn-price-summary">
                     <span className="btn-total">₹{total}</span>
                     <span className="btn-subtext">TOTAL</span>
                   </div>
                   <div className="btn-cta-text">
-                    <span>Proceed to Checkout</span>
+                    <span>
+                      {selectedLocation ? "Proceed to Checkout" : "Select Address to Checkout"}
+                    </span>
                     <ArrowRight size={18} />
                   </div>
                 </button>
-                <span className="phase-note">
-                  Doorstep delivery across Mithila in 10-15 mins
+                <span className={`phase-note ${!selectedLocation ? "phase-note-alert" : ""}`}>
+                  {selectedLocation
+                    ? `Doorstep delivery in ${etaInfo.etaText} • ${etaInfo.serviceabilityStatus}`
+                    : "Please select an address before checkout"}
                 </span>
               </div>
             </div>

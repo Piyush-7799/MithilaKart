@@ -68,3 +68,12 @@ export interface FilterState {
   specialOnly: boolean;
 }
 
+export interface DeliveryEtaInfo {
+  etaText: string;
+  minMinutes: number;
+  maxMinutes: number;
+  serviceabilityStatus: string;
+  reason: string;
+}
+
+

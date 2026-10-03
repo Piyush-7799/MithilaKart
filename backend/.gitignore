@@ -1,0 +1,11 @@
+# Backend secrets — NEVER commit
+backend/.env
+backend/.env.local
+backend/.env.production
+
+# Backend build output
+backend/dist/
+backend/node_modules/
+
+# Prisma generated client (regenerated via db:generate)
+backend/node_modules/.prisma/

@@ -7,7 +7,14 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "server": "cd backend && node dist/server.js",
+    "server:dev": "cd backend && npm run dev",
+    "server:install": "cd backend && npm install",
+    "server:build": "cd backend && npm run build",
+    "server:db:generate": "cd backend && npm run db:generate",
+    "server:db:migrate": "cd backend && npm run db:migrate",
+    "server:db:validate": "cd backend && npm run db:validate"
   },
   "dependencies": {
     "lucide-react": "^1.49.0",

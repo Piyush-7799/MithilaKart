@@ -1,0 +1,159 @@
+// Prisma Schema for MithilaKart
+// Matches the existing frontend domain types in src/types/index.ts
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ─────────────────────────────────────────────────────────────────
+
+enum OrderStatus {
+  Placed
+  Confirmed
+  Preparing
+  OutForDelivery @map("Out for Delivery")
+  Delivered
+  Cancelled
+}
+
+enum AddressLabel {
+  Home
+  Work
+  Other
+}
+
+// ─── User ──────────────────────────────────────────────────────────────────
+
+model User {
+  id        String   @id @default(cuid())
+  fullName  String
+  email     String?  @unique
+  phone     String?
+  avatarUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  addresses Address[]
+  orders    Order[]
+
+  @@index([email])
+}
+
+// ─── Address ───────────────────────────────────────────────────────────────
+
+model Address {
+  id        String       @id @default(cuid())
+  userId    String
+  fullName  String
+  phone     String
+  house     String
+  street    String
+  city      String
+  state     String
+  pincode   String
+  landmark  String?
+  label     AddressLabel @default(Home)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ─── Product ───────────────────────────────────────────────────────────────
+// Mirrors the Product interface in src/types/index.ts
+// Fields: id, name, price, mrp, unit, category, rating, delivery,
+//         image, fallbackIcon, badge, isMithilaSpecial, description
+// availability: admin-managed (Phase 22 adminStorage)
+
+model Product {
+  id              String   @id
+  name            String
+  price           Float
+  mrp             Float
+  unit            String
+  category        String
+  rating          Float    @default(0)
+  delivery        String
+  image           String
+  fallbackIcon    String?
+  badge           String?
+  isMithilaSpecial Boolean @default(false)
+  description     String?
+  isAvailable     Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  orderItems OrderItem[]
+
+  @@index([category])
+  @@index([isAvailable])
+}
+
+// ─── Order ─────────────────────────────────────────────────────────────────
+// Mirrors the Order interface in src/types/index.ts
+
+model Order {
+  id                String      @id @default(cuid())
+  userId            String?
+  status            OrderStatus @default(Placed)
+  subtotal          Float
+  deliveryFee       Float
+  total             Float
+  savings           Float
+  deliveryEta       String
+  paymentMethod     String
+  estimatedDelivery String
+  notes             String?
+
+  // Snapshotted delivery address (immutable at order time)
+  addressFullName  String
+  addressPhone     String
+  addressHouse     String
+  addressStreet    String
+  addressCity      String
+  addressState     String
+  addressPincode   String
+  addressLandmark  String?
+  addressLabel     String?
+  addressDisplay   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  items OrderItem[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ─── OrderItem ─────────────────────────────────────────────────────────────
+// Historical snapshot — immutable once created.
+// Stores product data at time of order to survive catalogue changes.
+
+model OrderItem {
+  id            String  @id @default(cuid())
+  orderId       String
+  productId     String
+  nameSnapshot  String
+  imageSnapshot String
+  quantity      Int
+  priceSnapshot Float
+  mrpSnapshot   Float?
+  unitSnapshot  String?
+  lineTotal     Float
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([orderId])
+  @@index([productId])
+}

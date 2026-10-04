@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
+import { useProducts } from "./hooks/useProducts";
 import { ShoppingBag, ArrowRight, Sparkles, Layers } from "lucide-react";
 import "./App.css";
 import { Header } from "./components/Header";
@@ -17,7 +18,7 @@ import { OrderDetailsModal } from "./components/OrderDetailsModal";
 import { AccountModal } from "./components/AccountModal";
 import { AdminDashboard } from "./components/AdminDashboard";
 import { SectionDivider } from "./components/SectionDivider";
-import { CATEGORIES, PRODUCTS } from "./data/products";
+import { CATEGORIES } from "./data/products";
 import type {
   CartItem,
   DeliveryLocation,
@@ -89,6 +90,8 @@ const DEFAULT_FILTERS: FilterState = {
 };
 
 function App() {
+  // Phase 23.2: Fetch products from API; falls back to static data if unavailable
+  const { products: PRODUCTS, isLoading: productsLoading, isApiConnected } = useProducts();
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
 
@@ -111,7 +114,9 @@ function App() {
     setSelectedCategory("All");
   }, []);
 
-  // Restore cart from localStorage on mount, validated against valid product IDs
+  // Restore cart from localStorage on mount.
+  // On first render, PRODUCTS may still be loading from API — cart validation
+  // against API product IDs happens after load via the useEffect below.
   const [cart, setCart] = useState<Record<string, number>>(() => {
     return loadSavedCart(new Set(PRODUCTS.map((p) => p.id)));
   });
@@ -141,7 +146,7 @@ function App() {
     setSelectedProduct(product);
   }, []);
 
-  // Restore wishlist from localStorage on mount, validated against valid product IDs
+  // Restore wishlist from localStorage on mount.
   const [wishlist, setWishlist] = useState<string[]>(() => {
     return loadWishlist(new Set(PRODUCTS.map((p) => p.id)));
   });
@@ -153,7 +158,7 @@ function App() {
     return wishlist
       .map((id) => PRODUCTS.find((p) => p.id === id))
       .filter((p): p is Product => p !== undefined);
-  }, [wishlist]);
+  }, [wishlist, PRODUCTS]);
 
   // Synchronize cart state to localStorage on every change
   useEffect(() => {
@@ -390,7 +395,7 @@ function App() {
 
       return true;
     });
-  }, [search, selectedCategory, filters]);
+  }, [search, selectedCategory, filters, PRODUCTS]);
 
   // Derived sorted catalogue products
   const sortedProducts = useMemo(() => {
@@ -420,7 +425,7 @@ function App() {
 
   const mithilaSpecialsProducts = useMemo(
     () => PRODUCTS.filter((p) => p.category === "Mithila Specials"),
-    []
+    [PRODUCTS]
   );
 
   const popularPicksProducts = useMemo(
@@ -428,7 +433,7 @@ function App() {
       POPULAR_PICKS_IDS.map((id) => PRODUCTS.find((p) => p.id === id)).filter(
         (p): p is Product => p !== undefined
       ),
-    []
+    [PRODUCTS]
   );
 
   const everydayEssentialsProducts = useMemo(
@@ -436,7 +441,7 @@ function App() {
       EVERYDAY_ESSENTIALS_IDS.map((id) => PRODUCTS.find((p) => p.id === id)).filter(
         (p): p is Product => p !== undefined
       ),
-    []
+    [PRODUCTS]
   );
 
   const handleShopNow = () => {
@@ -592,7 +597,7 @@ function App() {
     setShowOrderHistory(false);
     setShowOrderConfirmation(false);
     setShowCart(true);
-  }, []);
+  }, [PRODUCTS]);
 
   const handleViewOrder = useCallback((orderId: string) => {
     const ord = getOrderById(orderId);
@@ -743,6 +748,15 @@ function App() {
         <SectionDivider motif="sun" />
 
         {/* 6. Full Product Catalogue with Search, Category & Smart Filters */}
+        {productsLoading ? (
+          <section className="product-grid-loading" aria-busy="true" aria-label="Loading products">
+            <div className="product-grid-loading-inner">
+              <div className="product-loading-spinner" aria-hidden="true" />
+              <p className="product-loading-text">Loading catalogue…</p>
+              <p className="product-loading-sub">Fetching products from database</p>
+            </div>
+          </section>
+        ) : (
         <ProductGrid
           products={sortedProducts}
           cart={cart}
@@ -764,6 +778,7 @@ function App() {
           onClearAllFilters={handleClearAllFilters}
           isProductAvailable={isItemAvailable}
         />
+        )}
 
         {/* Storefront Footer with Local Admin Entry */}
         <footer className="storefront-footer" aria-label="MithilaKart footer">
@@ -849,7 +864,9 @@ function App() {
 
           <div className="storefront-footer-bottom">
             <p>© {new Date().getFullYear()} MithilaKart. Authentic regional quick-commerce.</p>
-            <span className="storefront-footer-phase-badge">Phase 22 • Local Admin Active</span>
+            <span className="storefront-footer-phase-badge">
+              Phase 23.2 • {isApiConnected ? `API Connected • ${PRODUCTS.length} products` : "Local Data"}
+            </span>
           </div>
         </footer>
       </main>

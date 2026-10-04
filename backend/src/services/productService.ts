@@ -37,7 +37,7 @@ export async function listProducts(params: ProductQueryParams) {
     where.isAvailable = params.available === "true";
   }
 
-  const limit = Math.min(parseInt(params.limit ?? "50", 10), 100);
+  const limit = Math.min(parseInt(params.limit ?? "50", 10), 200);
   const offset = parseInt(params.offset ?? "0", 10);
 
   const [total, products] = await Promise.all([

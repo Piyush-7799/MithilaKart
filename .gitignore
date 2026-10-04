@@ -28,3 +28,8 @@ backend/.env
 backend/.env.local
 backend/.env.production
 backend/dist/
+
+# Frontend local env override (VITE_API_URL etc) — .env.example is tracked instead
+.env
+.env.local
+

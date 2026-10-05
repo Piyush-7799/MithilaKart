@@ -3,7 +3,7 @@
  */
 
 import type { RequestHandler } from "express";
-import { listOrders, getOrderById } from "../services/orderService.js";
+import { listOrders, getOrderById, createOrder as createOrderService } from "../services/orderService.js";
 import { createApiError } from "../middleware/errorHandler.js";
 
 /** GET /api/orders — list orders with optional ?userId, ?status */
@@ -31,6 +31,32 @@ export const getOrder: RequestHandler = async (req, res, next) => {
     }
     res.json({ status: "ok", order });
   } catch (err) {
+    next(err);
+  }
+};
+
+/** POST /api/orders — create a new order */
+export const createOrder: RequestHandler = async (req, res, next) => {
+  try {
+    const { userId, address, items, paymentMethod, notes } = req.body;
+    
+    if (!address || !items || !Array.isArray(items) || items.length === 0) {
+      return next(createApiError("Missing address or items", 400));
+    }
+
+    const order = await createOrderService({
+      userId,
+      address,
+      items,
+      paymentMethod,
+      notes,
+    });
+
+    res.status(201).json({ status: "ok", order });
+  } catch (err: unknown) {
+    if (err instanceof Error && (err.message.includes("Products not found") || err.message.includes("unavailable") || err.message.includes("Invalid quantity") || err.message.includes("at least one item"))) {
+      return next(createApiError(err.message, 400));
+    }
     next(err);
   }
 };

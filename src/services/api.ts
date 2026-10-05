@@ -8,7 +8,7 @@
  * Orders, users, addresses remain on localStorage (Phase 23.3+).
  */
 
-import type { Product } from "../types";
+import type { Product, Order } from "../types";
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
@@ -149,6 +149,80 @@ export async function fetchProductById(
     if (err instanceof Error && err.message.includes("API 404")) return null;
     throw err;
   }
+}
+
+async function apiPost<T>(path: string, body: unknown, signal?: AbortSignal): Promise<T> {
+  const url = `${API_BASE}${path}`;
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+    signal,
+  });
+
+  if (!response.ok) {
+    throw new Error(`API ${response.status}: ${response.statusText} — ${url}`);
+  }
+
+  const data = (await response.json()) as unknown;
+
+  if (
+    typeof data !== "object" ||
+    data === null ||
+    (data as Record<string, unknown>)["status"] === "error"
+  ) {
+    const msg = (data as Record<string, unknown>)["message"];
+    throw new Error(typeof msg === "string" ? msg : "Unexpected API response");
+  }
+
+  return data as T;
+}
+
+export interface CreateOrderRequest {
+  userId?: string;
+  address: {
+    fullName: string;
+    phone: string;
+    house: string;
+    street: string;
+    city: string;
+    state: string;
+    pincode: string;
+    landmark?: string;
+    label?: string;
+    displayName?: string;
+  };
+  items: {
+    productId: string;
+    quantity: number;
+  }[];
+  paymentMethod: string;
+  notes?: string;
+}
+
+export async function createOrder(
+  req: CreateOrderRequest,
+  signal?: AbortSignal
+) {
+  return await apiPost<{ status: "ok"; order: Order }>("/orders", req, signal);
+}
+
+export async function fetchOrders(
+  userId?: string,
+  signal?: AbortSignal
+) {
+  const qs = userId ? `?userId=${encodeURIComponent(userId)}` : "";
+  const path = `/orders${qs}`;
+  const data = await apiFetch<{ status: "ok"; orders: Order[] }>(path, signal);
+  return data.orders;
+}
+
+export async function fetchOrderById(
+  id: string,
+  signal?: AbortSignal
+) {
+  const data = await apiFetch<{ status: "ok"; order: Order }>(`/orders/${encodeURIComponent(id)}`, signal);
+  return data.order;
 }
 
 /** Exported for use in the useProducts hook */

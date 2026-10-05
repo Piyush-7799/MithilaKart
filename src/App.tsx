@@ -40,12 +40,14 @@ import {
 } from "./utils/addressStorage";
 import { loadWishlist, saveWishlist } from "./utils/wishlistStorage";
 import {
-  getOrders,
-  getOrderById,
-  createOrder,
   createAddressSnapshot,
   updateOrderStatus,
 } from "./utils/orderStorage";
+import {
+  createOrder as apiCreateOrder,
+  fetchOrders as apiFetchOrders,
+  fetchOrderById as apiFetchOrderById
+} from "./services/api";
 import { getProfile, saveProfile } from "./utils/profileStorage";
 import { calculateCartDeliveryEta } from "./utils/deliveryEta";
 import {
@@ -170,8 +172,19 @@ function App() {
     saveWishlist(wishlist);
   }, [wishlist]);
 
+  // Phase 21: User profile & account modal state
+  const [profile, setProfile] = useState<UserProfile | null>(() => getProfile());
+  const [showAccountModal, setShowAccountModal] = useState(false);
+
   // Phase 20: Orders and order history state
-  const [orders, setOrders] = useState<Order[]>(() => getOrders());
+  const [orders, setOrders] = useState<Order[]>([]);
+  
+  useEffect(() => {
+    if (profile?.id) {
+      apiFetchOrders(profile.id).then(setOrders).catch(console.error);
+    }
+  }, [profile?.id]);
+
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [confirmedOrder, setConfirmedOrder] = useState<Order | null>(null);
   const [showCheckoutReview, setShowCheckoutReview] = useState(false);
@@ -179,10 +192,6 @@ function App() {
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const [showOrderConfirmation, setShowOrderConfirmation] = useState(false);
   const [orderToast, setOrderToast] = useState<string | null>(null);
-
-  // Phase 21: User profile & account modal state
-  const [profile, setProfile] = useState<UserProfile | null>(() => getProfile());
-  const [showAccountModal, setShowAccountModal] = useState(false);
 
   // Phase 22: Admin Dashboard & Product Availability overrides state
   const [isAdminMode, setIsAdminMode] = useState(false);
@@ -197,15 +206,20 @@ function App() {
     [productOverrides]
   );
 
-  const handleUpdateOrderStatus = useCallback((orderId: string, newStatus: OrderStatus) => {
+  const handleUpdateOrderStatus = useCallback(async (orderId: string, newStatus: OrderStatus) => {
     const success = updateOrderStatus(orderId, newStatus);
     if (success) {
-      setOrders(getOrders());
+      try {
+        const fetchedOrders = await apiFetchOrders(profile?.id);
+        setOrders(fetchedOrders);
+      } catch (err) {
+        console.error("Failed to fetch updated orders", err);
+      }
       setSelectedOrder((prev) =>
         prev && prev.id === orderId ? { ...prev, status: newStatus } : prev
       );
     }
-  }, []);
+  }, [profile]);
 
   const handleToggleProductAvailability = useCallback(
     (productId: string, isAvailable: boolean) => {
@@ -497,67 +511,73 @@ function App() {
     }
     setShowCheckoutReview(true);
   }, [selectedLocation, cartItems.length]);
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
-  const handlePlaceOrder = useCallback(() => {
+  const handlePlaceOrder = useCallback(async () => {
     if (!selectedLocation) {
       setShowLocationModal(true);
       return;
     }
-    if (cartItems.length === 0) {
+    if (cartItems.length === 0 || isPlacingOrder) {
       return;
     }
 
-    const orderItems: OrderItem[] = cartItems.map(({ product, quantity }) => ({
-      productId: product.id,
-      name: product.name,
-      image: product.image,
-      quantity,
-      price: product.price,
-      mrp: product.mrp,
-      unit: product.unit,
-      lineTotal: product.price * quantity,
-    }));
+    setIsPlacingOrder(true);
 
-    const addressSnapshot = createAddressSnapshot(selectedLocation);
-    if (!selectedLocation.address && profile?.fullName) {
-      addressSnapshot.fullName = profile.fullName;
-      if (profile.phone) {
-        addressSnapshot.phone = profile.phone;
+    try {
+      const orderItems: OrderItem[] = cartItems.map(({ product, quantity }) => ({
+        productId: product.id,
+        name: product.name,
+        image: product.image,
+        quantity,
+        price: product.price,
+        mrp: product.mrp,
+        unit: product.unit,
+        lineTotal: product.price * quantity,
+      }));
+
+      const addressSnapshot = createAddressSnapshot(selectedLocation);
+      if (!selectedLocation.address && profile?.fullName) {
+        addressSnapshot.fullName = profile.fullName;
+        if (profile.phone) {
+          addressSnapshot.phone = profile.phone;
+        }
       }
+
+      const apiOrderRes = await apiCreateOrder({
+        userId: profile?.id,
+        address: addressSnapshot,
+        items: orderItems,
+        paymentMethod: "Cash on Delivery",
+      });
+
+      const newOrder = apiOrderRes.order;
+
+      // Refresh orders list from API
+      try {
+        const fetchedOrders = await apiFetchOrders(profile?.id);
+        setOrders(fetchedOrders);
+      } catch (err) {
+        console.error("Failed to fetch updated orders", err);
+      }
+
+      // Clear cart (only after successful creation)
+      setCart({});
+
+      // Close review and cart drawer
+      setShowCheckoutReview(false);
+      setShowCart(false);
+
+      // Show confirmation modal
+      setConfirmedOrder(newOrder);
+      setShowOrderConfirmation(true);
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : "Failed to place order. Please try again.";
+      setOrderToast(msg);
+    } finally {
+      setIsPlacingOrder(false);
     }
-    const calculatedEta = calculateCartDeliveryEta(cartItems, selectedLocation);
-
-    const mrpSum = cartItems.reduce(
-      (sum, { product, quantity }) => sum + (product.mrp || product.price) * quantity,
-      0
-    );
-    const savings = Math.max(0, mrpSum - subtotal);
-
-    const newOrder = createOrder({
-      items: orderItems,
-      subtotal,
-      deliveryFee,
-      total,
-      savings,
-      deliveryEta: calculatedEta.etaText,
-      address: addressSnapshot,
-      paymentMethod: "Cash on Delivery",
-    });
-
-    // Refresh orders list
-    setOrders(getOrders());
-
-    // Clear cart (only after successful creation)
-    setCart({});
-
-    // Close review and cart drawer
-    setShowCheckoutReview(false);
-    setShowCart(false);
-
-    // Show confirmation modal
-    setConfirmedOrder(newOrder);
-    setShowOrderConfirmation(true);
-  }, [selectedLocation, cartItems, subtotal, deliveryFee, total, profile]);
+  }, [selectedLocation, cartItems, profile, isPlacingOrder]);
 
   const handleReorder = useCallback((orderToReorder: Order) => {
     const availableItems: { id: string; quantity: number }[] = [];
@@ -599,12 +619,16 @@ function App() {
     setShowCart(true);
   }, [PRODUCTS]);
 
-  const handleViewOrder = useCallback((orderId: string) => {
-    const ord = getOrderById(orderId);
-    if (ord) {
-      setSelectedOrder(ord);
-      setShowOrderConfirmation(false);
-      setShowOrderDetails(true);
+  const handleViewOrder = useCallback(async (orderId: string) => {
+    try {
+      const ord = await apiFetchOrderById(orderId);
+      if (ord) {
+        setSelectedOrder(ord);
+        setShowOrderConfirmation(false);
+        setShowOrderDetails(true);
+      }
+    } catch (err) {
+      console.error("Failed to view order", err);
     }
   }, []);
 

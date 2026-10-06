@@ -1,3 +1,12 @@
+# MithilaKart
+
+## Project Status
+- Phase 23.1 Backend + Neon PostgreSQL is complete
+- Phase 23.2 Product API migration is complete
+- Phase 23.3 Cart, Checkout & Orders backend integration is complete
+
+---
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.

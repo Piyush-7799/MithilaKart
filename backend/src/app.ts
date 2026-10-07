@@ -17,6 +17,8 @@ import orderRoutes from "./routes/orders.js";
 import userRoutes from "./routes/users.js";
 import addressRoutes from "./routes/addresses.js";
 
+import authRoutes from "./routes/auth.js";
+
 export function createApp() {
   const app = express();
 
@@ -43,6 +45,7 @@ export function createApp() {
 
   // ── Routes ─────────────────────────────────────────────────────────────────
   app.use("/api/health", healthRoutes);
+  app.use("/api/auth", authRoutes);
   app.use("/api/products", productRoutes);
   app.use("/api/orders", orderRoutes);
   app.use("/api/users", userRoutes);

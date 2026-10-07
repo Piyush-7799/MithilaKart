@@ -6,11 +6,16 @@ import type { RequestHandler } from "express";
 import { listOrders, getOrderById, createOrder as createOrderService } from "../services/orderService.js";
 import { createApiError } from "../middleware/errorHandler.js";
 
-/** GET /api/orders — list orders with optional ?userId, ?status */
+/** GET /api/orders — list orders with optional ?status */
 export const getOrders: RequestHandler = async (req, res, next) => {
   try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return next(createApiError("Unauthorized", 401));
+    }
+
     const result = await listOrders({
-      userId: req.query["userId"] as string | undefined,
+      userId,
       status: req.query["status"] as string | undefined,
       limit: req.query["limit"] as string | undefined,
       offset: req.query["offset"] as string | undefined,
@@ -25,10 +30,20 @@ export const getOrders: RequestHandler = async (req, res, next) => {
 /** GET /api/orders/:id — single order with items */
 export const getOrder: RequestHandler = async (req, res, next) => {
   try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return next(createApiError("Unauthorized", 401));
+    }
+
     const order = await getOrderById(String(req.params["id"] ?? ""));
     if (!order) {
       return next(createApiError(`Order not found: ${req.params["id"]}`, 404));
     }
+
+    if (order.userId !== userId && req.user?.role !== "ADMIN") {
+      return next(createApiError("Forbidden", 403));
+    }
+
     res.json({ status: "ok", order });
   } catch (err) {
     next(err);
@@ -38,7 +53,12 @@ export const getOrder: RequestHandler = async (req, res, next) => {
 /** POST /api/orders — create a new order */
 export const createOrder: RequestHandler = async (req, res, next) => {
   try {
-    const { userId, address, items, paymentMethod, notes } = req.body;
+    const userId = req.user?.id;
+    if (!userId) {
+      return next(createApiError("Unauthorized", 401));
+    }
+
+    const { address, items, paymentMethod, notes } = req.body;
     
     if (!address || !items || !Array.isArray(items) || items.length === 0) {
       return next(createApiError("Missing address or items", 400));

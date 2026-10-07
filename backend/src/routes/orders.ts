@@ -4,16 +4,17 @@
 
 import { Router } from "express";
 import { getOrders, getOrder, createOrder } from "../controllers/orderController.js";
+import { authenticate } from "../middleware/auth.js";
 
 const router = Router();
 
-// GET /api/orders?userId=&status=
-router.get("/", getOrders);
+// GET /api/orders?status=
+router.get("/", authenticate, getOrders);
 
 // POST /api/orders
-router.post("/", createOrder);
+router.post("/", authenticate, createOrder);
 
 // GET /api/orders/:id
-router.get("/:id", getOrder);
+router.get("/:id", authenticate, getOrder);
 
 export default router;

@@ -12,23 +12,35 @@ import { createApiError } from "../middleware/errorHandler.js";
 /** GET /api/users/:id */
 export const getUser: RequestHandler = async (req, res, next) => {
   try {
-    const user = await getUserById(String(req.params["id"] ?? ""));
-    if (!user) {
-      return next(createApiError(`User not found: ${req.params["id"]}`, 404));
+    const userId = req.user?.id;
+    if (!userId) {
+      return next(createApiError("Unauthorized", 401));
     }
+
+    const targetUserId = req.params["id"];
+    if (userId !== targetUserId && req.user?.role !== "ADMIN") {
+      return next(createApiError("Forbidden", 403));
+    }
+
+    const user = await getUserById(String(targetUserId ?? ""));
+    if (!user) {
+      return next(createApiError(`User not found: ${targetUserId}`, 404));
+    }
+
     res.json({ status: "ok", user });
   } catch (err) {
     next(err);
   }
 };
 
-/** GET /api/addresses?userId=xxx */
+/** GET /api/addresses */
 export const getAddresses: RequestHandler = async (req, res, next) => {
   try {
-    const userId = req.query["userId"] as string | undefined;
+    const userId = req.user?.id;
     if (!userId) {
-      return next(createApiError("userId query parameter is required", 400));
+      return next(createApiError("Unauthorized", 401));
     }
+
     const addresses = await getAddressesByUserId(userId);
     res.json({ status: "ok", addresses });
   } catch (err) {

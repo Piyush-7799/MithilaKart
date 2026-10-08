@@ -20,13 +20,16 @@ import {
 import type { Address, AddressLabel, DeliveryLocation } from "../types";
 import { POPULAR_LOCATIONS, loadRecentLocations } from "../utils/locationStorage";
 import {
-  ADDRESS_STORAGE_KEY,
-  loadSavedAddresses,
-  saveAddresses,
   saveSelectedAddressId,
   addressToDeliveryLocation,
   validateAddress,
 } from "../utils/addressStorage";
+import {
+  fetchAddresses,
+  createAddress,
+  updateAddress,
+  deleteAddress,
+} from "../services/api";
 
 interface LocationModalProps {
   isOpen: boolean;
@@ -34,6 +37,8 @@ interface LocationModalProps {
   selectedLocation: DeliveryLocation | null;
   onSelectLocation: (location: DeliveryLocation) => void;
   onClearLocation: () => void;
+  isAuthenticated?: boolean;
+  onRequireLogin?: () => void;
 }
 
 interface AddressFormData {
@@ -66,6 +71,8 @@ export function LocationModal({
   selectedLocation,
   onSelectLocation,
   onClearLocation,
+  isAuthenticated,
+  onRequireLogin,
 }: LocationModalProps) {
   // Navigation & View Mode
   const [activeTab, setActiveTab] = useState<"saved" | "cities">("saved");
@@ -74,9 +81,8 @@ export function LocationModal({
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   // Address data & form state
-  const [savedAddresses, setSavedAddresses] = useState<Address[]>(() =>
-    loadSavedAddresses()
-  );
+  const [savedAddresses, setSavedAddresses] = useState<Address[]>([]);
+  const [isLoadingAddresses, setIsLoadingAddresses] = useState(false);
   const [formData, setFormData] = useState<AddressFormData>(INITIAL_FORM_DATA);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -107,16 +113,29 @@ export function LocationModal({
     handleClose();
   };
 
-  // Sync addresses on storage changes across tabs/windows
+  // Load addresses from API if authenticated
+  const loadAddresses = useCallback(async () => {
+    if (!isAuthenticated) {
+      setSavedAddresses([]);
+      return;
+    }
+    try {
+      setIsLoadingAddresses(true);
+      const data = await fetchAddresses();
+      setSavedAddresses(data);
+    } catch (err) {
+      console.error("Failed to fetch addresses:", err);
+    } finally {
+      setIsLoadingAddresses(false);
+    }
+  }, [isAuthenticated]);
+
   useEffect(() => {
-    const handleStorage = (e: StorageEvent) => {
-      if (!e.key || e.key === ADDRESS_STORAGE_KEY) {
-        setSavedAddresses(loadSavedAddresses());
-      }
-    };
-    window.addEventListener("storage", handleStorage);
-    return () => window.removeEventListener("storage", handleStorage);
-  }, []);
+    if (isOpen && activeTab === "saved") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      loadAddresses();
+    }
+  }, [isOpen, activeTab, loadAddresses]);
 
   // Autofocus when switching views
   useEffect(() => {
@@ -264,26 +283,32 @@ export function LocationModal({
     setMode("form");
   };
 
-  const handleConfirmDelete = (id: string) => {
-    const updated = savedAddresses.filter((a) => a.id !== id);
-    setSavedAddresses(updated);
-    saveAddresses(updated);
-    setConfirmDeleteId(null);
+  const handleConfirmDelete = async (id: string) => {
+    if (!isAuthenticated) return;
+    try {
+      await deleteAddress(id);
+      const updated = savedAddresses.filter((a) => a.id !== id);
+      setSavedAddresses(updated);
+      setConfirmDeleteId(null);
 
-    const isCurrentlySelected =
-      selectedLocation?.address?.id === id ||
-      selectedLocation?.id === id ||
-      selectedLocation?.id === `addr-${id}`;
+      const isCurrentlySelected =
+        selectedLocation?.address?.id === id ||
+        selectedLocation?.id === id ||
+        selectedLocation?.id === `addr-${id}`;
 
-    if (isCurrentlySelected) {
-      if (updated.length > 0) {
-        const nextAddr = updated[0];
-        saveSelectedAddressId(nextAddr.id);
-        onSelectLocation(addressToDeliveryLocation(nextAddr));
-      } else {
-        saveSelectedAddressId(null);
-        onClearLocation();
+      if (isCurrentlySelected) {
+        if (updated.length > 0) {
+          const nextAddr = updated[0];
+          saveSelectedAddressId(nextAddr.id);
+          onSelectLocation(addressToDeliveryLocation(nextAddr));
+        } else {
+          saveSelectedAddressId(null);
+          onClearLocation();
+        }
       }
+    } catch (err) {
+      console.error("Failed to delete address:", err);
+      setErrors({ form: "Failed to delete address" });
     }
   };
 
@@ -301,74 +326,66 @@ export function LocationModal({
     }
   };
 
-  const handleSaveForm = (e: React.FormEvent) => {
+  const handleSaveForm = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAuthenticated) return;
+
     const validationErrors = validateAddress(formData);
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
 
-    if (editingAddress) {
-      // Preserve existing id!
-      const updated: Address = {
-        id: editingAddress.id,
-        label: formData.label,
-        fullName: formData.fullName.trim(),
-        phone: formData.phone.trim(),
-        house: formData.house.trim(),
-        street: formData.street.trim(),
-        city: formData.city.trim(),
-        state: formData.state.trim(),
-        pincode: formData.pincode.trim(),
-        landmark: formData.landmark.trim() || undefined,
-      };
+    try {
+      let savedAddr: Address;
+      if (editingAddress) {
+        savedAddr = await updateAddress(editingAddress.id, {
+          label: formData.label,
+          fullName: formData.fullName.trim(),
+          phone: formData.phone.trim(),
+          house: formData.house.trim(),
+          street: formData.street.trim(),
+          city: formData.city.trim(),
+          state: formData.state.trim(),
+          pincode: formData.pincode.trim(),
+          landmark: formData.landmark.trim() || undefined,
+        });
+      } else {
+        savedAddr = await createAddress({
+          label: formData.label,
+          fullName: formData.fullName.trim(),
+          phone: formData.phone.trim(),
+          house: formData.house.trim(),
+          street: formData.street.trim(),
+          city: formData.city.trim(),
+          state: formData.state.trim(),
+          pincode: formData.pincode.trim(),
+          landmark: formData.landmark.trim() || undefined,
+        });
+      }
 
-      const nextList = savedAddresses.map((a) =>
-        a.id === editingAddress.id ? updated : a
-      );
-      setSavedAddresses(nextList);
-      saveAddresses(nextList);
+      await loadAddresses();
 
+      // If it was a new address, or the edited one was currently selected, select it
       const isSelected =
-        selectedLocation?.address?.id === updated.id ||
-        selectedLocation?.id === updated.id ||
-        selectedLocation?.id === `addr-${updated.id}`;
+        editingAddress && (
+          selectedLocation?.address?.id === savedAddr.id ||
+          selectedLocation?.id === savedAddr.id ||
+          selectedLocation?.id === `addr-${savedAddr.id}`
+        );
 
-      if (isSelected) {
-        onSelectLocation(addressToDeliveryLocation(updated));
+      if (!editingAddress || isSelected) {
+        saveSelectedAddressId(savedAddr.id);
+        onSelectLocation(addressToDeliveryLocation(savedAddr));
       }
 
       setMode("list");
       setEditingAddress(null);
       setErrors({});
-    } else {
-      // Adding new address
-      const newAddr: Address = {
-        id: `addr-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-        label: formData.label,
-        fullName: formData.fullName.trim(),
-        phone: formData.phone.trim(),
-        house: formData.house.trim(),
-        street: formData.street.trim(),
-        city: formData.city.trim(),
-        state: formData.state.trim(),
-        pincode: formData.pincode.trim(),
-        landmark: formData.landmark.trim() || undefined,
-      };
-
-      const nextList = [newAddr, ...savedAddresses];
-      setSavedAddresses(nextList);
-      saveAddresses(nextList);
-
-      // Auto-select newly created address
-      saveSelectedAddressId(newAddr.id);
-      onSelectLocation(addressToDeliveryLocation(newAddr));
-
-      setMode("list");
-      setEditingAddress(null);
-      setErrors({});
-      handleClose();
+      if (!editingAddress) handleClose();
+    } catch (err) {
+      console.error("Failed to save address:", err);
+      setErrors({ form: err instanceof Error ? err.message : "Failed to save address. Please try again." });
     }
   };
 
@@ -742,47 +759,70 @@ export function LocationModal({
                VIEW 2: SAVED ADDRESSES LIST
                ======================================================== */
             <div className="address-saved-container">
-              {/* + Add New Address Action Bar */}
-              <button
-                type="button"
-                className="address-add-new-btn"
-                onClick={handleStartAdd}
-                aria-label="Add a new delivery address"
-              >
-                <div className="address-add-icon-box">
-                  <Plus size={18} />
-                </div>
-                <div className="address-add-text-box">
-                  <span className="address-add-btn-title">+ Add New Address</span>
-                  <span className="address-add-btn-sub">
-                    Save flat, building, or office for quicker ordering
-                  </span>
-                </div>
-              </button>
-
-              {/* Saved Addresses List / Empty State */}
-              {savedAddresses.length === 0 ? (
+              {!isAuthenticated ? (
                 <div className="address-empty-state">
                   <div className="address-empty-icon-box">
-                    <MapPin size={34} />
+                    <MapPinOff size={34} />
                   </div>
-                  <h4 className="address-empty-title">No saved addresses yet</h4>
+                  <h4 className="address-empty-title">Login Required</h4>
                   <p className="address-empty-subtitle">
-                    Add an address for faster checkout.
+                    Please login to save and manage your delivery addresses.
                   </p>
                   <button
                     type="button"
                     className="address-empty-add-btn"
-                    onClick={handleStartAdd}
+                    onClick={() => {
+                      handleClose();
+                      if (onRequireLogin) onRequireLogin();
+                    }}
                   >
-                    <Plus size={15} />
-                    <span>+ Add New Address</span>
+                    <span>Login</span>
                   </button>
-                  <span className="address-empty-hint">
-                    Add your first delivery address
-                  </span>
+                </div>
+              ) : isLoadingAddresses ? (
+                <div style={{ display: 'flex', justifyContent: 'center', padding: '4rem 0', color: 'var(--color-primary)' }}>
+                  <Loader2 className="spinner" size={28} />
                 </div>
               ) : (
+                <>
+                  {/* + Add New Address Action Bar */}
+                  <button
+                    type="button"
+                    className="address-add-new-btn"
+                    onClick={handleStartAdd}
+                    aria-label="Add a new delivery address"
+                  >
+                    <div className="address-add-icon-box">
+                      <Plus size={18} />
+                    </div>
+                    <div className="address-add-text-box">
+                      <span className="address-add-btn-title">+ Add New Address</span>
+                      <span className="address-add-btn-sub">
+                        Save flat, building, or office for quicker ordering
+                      </span>
+                    </div>
+                  </button>
+
+                  {/* Saved Addresses List / Empty State */}
+                  {savedAddresses.length === 0 ? (
+                    <div className="address-empty-state">
+                      <div className="address-empty-icon-box">
+                        <MapPin size={34} />
+                      </div>
+                      <h4 className="address-empty-title">No saved addresses yet</h4>
+                      <p className="address-empty-subtitle">
+                        Add an address for faster checkout.
+                      </p>
+                      <button
+                        type="button"
+                        className="address-empty-add-btn"
+                        onClick={handleStartAdd}
+                      >
+                        <Plus size={15} />
+                        <span>+ Add New Address</span>
+                      </button>
+                    </div>
+                  ) : (
                 <div className="address-list-section">
                   <div className="address-list-header-row">
                     <span className="address-list-title">SAVED ADDRESSES</span>
@@ -952,8 +992,10 @@ export function LocationModal({
                   </div>
                 </div>
               )}
-            </div>
-          ) : (
+              </>
+            )}
+          </div>
+        ) : (
             /* ========================================================
                VIEW 3: QUICK CITIES & GPS
                ======================================================== */

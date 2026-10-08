@@ -191,6 +191,39 @@ async function apiPost<T>(path: string, body: unknown, signal?: AbortSignal): Pr
   return data as T;
 }
 
+async function apiPut<T>(path: string, body: unknown, signal?: AbortSignal): Promise<T> {
+  const url = `${API_BASE}${path}`;
+  const response = await fetch(url, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(body),
+    signal,
+  });
+
+  if (!response.ok) throw new Error(`API ${response.status}: ${response.statusText}`);
+  const data = (await response.json()) as unknown;
+  if (typeof data !== "object" || data === null || (data as Record<string, unknown>)["status"] === "error") {
+    throw new Error("API Error");
+  }
+  return data as T;
+}
+
+async function apiDelete<T>(path: string, signal?: AbortSignal): Promise<T> {
+  const url = `${API_BASE}${path}`;
+  const response = await fetch(url, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+    signal,
+  });
+
+  if (!response.ok) throw new Error(`API ${response.status}: ${response.statusText}`);
+  const data = (await response.json()) as unknown;
+  if (typeof data !== "object" || data === null || (data as Record<string, unknown>)["status"] === "error") {
+    throw new Error("API Error");
+  }
+  return data as T;
+}
+
 export interface CreateOrderRequest {
   address: {
     fullName: string;
@@ -250,4 +283,25 @@ export async function registerUser(fullName: string, email: string, password: st
 
 export async function fetchCurrentUser(signal?: AbortSignal) {
   return await apiFetch<{ status: "ok"; user: import("../types").UserProfile }>("/auth/me", signal);
+}
+
+// ── Address APIs ───────────────────────────────────────────────────────────────
+
+export async function fetchAddresses(signal?: AbortSignal) {
+  const data = await apiFetch<{ status: "ok"; addresses: import("../types").Address[] }>("/addresses", signal);
+  return data.addresses;
+}
+
+export async function createAddress(address: Omit<import("../types").Address, "id" | "userId" | "createdAt" | "updatedAt">) {
+  const data = await apiPost<{ status: "ok"; address: import("../types").Address }>("/addresses", address);
+  return data.address;
+}
+
+export async function updateAddress(id: string, address: Partial<import("../types").Address>) {
+  const data = await apiPut<{ status: "ok"; address: import("../types").Address }>(`/addresses/${id}`, address);
+  return data.address;
+}
+
+export async function deleteAddress(id: string) {
+  await apiDelete<{ status: "ok" }>(`/addresses/${id}`);
 }

@@ -29,14 +29,12 @@ import type {
   OrderItem,
   OrderStatus,
   UserProfile,
+  Address,
 } from "./types";
 import { loadSavedCart, saveCart } from "./utils/cartStorage";
 import { loadSavedLocation, saveLocation, clearSavedLocation } from "./utils/locationStorage";
 import {
-  loadSavedAddresses,
-  getSelectedAddressId,
   saveSelectedAddressId,
-  addressToDeliveryLocation,
 } from "./utils/addressStorage";
 import { loadWishlist, saveWishlist } from "./utils/wishlistStorage";
 import {
@@ -50,7 +48,8 @@ import {
   loginUser,
   registerUser,
   fetchCurrentUser,
-  TOKEN_KEY
+  TOKEN_KEY,
+  fetchAddresses
 } from "./services/api";
 import { calculateCartDeliveryEta } from "./utils/deliveryEta";
 import {
@@ -127,19 +126,10 @@ function App() {
   });
   const [showCart, setShowCart] = useState(false);
 
-  // Restore delivery location from localStorage on mount, fall back to selected address if available
+  // Restore delivery location from localStorage on mount
   const [selectedLocation, setSelectedLocation] = useState<DeliveryLocation | null>(() => {
     const loc = loadSavedLocation();
     if (loc) return loc;
-    const addresses = loadSavedAddresses();
-    if (addresses.length > 0) {
-      const selectedId = getSelectedAddressId();
-      const active = addresses.find((a) => a.id === selectedId) || addresses[0];
-      const deliveryLoc = addressToDeliveryLocation(active);
-      saveLocation(deliveryLoc);
-      saveSelectedAddressId(active.id);
-      return deliveryLoc;
-    }
     return null;
   });
   const [showLocationModal, setShowLocationModal] = useState(false);
@@ -193,10 +183,15 @@ function App() {
 
   // Phase 20: Orders and order history state
   const [orders, setOrders] = useState<Order[]>([]);
+  const [addresses, setAddresses] = useState<Address[]>([]);
   
   useEffect(() => {
     if (profile?.id) {
       apiFetchOrders().then(setOrders).catch(console.error);
+      fetchAddresses().then(setAddresses).catch(console.error);
+    } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setAddresses([]);
     }
   }, [profile?.id]);
 
@@ -225,7 +220,7 @@ function App() {
     const success = updateOrderStatus(orderId, newStatus);
     if (success) {
       try {
-        const fetchedOrders = await apiFetchOrders(profile?.id);
+        const fetchedOrders = await apiFetchOrders();
         setOrders(fetchedOrders);
       } catch (err) {
         console.error("Failed to fetch updated orders", err);
@@ -585,7 +580,7 @@ function App() {
 
       // Refresh orders list from API
       try {
-        const fetchedOrders = await apiFetchOrders(profile?.id);
+        const fetchedOrders = await apiFetchOrders();
         setOrders(fetchedOrders);
       } catch (err) {
         console.error("Failed to fetch updated orders", err);
@@ -682,7 +677,7 @@ function App() {
           onToggleProductAvailability={handleToggleProductAvailability}
           onResetProductOverrides={handleResetProductOverrides}
           userProfile={profile}
-          savedAddresses={loadSavedAddresses()}
+          savedAddresses={addresses}
           cartCount={cartCount}
         />
 
@@ -1005,10 +1000,15 @@ function App() {
       {/* Location Selector Modal */}
       <LocationModal
         isOpen={showLocationModal}
-        onClose={() => setShowLocationModal(false)}
+        onClose={() => {
+          setShowLocationModal(false);
+          if (profile?.id) fetchAddresses().then(setAddresses).catch(console.error);
+        }}
         selectedLocation={selectedLocation}
         onSelectLocation={handleSelectLocation}
         onClearLocation={handleClearLocation}
+        isAuthenticated={!!profile}
+        onRequireLogin={() => setShowAccountModal(true)}
       />
 
       {/* Product Details Modal */}
@@ -1089,7 +1089,7 @@ function App() {
         onRegister={handleRegister}
         onLogout={handleLogout}
         orders={orders}
-        savedAddressesCount={loadSavedAddresses().length}
+        savedAddressesCount={addresses.length}
         cartCount={cartCount}
         onOpenOrders={() => {
           setShowAccountModal(false);

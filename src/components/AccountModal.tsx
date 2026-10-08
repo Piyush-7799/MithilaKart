@@ -204,7 +204,7 @@ export function AccountModal({
               )}
             </div>
 
-            {!isEditing ? (
+            {profile ? (
               /* Profile Read View */
               <div className="account-profile-details">
                 <div className="account-profile-name-row">

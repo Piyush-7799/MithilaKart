@@ -46,9 +46,9 @@ import {
   loginUser,
   registerUser,
   fetchCurrentUser,
-  TOKEN_KEY,
   fetchAddresses,
-  apiUpdateOrderStatus
+  apiUpdateOrderStatus,
+  logoutUser
 } from "./services/api";
 import { calculateCartDeliveryEta } from "./utils/deliveryEta";
 import {
@@ -169,15 +169,11 @@ function App() {
   const [showAccountModal, setShowAccountModal] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem(TOKEN_KEY);
-    if (token) {
-      fetchCurrentUser().then(res => {
-        setProfile(res.user);
-      }).catch(() => {
-        localStorage.removeItem(TOKEN_KEY);
-        setProfile(null);
-      });
-    }
+    fetchCurrentUser().then(res => {
+      setProfile(res.user);
+    }).catch(() => {
+      setProfile(null);
+    });
   }, []);
 
 
@@ -282,31 +278,35 @@ function App() {
 
   const handleLogin = useCallback(async (email: string, pass: string) => {
     const res = await loginUser(email, pass);
-    localStorage.setItem(TOKEN_KEY, res.token);
     setProfile(res.user);
     setOrderToast("Logged in successfully");
   }, []);
 
   const handleRegister = useCallback(async (name: string, email: string, pass: string) => {
     const res = await registerUser(name, email, pass);
-    localStorage.setItem(TOKEN_KEY, res.token);
     setProfile(res.user);
     setOrderToast("Account created successfully");
   }, []);
 
   const handleLogout = useCallback(() => {
-    localStorage.removeItem(TOKEN_KEY);
-    setProfile(null);
-    setOrders([]);
-    setShowCheckoutReview(false);
-    setSelectedLocation(null);
-    clearSavedLocation();
-    setShowCart(false);
-    setShowAccountModal(false);
-    setShowOrderHistory(false);
-    setShowOrderDetails(false);
-    setShowOrderConfirmation(false);
-    setOrderToast("Logged out");
+    logoutUser()
+      .then(() => {
+        setProfile(null);
+        setOrders([]);
+        setShowCheckoutReview(false);
+        setSelectedLocation(null);
+        clearSavedLocation();
+        setShowCart(false);
+        setShowAccountModal(false);
+        setShowOrderHistory(false);
+        setShowOrderDetails(false);
+        setShowOrderConfirmation(false);
+        setOrderToast("Logged out");
+      })
+      .catch((err) => {
+        console.error("Logout failed:", err);
+        setOrderToast("Failed to logout. Please try again.");
+      });
   }, [
     setOrderToast,
     setProfile,

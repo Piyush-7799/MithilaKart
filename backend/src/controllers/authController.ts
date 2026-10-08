@@ -2,6 +2,17 @@ import type { RequestHandler } from "express";
 import { PrismaClient } from "@prisma/client";
 import { createApiError } from "../middleware/errorHandler.js";
 import { hashPassword, verifyPassword, generateToken } from "../services/authService.js";
+import { env } from "../config/env.js";
+
+function setAuthCookie(res: import("express").Response, token: string) {
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: env.isProd,
+    sameSite: "strict",
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    path: "/",
+  });
+}
 
 const prisma = new PrismaClient();
 
@@ -41,10 +52,10 @@ export const register: RequestHandler = async (req, res, next) => {
     });
 
     const token = generateToken({ id: newUser.id, role: newUser.role });
+    setAuthCookie(res, token);
 
     res.status(201).json({
       status: "ok",
-      token,
       user: {
         id: newUser.id,
         fullName: newUser.fullName,
@@ -82,10 +93,10 @@ export const login: RequestHandler = async (req, res, next) => {
     }
 
     const token = generateToken({ id: user.id, role: user.role });
+    setAuthCookie(res, token);
 
     res.json({
       status: "ok",
-      token,
       user: {
         id: user.id,
         fullName: user.fullName,
@@ -130,4 +141,9 @@ export const me: RequestHandler = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+};
+
+export const logout: RequestHandler = (req, res) => {
+  res.clearCookie("token", { path: "/" });
+  res.json({ status: "ok" });
 };

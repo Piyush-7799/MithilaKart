@@ -19,29 +19,20 @@ const REQUEST_TIMEOUT_MS = 8000;
 
 // ── Shared fetch helper ───────────────────────────────────────────────────────
 
-export const TOKEN_KEY = "mithilakart_token";
-
 function getAuthHeaders() {
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
-  if (typeof window !== "undefined" && window.localStorage) {
-    const token = localStorage.getItem(TOKEN_KEY);
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
-  }
-  return headers;
+  return { "Content-Type": "application/json" };
 }
 
 async function apiFetch<T>(path: string, signal?: AbortSignal): Promise<T> {
   const url = `${API_BASE}${path}`;
   const response = await fetch(url, {
     headers: getAuthHeaders(),
+    credentials: "include",
     signal,
   });
 
   if (!response.ok) {
     if (response.status === 401) {
-      localStorage.removeItem(TOKEN_KEY);
       if (typeof window !== "undefined") {
         window.dispatchEvent(new Event("mithilakart:auth-expired"));
       }
@@ -232,13 +223,13 @@ async function apiPost<T>(path: string, body: unknown, signal?: AbortSignal, ext
   const response = await fetch(url, {
     method: "POST",
     headers,
+    credentials: "include",
     body: JSON.stringify(body),
     signal,
   });
 
   if (!response.ok) {
     if (response.status === 401) {
-      localStorage.removeItem(TOKEN_KEY);
       if (typeof window !== "undefined") {
         window.dispatchEvent(new Event("mithilakart:auth-expired"));
       }
@@ -265,13 +256,13 @@ async function apiPut<T>(path: string, body: unknown, signal?: AbortSignal): Pro
   const response = await fetch(url, {
     method: "PUT",
     headers: getAuthHeaders(),
+    credentials: "include",
     body: JSON.stringify(body),
     signal,
   });
 
   if (!response.ok) {
     if (response.status === 401) {
-      localStorage.removeItem(TOKEN_KEY);
       if (typeof window !== "undefined") {
         window.dispatchEvent(new Event("mithilakart:auth-expired"));
       }
@@ -290,12 +281,12 @@ async function apiDelete<T>(path: string, signal?: AbortSignal): Promise<T> {
   const response = await fetch(url, {
     method: "DELETE",
     headers: getAuthHeaders(),
+    credentials: "include",
     signal,
   });
 
   if (!response.ok) {
     if (response.status === 401) {
-      localStorage.removeItem(TOKEN_KEY);
       if (typeof window !== "undefined") {
         window.dispatchEvent(new Event("mithilakart:auth-expired"));
       }
@@ -378,11 +369,15 @@ export { REQUEST_TIMEOUT_MS };
 // ── Auth APIs ─────────────────────────────────────────────────────────────────
 
 export async function loginUser(email: string, password: string) {
-  return await apiPost<{ status: "ok"; token: string; user: import("../types").UserProfile }>("/auth/login", { email, password });
+  return await apiPost<{ status: "ok"; user: import("../types").UserProfile }>("/auth/login", { email, password });
 }
 
 export async function registerUser(fullName: string, email: string, password: string) {
-  return await apiPost<{ status: "ok"; token: string; user: import("../types").UserProfile }>("/auth/register", { fullName, email, password });
+  return await apiPost<{ status: "ok"; user: import("../types").UserProfile }>("/auth/register", { fullName, email, password });
+}
+
+export async function logoutUser() {
+  return await apiPost<{ status: "ok" }>("/auth/logout", {});
 }
 
 export async function fetchCurrentUser(signal?: AbortSignal) {

@@ -7,7 +7,9 @@
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
+import helmet from "helmet";
 import { env } from "./config/env.js";
+import { apiLimiter } from "./middleware/rateLimit.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { notFound } from "./middleware/notFound.js";
 
@@ -23,6 +25,9 @@ export function createApp() {
   const app = express();
 
   // ── Security & Parsing ─────────────────────────────────────────────────────
+
+  // Use Helmet for secure HTTP headers
+  app.use(helmet());
 
   // CORS: only allow requests from the configured frontend origin
   app.use(
@@ -45,6 +50,10 @@ export function createApp() {
 
   // ── Routes ─────────────────────────────────────────────────────────────────
   app.use("/api/health", healthRoutes);
+
+  // Apply general rate limiting to all other API routes
+  app.use("/api/", apiLimiter);
+
   app.use("/api/auth", authRoutes);
   app.use("/api/products", productRoutes);
   app.use("/api/orders", orderRoutes);

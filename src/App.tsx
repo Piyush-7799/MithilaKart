@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, Suspense, lazy } from "react";
 import { useProducts } from "./hooks/useProducts";
 import { ShoppingBag, ArrowRight, Sparkles, Layers } from "lucide-react";
 import "./App.css";
@@ -9,14 +9,14 @@ import { ProductRail } from "./components/ProductRail";
 import { ProductGrid } from "./components/ProductGrid";
 import { CartDrawer } from "./components/CartDrawer";
 import { WishlistDrawer } from "./components/WishlistDrawer";
-import { LocationModal } from "./components/LocationModal";
-import { ProductDetailsModal } from "./components/ProductDetailsModal";
-import { CheckoutReviewModal } from "./components/CheckoutReviewModal";
-import { OrderConfirmationModal } from "./components/OrderConfirmationModal";
-import { OrderHistoryModal } from "./components/OrderHistoryModal";
-import { OrderDetailsModal } from "./components/OrderDetailsModal";
-import { AccountModal } from "./components/AccountModal";
-import { AdminDashboard } from "./components/AdminDashboard";
+const LocationModal = lazy(() => import("./components/LocationModal").then(module => ({ default: module.LocationModal })));
+const ProductDetailsModal = lazy(() => import("./components/ProductDetailsModal").then(module => ({ default: module.ProductDetailsModal })));
+const CheckoutReviewModal = lazy(() => import("./components/CheckoutReviewModal").then(module => ({ default: module.CheckoutReviewModal })));
+const OrderConfirmationModal = lazy(() => import("./components/OrderConfirmationModal").then(module => ({ default: module.OrderConfirmationModal })));
+const OrderHistoryModal = lazy(() => import("./components/OrderHistoryModal").then(module => ({ default: module.OrderHistoryModal })));
+const OrderDetailsModal = lazy(() => import("./components/OrderDetailsModal").then(module => ({ default: module.OrderDetailsModal })));
+const AccountModal = lazy(() => import("./components/AccountModal").then(module => ({ default: module.AccountModal })));
+const AdminDashboard = lazy(() => import("./components/AdminDashboard").then(module => ({ default: module.AdminDashboard })));
 import { SectionDivider } from "./components/SectionDivider";
 import { CATEGORIES } from "./data/products";
 import type {
@@ -723,44 +723,48 @@ function App() {
   // Phase 22: Admin Dashboard dedicated operations view
   if (isAdminMode) {
     return (
-      <div className="app-container admin-app-view">
-        <AdminDashboard
-          onBackToStore={() => {
-            window.scrollTo({ top: 0, behavior: "instant" });
-            setIsAdminMode(false);
-          }}
-          orders={orders}
-          onUpdateOrderStatus={handleUpdateOrderStatus}
-          onViewOrderDetails={(order) => {
-            setSelectedOrder(order);
-            setShowOrderDetails(true);
-          }}
-          products={PRODUCTS}
-          productOverrides={productOverrides}
-          onToggleProductAvailability={handleToggleProductAvailability}
-          onResetProductOverrides={handleResetProductOverrides}
-          userProfile={profile}
-          savedAddresses={addresses}
-          cartCount={cartCount}
-        />
+      <Suspense fallback={null}>
+        <div className="app-container admin-app-view">
+          <AdminDashboard
+            onBackToStore={() => {
+              window.scrollTo({ top: 0, behavior: "instant" });
+              setIsAdminMode(false);
+            }}
+            orders={orders}
+            onUpdateOrderStatus={handleUpdateOrderStatus}
+            onViewOrderDetails={(order) => {
+              setSelectedOrder(order);
+              setShowOrderDetails(true);
+            }}
+            products={PRODUCTS}
+            productOverrides={productOverrides}
+            onToggleProductAvailability={handleToggleProductAvailability}
+            onResetProductOverrides={handleResetProductOverrides}
+            userProfile={profile}
+            savedAddresses={addresses}
+            cartCount={cartCount}
+          />
 
-        {/* Order Details Modal reused for Admin Inspection */}
-        <OrderDetailsModal
-          isOpen={showOrderDetails}
-          order={selectedOrder}
-          onClose={() => setShowOrderDetails(false)}
-          onReorder={handleReorder}
-          onBackToOrders={() => setShowOrderDetails(false)}
-        />
+          {/* Order Details Modal reused for Admin Inspection */}
+          {showOrderDetails && (
+            <OrderDetailsModal
+              isOpen={showOrderDetails}
+              order={selectedOrder}
+              onClose={() => setShowOrderDetails(false)}
+              onReorder={handleReorder}
+              onBackToOrders={() => setShowOrderDetails(false)}
+            />
+          )}
 
-        {/* Order / Admin Floating Toast */}
-        {orderToast && (
-          <div className="order-floating-toast" role="status" aria-live="polite">
-            <Sparkles size={16} />
-            <span>{orderToast}</span>
-          </div>
-        )}
-      </div>
+          {/* Order / Admin Floating Toast */}
+          {orderToast && (
+            <div className="order-floating-toast" role="status" aria-live="polite">
+              <Sparkles size={16} />
+              <span>{orderToast}</span>
+            </div>
+          )}
+        </div>
+      </Suspense>
     );
   }
 
@@ -1060,124 +1064,134 @@ function App() {
         }}
       />
 
-      {/* Location Selector Modal */}
-      <LocationModal
-        isOpen={showLocationModal}
-        onClose={() => {
-          setShowLocationModal(false);
-          if (profile?.id) fetchAddresses().then(setAddresses).catch(console.error);
-        }}
-        selectedLocation={selectedLocation}
-        onSelectLocation={handleSelectLocation}
-        onClearLocation={handleClearLocation}
-        isAuthenticated={!!profile}
-        onRequireLogin={() => setShowAccountModal(true)}
-      />
+      {/* Lazy-Loaded Modals */}
+      <Suspense fallback={null}>
+        {showLocationModal && (
+          <LocationModal
+            isOpen={showLocationModal}
+            onClose={() => {
+              setShowLocationModal(false);
+              if (profile?.id) fetchAddresses().then(setAddresses).catch(console.error);
+            }}
+            selectedLocation={selectedLocation}
+            onSelectLocation={handleSelectLocation}
+            onClearLocation={handleClearLocation}
+            isAuthenticated={!!profile}
+            onRequireLogin={() => setShowAccountModal(true)}
+          />
+        )}
 
-      {/* Product Details Modal */}
-      <ProductDetailsModal
-        isOpen={!!selectedProduct}
-        product={selectedProduct}
-        onClose={() => setSelectedProduct(null)}
-        cartQuantity={selectedProduct ? cart[selectedProduct.id] || 0 : 0}
-        onAddToCart={addToCart}
-        onRemoveFromCart={removeFromCart}
-        isWishlisted={selectedProduct ? wishlistSet.has(selectedProduct.id) : false}
-        onToggleWishlist={handleToggleWishlist}
-        isAvailable={selectedProduct ? isItemAvailable(selectedProduct.id) : true}
-      />
+        {!!selectedProduct && (
+          <ProductDetailsModal
+            isOpen={!!selectedProduct}
+            product={selectedProduct}
+            onClose={() => setSelectedProduct(null)}
+            cartQuantity={selectedProduct ? cart[selectedProduct.id] || 0 : 0}
+            onAddToCart={addToCart}
+            onRemoveFromCart={removeFromCart}
+            isWishlisted={selectedProduct ? wishlistSet.has(selectedProduct.id) : false}
+            onToggleWishlist={handleToggleWishlist}
+            isAvailable={selectedProduct ? isItemAvailable(selectedProduct.id) : true}
+          />
+        )}
 
-      {/* Checkout Review Modal */}
-      <CheckoutReviewModal
-        isOpen={showCheckoutReview}
-        onClose={() => setShowCheckoutReview(false)}
-        cartItems={cartItems}
-        cartCount={cartCount}
-        subtotal={subtotal}
-        deliveryFee={deliveryFee}
-        productSavings={productSavings}
-        total={total}
-        selectedLocation={selectedLocation}
-        etaInfo={etaInfo}
-        onPlaceOrder={handlePlaceOrder}
-        isPlacingOrder={isPlacingOrder}
-        onChangeAddress={() => {
-          setShowCheckoutReview(false);
-          setShowLocationModal(true);
-        }}
-      />
+        {showCheckoutReview && (
+          <CheckoutReviewModal
+            isOpen={showCheckoutReview}
+            onClose={() => setShowCheckoutReview(false)}
+            cartItems={cartItems}
+            cartCount={cartCount}
+            subtotal={subtotal}
+            deliveryFee={deliveryFee}
+            productSavings={productSavings}
+            total={total}
+            selectedLocation={selectedLocation}
+            etaInfo={etaInfo}
+            onPlaceOrder={handlePlaceOrder}
+            isPlacingOrder={isPlacingOrder}
+            onChangeAddress={() => {
+              setShowCheckoutReview(false);
+              setShowLocationModal(true);
+            }}
+          />
+        )}
 
-      {/* Order Confirmation Modal */}
-      <OrderConfirmationModal
-        isOpen={showOrderConfirmation}
-        order={confirmedOrder}
-        onClose={() => setShowOrderConfirmation(false)}
-        onViewOrder={handleViewOrder}
-        onContinueShopping={() => setShowOrderConfirmation(false)}
-      />
+        {showOrderConfirmation && (
+          <OrderConfirmationModal
+            isOpen={showOrderConfirmation}
+            order={confirmedOrder}
+            onClose={() => setShowOrderConfirmation(false)}
+            onViewOrder={handleViewOrder}
+            onContinueShopping={() => setShowOrderConfirmation(false)}
+          />
+        )}
 
-      {/* Order History Modal */}
-      <OrderHistoryModal
-        isOpen={showOrderHistory}
-        onClose={() => setShowOrderHistory(false)}
-        orders={orders}
-        isLoadingOrders={isLoadingOrders}
-        onSelectOrder={(order) => {
-          setSelectedOrder(order);
-          setShowOrderDetails(true);
-        }}
-        onReorder={handleReorder}
-        onStartShopping={() => {
-          setShowOrderHistory(false);
-          handleShopNow();
-        }}
-      />
+        {showOrderHistory && (
+          <OrderHistoryModal
+            isOpen={showOrderHistory}
+            onClose={() => setShowOrderHistory(false)}
+            orders={orders}
+            isLoadingOrders={isLoadingOrders}
+            onSelectOrder={(order) => {
+              setSelectedOrder(order);
+              setShowOrderDetails(true);
+            }}
+            onReorder={handleReorder}
+            onStartShopping={() => {
+              setShowOrderHistory(false);
+              handleShopNow();
+            }}
+          />
+        )}
 
-      {/* Order Details Modal */}
-      <OrderDetailsModal
-        isOpen={showOrderDetails}
-        order={selectedOrder}
-        onClose={() => setShowOrderDetails(false)}
-        onReorder={handleReorder}
-        onBackToOrders={() => {
-          setShowOrderDetails(false);
-          setShowOrderHistory(true);
-        }}
-      />
+        {showOrderDetails && (
+          <OrderDetailsModal
+            isOpen={showOrderDetails}
+            order={selectedOrder}
+            onClose={() => setShowOrderDetails(false)}
+            onReorder={handleReorder}
+            onBackToOrders={() => {
+              setShowOrderDetails(false);
+              setShowOrderHistory(true);
+            }}
+          />
+        )}
 
-      {/* Account & Profile Modal */}
-      <AccountModal
-        isOpen={showAccountModal}
-        onClose={() => setShowAccountModal(false)}
-        profile={profile}
-        onLogin={handleLogin}
-        onRegister={handleRegister}
-        onLogout={handleLogout}
-        orders={orders}
-        savedAddressesCount={addresses.length}
-        cartCount={cartCount}
-        onOpenOrders={() => {
-          setShowAccountModal(false);
-          setShowOrderHistory(true);
-        }}
-        onOpenAddresses={() => {
-          setShowAccountModal(false);
-          setShowLocationModal(true);
-        }}
-        onViewOrderDetails={(order) => {
-          setSelectedOrder(order);
-          setShowAccountModal(false);
-          setShowOrderDetails(true);
-        }}
-        onContinueShopping={() => {
-          setShowAccountModal(false);
-          handleShopNow();
-        }}
-        onOpenAdmin={() => {
-          window.scrollTo({ top: 0, behavior: "instant" });
-          setIsAdminMode(true);
-        }}
-      />
+        {showAccountModal && (
+          <AccountModal
+            isOpen={showAccountModal}
+            onClose={() => setShowAccountModal(false)}
+            profile={profile}
+            onLogin={handleLogin}
+            onRegister={handleRegister}
+            onLogout={handleLogout}
+            orders={orders}
+            savedAddressesCount={addresses.length}
+            cartCount={cartCount}
+            onOpenOrders={() => {
+              setShowAccountModal(false);
+              setShowOrderHistory(true);
+            }}
+            onOpenAddresses={() => {
+              setShowAccountModal(false);
+              setShowLocationModal(true);
+            }}
+            onViewOrderDetails={(order) => {
+              setSelectedOrder(order);
+              setShowAccountModal(false);
+              setShowOrderDetails(true);
+            }}
+            onContinueShopping={() => {
+              setShowAccountModal(false);
+              handleShopNow();
+            }}
+            onOpenAdmin={() => {
+              window.scrollTo({ top: 0, behavior: "instant" });
+              setIsAdminMode(true);
+            }}
+          />
+        )}
+      </Suspense>
 
       {/* Order / Reorder / Profile Floating Toast */}
       {orderToast && (

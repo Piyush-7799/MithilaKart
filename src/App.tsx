@@ -212,12 +212,26 @@ function App() {
       clearSavedLocation();
       setShowCart(false);
       setShowAccountModal(false);
+      setShowOrderHistory(false);
+      setShowOrderDetails(false);
+      setShowOrderConfirmation(false);
       setOrderToast("Your session has expired. Please login again.");
     };
 
     window.addEventListener("mithilakart:auth-expired", handleAuthExpired);
     return () => window.removeEventListener("mithilakart:auth-expired", handleAuthExpired);
-  }, [setOrderToast, setProfile, setOrders, setShowCheckoutReview, setSelectedLocation, setShowAccountModal]);
+  }, [
+    setOrderToast,
+    setProfile,
+    setOrders,
+    setShowCheckoutReview,
+    setSelectedLocation,
+    setShowAccountModal,
+    setShowOrderHistory,
+    setShowOrderDetails,
+    setShowOrderConfirmation,
+    setShowCart
+  ]);
 
   // Phase 22: Admin Dashboard & Product Availability overrides state
   const [isAdminMode, setIsAdminMode] = useState(false);
@@ -281,9 +295,24 @@ function App() {
     setShowCheckoutReview(false);
     setSelectedLocation(null);
     clearSavedLocation();
-    setOrderToast("Logged out");
+    setShowCart(false);
     setShowAccountModal(false);
-  }, [setOrderToast, setProfile, setOrders, setShowCheckoutReview, setSelectedLocation, setShowAccountModal]);
+    setShowOrderHistory(false);
+    setShowOrderDetails(false);
+    setShowOrderConfirmation(false);
+    setOrderToast("Logged out");
+  }, [
+    setOrderToast,
+    setProfile,
+    setOrders,
+    setShowCheckoutReview,
+    setSelectedLocation,
+    setShowAccountModal,
+    setShowOrderHistory,
+    setShowOrderDetails,
+    setShowOrderConfirmation,
+    setShowCart
+  ]);
 
   // Auto-dismiss floating order toasts
   useEffect(() => {
@@ -621,7 +650,9 @@ function App() {
       setShowOrderConfirmation(true);
     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : "Failed to place order. Please try again.";
-      setOrderToast(msg);
+      if (!msg.includes("401")) {
+        setOrderToast(msg);
+      }
     } finally {
       setIsPlacingOrder(false);
     }

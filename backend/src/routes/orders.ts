@@ -3,7 +3,7 @@
  */
 
 import { Router } from "express";
-import { getOrders, getOrder, createOrder } from "../controllers/orderController.js";
+import { getOrders, getOrder, createOrder, updateStatus } from "../controllers/orderController.js";
 import { authenticate } from "../middleware/auth.js";
 
 const router = Router();
@@ -16,5 +16,8 @@ router.post("/", authenticate, createOrder);
 
 // GET /api/orders/:id
 router.get("/:id", authenticate, getOrder);
+
+// PUT /api/orders/:id/status
+router.put("/:id/status", authenticate, updateStatus);
 
 export default router;

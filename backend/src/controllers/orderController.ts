@@ -3,7 +3,8 @@
  */
 
 import type { RequestHandler } from "express";
-import { listOrders, getOrderById, createOrder as createOrderService } from "../services/orderService.js";
+import type { OrderStatus } from "@prisma/client";
+import { listOrders, getOrderById, createOrder as createOrderService, updateOrderStatus } from "../services/orderService.js";
 import { createApiError } from "../middleware/errorHandler.js";
 
 /** GET /api/orders — list orders with optional ?status */
@@ -68,7 +69,7 @@ export const createOrder: RequestHandler = async (req, res, next) => {
     }
 
     const { address, items, paymentMethod, notes } = req.body;
-    
+
     // Validate address
     if (!address || typeof address !== "object" || Array.isArray(address)) {
       return next(createApiError("Missing or invalid address", 400));
@@ -124,6 +125,56 @@ export const createOrder: RequestHandler = async (req, res, next) => {
     if (err instanceof Error && (err.message.includes("Products not found") || err.message.includes("unavailable") || err.message.includes("Invalid quantity") || err.message.includes("at least one item"))) {
       return next(createApiError(err.message, 400));
     }
+    next(err);
+  }
+};
+
+/** PUT /api/orders/:id/status — update order status (ADMIN ONLY) */
+export const updateStatus: RequestHandler = async (req, res, next) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return next(createApiError("Unauthorized", 401));
+    }
+
+    if (req.user?.role !== "ADMIN") {
+      return next(createApiError("Forbidden", 403));
+    }
+
+    const orderId = req.params["id"];
+    if (!orderId || typeof orderId !== "string") {
+      return next(createApiError("Invalid order ID", 400));
+    }
+
+    if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
+      return next(createApiError("Invalid request body", 400));
+    }
+
+    const { status } = req.body;
+
+    // Validate status
+    const validStatuses: OrderStatus[] = [
+      "Placed",
+      "Confirmed",
+      "Preparing",
+      "OutForDelivery",
+      "Delivered",
+      "Cancelled"
+    ];
+
+    if (!status || typeof status !== "string" || !validStatuses.includes(status as OrderStatus)) {
+      return next(createApiError(`Invalid status. Must be one of: ${validStatuses.join(", ")}`, 400));
+    }
+
+    const order = await getOrderById(orderId);
+    if (!order) {
+      return next(createApiError(`Order not found: ${orderId}`, 404));
+    }
+
+    const updatedOrder = await updateOrderStatus(orderId, status as OrderStatus);
+
+    res.json({ status: "ok", order: updatedOrder });
+  } catch (err) {
     next(err);
   }
 };

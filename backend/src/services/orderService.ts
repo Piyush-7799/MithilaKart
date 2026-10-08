@@ -224,3 +224,11 @@ export async function createOrder(params: CreateOrderParams) {
     throw err;
   }
 }
+
+export async function updateOrderStatus(id: string, status: OrderStatus) {
+  return await prisma.order.update({
+    where: { id },
+    data: { status },
+    include: { items: true },
+  });
+}

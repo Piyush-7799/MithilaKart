@@ -8,7 +8,7 @@
  * Orders, users, addresses remain on localStorage (Phase 23.3+).
  */
 
-import type { Product, Order } from "../types";
+import type { Product } from "../types";
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
@@ -113,6 +113,59 @@ function mapApiProduct(p: ApiProduct): Product {
     badge: p.badge ?? undefined,
     isMithilaSpecial: p.isMithilaSpecial,
     description: p.description ?? undefined,
+  };
+}
+interface ApiOrderItem {
+  productId: string;
+  nameSnapshot: string;
+  imageSnapshot: string;
+  quantity: number;
+  priceSnapshot: number;
+  mrpSnapshot?: number | null;
+  unitSnapshot?: string | null;
+  lineTotal: number;
+}
+
+interface ApiOrder {
+  items: ApiOrderItem[];
+  addressFullName: string;
+  addressPhone: string;
+  addressHouse: string;
+  addressStreet: string;
+  addressCity: string;
+  addressState: string;
+  addressPincode: string;
+  addressLandmark?: string | null;
+  addressLabel?: string | null;
+  addressDisplay?: string | null;
+  [key: string]: unknown;
+}
+
+function mapApiOrder(apiOrder: ApiOrder): import("../types").Order {
+  return {
+    ...(apiOrder as unknown as import("../types").Order),
+    items: apiOrder.items?.map((item) => ({
+      productId: item.productId,
+      name: item.nameSnapshot,
+      image: item.imageSnapshot,
+      quantity: item.quantity,
+      price: item.priceSnapshot,
+      mrp: item.mrpSnapshot || undefined,
+      unit: item.unitSnapshot || undefined,
+      lineTotal: item.lineTotal,
+    })) || [],
+    address: {
+      fullName: apiOrder.addressFullName,
+      phone: apiOrder.addressPhone,
+      house: apiOrder.addressHouse,
+      street: apiOrder.addressStreet,
+      city: apiOrder.addressCity,
+      state: apiOrder.addressState,
+      pincode: apiOrder.addressPincode,
+      landmark: apiOrder.addressLandmark || undefined,
+      label: apiOrder.addressLabel || "",
+      displayName: apiOrder.addressDisplay || undefined,
+    }
   };
 }
 
@@ -249,23 +302,24 @@ export async function createOrder(
   req: CreateOrderRequest,
   signal?: AbortSignal
 ) {
-  return await apiPost<{ status: "ok"; order: Order }>("/orders", req, signal);
+  const data = await apiPost<{ status: "ok"; order: ApiOrder }>("/orders", req, signal);
+  return { ...data, order: mapApiOrder(data.order) };
 }
 
 export async function fetchOrders(
   signal?: AbortSignal
 ) {
   const path = `/orders`;
-  const data = await apiFetch<{ status: "ok"; orders: Order[] }>(path, signal);
-  return data.orders;
+  const data = await apiFetch<{ status: "ok"; orders: ApiOrder[] }>(path, signal);
+  return data.orders.map(mapApiOrder);
 }
 
 export async function fetchOrderById(
   id: string,
   signal?: AbortSignal
 ) {
-  const data = await apiFetch<{ status: "ok"; order: Order }>(`/orders/${encodeURIComponent(id)}`, signal);
-  return data.order;
+  const data = await apiFetch<{ status: "ok"; order: ApiOrder }>(`/orders/${encodeURIComponent(id)}`, signal);
+  return mapApiOrder(data.order);
 }
 
 /** Exported for use in the useProducts hook */

@@ -26,7 +26,6 @@ import type {
   Product,
   SortOption,
   Order,
-  OrderItem,
   OrderStatus,
   UserProfile,
   Address,
@@ -229,7 +228,7 @@ function App() {
         prev && prev.id === orderId ? { ...prev, status: newStatus } : prev
       );
     }
-  }, [profile]);
+  }, []);
 
   const handleToggleProductAvailability = useCallback(
     (productId: string, isAvailable: boolean) => {
@@ -262,6 +261,9 @@ function App() {
     localStorage.removeItem(TOKEN_KEY);
     setProfile(null);
     setOrders([]);
+    setShowCheckoutReview(false);
+    setSelectedLocation(null);
+    clearSavedLocation();
     setOrderToast("Logged out");
     setShowAccountModal(false);
   }, []);
@@ -528,6 +530,11 @@ function App() {
   }, [cartItems, selectedLocation]);
 
   const handleProceedToCheckout = useCallback(() => {
+    if (!profile) {
+      alert("Please login to proceed with your order.");
+      setShowAccountModal(true);
+      return;
+    }
     if (!selectedLocation) {
       setShowLocationModal(true);
       return;
@@ -536,7 +543,7 @@ function App() {
       return;
     }
     setShowCheckoutReview(true);
-  }, [selectedLocation, cartItems.length]);
+  }, [selectedLocation, cartItems.length, profile]);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
   const handlePlaceOrder = useCallback(async () => {
@@ -551,15 +558,9 @@ function App() {
     setIsPlacingOrder(true);
 
     try {
-      const orderItems: OrderItem[] = cartItems.map(({ product, quantity }) => ({
+      const orderItems = cartItems.map(({ product, quantity }) => ({
         productId: product.id,
-        name: product.name,
-        image: product.image,
         quantity,
-        price: product.price,
-        mrp: product.mrp,
-        unit: product.unit,
-        lineTotal: product.price * quantity,
       }));
 
       const addressSnapshot = createAddressSnapshot(selectedLocation);

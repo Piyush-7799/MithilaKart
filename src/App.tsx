@@ -180,6 +180,7 @@ function App() {
     }
   }, []);
 
+
   // Phase 20: Orders and order history state
   const [orders, setOrders] = useState<Order[]>([]);
   const [addresses, setAddresses] = useState<Address[]>([]);
@@ -201,6 +202,22 @@ function App() {
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const [showOrderConfirmation, setShowOrderConfirmation] = useState(false);
   const [orderToast, setOrderToast] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleAuthExpired = () => {
+      setProfile(null);
+      setOrders([]);
+      setShowCheckoutReview(false);
+      setSelectedLocation(null);
+      clearSavedLocation();
+      setShowCart(false);
+      setShowAccountModal(false);
+      setOrderToast("Your session has expired. Please login again.");
+    };
+
+    window.addEventListener("mithilakart:auth-expired", handleAuthExpired);
+    return () => window.removeEventListener("mithilakart:auth-expired", handleAuthExpired);
+  }, [setOrderToast, setProfile, setOrders, setShowCheckoutReview, setSelectedLocation, setShowAccountModal]);
 
   // Phase 22: Admin Dashboard & Product Availability overrides state
   const [isAdminMode, setIsAdminMode] = useState(false);
@@ -266,7 +283,7 @@ function App() {
     clearSavedLocation();
     setOrderToast("Logged out");
     setShowAccountModal(false);
-  }, []);
+  }, [setOrderToast, setProfile, setOrders, setShowCheckoutReview, setSelectedLocation, setShowAccountModal]);
 
   // Auto-dismiss floating order toasts
   useEffect(() => {
@@ -318,7 +335,7 @@ function App() {
         [id]: Math.min(99, (prev[id] || 0) + 1),
       }));
     },
-    [isItemAvailable]
+    [isItemAvailable, setOrderToast]
   );
 
   const removeFromCart = useCallback((id: string) => {
@@ -529,6 +546,8 @@ function App() {
     return calculateCartDeliveryEta(cartItems, selectedLocation);
   }, [cartItems, selectedLocation]);
 
+  const [checkoutIdempotencyKey, setCheckoutIdempotencyKey] = useState<string | null>(null);
+
   const handleProceedToCheckout = useCallback(() => {
     if (!profile) {
       alert("Please login to proceed with your order.");
@@ -542,8 +561,9 @@ function App() {
     if (cartItems.length === 0) {
       return;
     }
+    setCheckoutIdempotencyKey(crypto.randomUUID());
     setShowCheckoutReview(true);
-  }, [selectedLocation, cartItems.length, profile]);
+  }, [selectedLocation, cartItems.length, profile, setShowCheckoutReview, setShowAccountModal, setShowLocationModal]);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
   const handlePlaceOrder = useCallback(async () => {
@@ -551,7 +571,7 @@ function App() {
       setShowLocationModal(true);
       return;
     }
-    if (cartItems.length === 0 || isPlacingOrder) {
+    if (cartItems.length === 0 || isPlacingOrder || !checkoutIdempotencyKey) {
       return;
     }
 
@@ -575,6 +595,7 @@ function App() {
         address: addressSnapshot,
         items: orderItems,
         paymentMethod: "Cash on Delivery",
+        idempotencyKey: checkoutIdempotencyKey,
       });
 
       const newOrder = apiOrderRes.order;
@@ -589,6 +610,7 @@ function App() {
 
       // Clear cart (only after successful creation)
       setCart({});
+      setCheckoutIdempotencyKey(null);
 
       // Close review and cart drawer
       setShowCheckoutReview(false);
@@ -603,7 +625,7 @@ function App() {
     } finally {
       setIsPlacingOrder(false);
     }
-  }, [selectedLocation, cartItems, profile, isPlacingOrder]);
+  }, [selectedLocation, cartItems, profile, isPlacingOrder, checkoutIdempotencyKey, setShowLocationModal, setOrderToast, setOrders, setShowCheckoutReview, setShowCart]);
 
   const handleReorder = useCallback((orderToReorder: Order) => {
     const availableItems: { id: string; quantity: number }[] = [];
@@ -643,7 +665,7 @@ function App() {
     setShowOrderHistory(false);
     setShowOrderConfirmation(false);
     setShowCart(true);
-  }, [PRODUCTS]);
+  }, [PRODUCTS, setOrderToast, setShowCart]);
 
   const handleViewOrder = useCallback(async (orderId: string) => {
     try {
@@ -1038,6 +1060,7 @@ function App() {
         selectedLocation={selectedLocation}
         etaInfo={etaInfo}
         onPlaceOrder={handlePlaceOrder}
+        isPlacingOrder={isPlacingOrder}
         onChangeAddress={() => {
           setShowCheckoutReview(false);
           setShowLocationModal(true);

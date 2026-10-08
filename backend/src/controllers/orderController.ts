@@ -58,6 +58,11 @@ export const createOrder: RequestHandler = async (req, res, next) => {
       return next(createApiError("Unauthorized", 401));
     }
 
+    const idempotencyKey = req.headers["x-idempotency-key"] as string | undefined;
+    if (!idempotencyKey || idempotencyKey.length < 10 || idempotencyKey.length > 100) {
+      return next(createApiError("Missing or invalid X-Idempotency-Key header", 400));
+    }
+
     const { address, items, paymentMethod, notes } = req.body;
     
     if (!address || !items || !Array.isArray(items) || items.length === 0) {
@@ -70,6 +75,7 @@ export const createOrder: RequestHandler = async (req, res, next) => {
       items,
       paymentMethod,
       notes,
+      idempotencyKey,
     });
 
     res.status(201).json({ status: "ok", order });

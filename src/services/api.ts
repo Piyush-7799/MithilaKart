@@ -40,6 +40,12 @@ async function apiFetch<T>(path: string, signal?: AbortSignal): Promise<T> {
   });
 
   if (!response.ok) {
+    if (response.status === 401) {
+      localStorage.removeItem(TOKEN_KEY);
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("mithilakart:auth-expired"));
+      }
+    }
     throw new Error(`API ${response.status}: ${response.statusText} — ${url}`);
   }
 
@@ -217,16 +223,26 @@ export async function fetchProductById(
   }
 }
 
-async function apiPost<T>(path: string, body: unknown, signal?: AbortSignal): Promise<T> {
+async function apiPost<T>(path: string, body: unknown, signal?: AbortSignal, extraHeaders?: Record<string, string>): Promise<T> {
   const url = `${API_BASE}${path}`;
+  const headers = getAuthHeaders();
+  if (extraHeaders) {
+    Object.assign(headers, extraHeaders);
+  }
   const response = await fetch(url, {
     method: "POST",
-    headers: getAuthHeaders(),
+    headers,
     body: JSON.stringify(body),
     signal,
   });
 
   if (!response.ok) {
+    if (response.status === 401) {
+      localStorage.removeItem(TOKEN_KEY);
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("mithilakart:auth-expired"));
+      }
+    }
     throw new Error(`API ${response.status}: ${response.statusText} — ${url}`);
   }
 
@@ -253,7 +269,15 @@ async function apiPut<T>(path: string, body: unknown, signal?: AbortSignal): Pro
     signal,
   });
 
-  if (!response.ok) throw new Error(`API ${response.status}: ${response.statusText}`);
+  if (!response.ok) {
+    if (response.status === 401) {
+      localStorage.removeItem(TOKEN_KEY);
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("mithilakart:auth-expired"));
+      }
+    }
+    throw new Error(`API ${response.status}: ${response.statusText}`);
+  }
   const data = (await response.json()) as unknown;
   if (typeof data !== "object" || data === null || (data as Record<string, unknown>)["status"] === "error") {
     throw new Error("API Error");
@@ -269,7 +293,15 @@ async function apiDelete<T>(path: string, signal?: AbortSignal): Promise<T> {
     signal,
   });
 
-  if (!response.ok) throw new Error(`API ${response.status}: ${response.statusText}`);
+  if (!response.ok) {
+    if (response.status === 401) {
+      localStorage.removeItem(TOKEN_KEY);
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("mithilakart:auth-expired"));
+      }
+    }
+    throw new Error(`API ${response.status}: ${response.statusText}`);
+  }
   const data = (await response.json()) as unknown;
   if (typeof data !== "object" || data === null || (data as Record<string, unknown>)["status"] === "error") {
     throw new Error("API Error");
@@ -296,13 +328,18 @@ export interface CreateOrderRequest {
   }[];
   paymentMethod: string;
   notes?: string;
+  idempotencyKey?: string;
 }
 
 export async function createOrder(
   req: CreateOrderRequest,
   signal?: AbortSignal
 ) {
-  const data = await apiPost<{ status: "ok"; order: ApiOrder }>("/orders", req, signal);
+  const extraHeaders: Record<string, string> = {};
+  if (req.idempotencyKey) {
+    extraHeaders["X-Idempotency-Key"] = req.idempotencyKey;
+  }
+  const data = await apiPost<{ status: "ok"; order: ApiOrder }>("/orders", req, signal, extraHeaders);
   return { ...data, order: mapApiOrder(data.order) };
 }
 

@@ -68,6 +68,7 @@ export interface CreateOrderParams {
   }[];
   paymentMethod: string;
   notes?: string;
+  idempotencyKey?: string;
 }
 
 export async function createOrder(params: CreateOrderParams) {
@@ -75,7 +76,22 @@ export async function createOrder(params: CreateOrderParams) {
     throw new Error("Order must contain at least one item.");
   }
 
-  return await prisma.$transaction(async (tx) => {
+  try {
+    return await prisma.$transaction(async (tx) => {
+      // 0. Check idempotency
+    if (params.idempotencyKey && params.userId) {
+      const existing = await tx.orderIdempotency.findUnique({
+        where: { key: params.idempotencyKey },
+        include: { order: { include: { items: true } } },
+      });
+      if (existing) {
+        if (existing.userId !== params.userId) {
+          throw new Error("Idempotency key mismatch");
+        }
+        return existing.order;
+      }
+    }
+
     // 1. Fetch products
     const productIds = params.items.map((i) => i.productId);
     const products = await tx.product.findMany({
@@ -165,6 +181,14 @@ export async function createOrder(params: CreateOrderParams) {
         items: {
           create: orderItemsData,
         },
+        ...(params.idempotencyKey && finalUserId ? {
+          idempotency: {
+            create: {
+              key: params.idempotencyKey,
+              userId: finalUserId,
+            }
+          }
+        } : {}),
       },
       include: {
         items: true,
@@ -176,4 +200,27 @@ export async function createOrder(params: CreateOrderParams) {
     maxWait: 5000,
     timeout: 20000,
   });
+  } catch (err: unknown) {
+    if (
+      err &&
+      typeof err === "object" &&
+      "code" in err &&
+      err.code === "P2002" &&
+      params.idempotencyKey &&
+      params.userId
+    ) {
+      const existing = await prisma.orderIdempotency.findUnique({
+        where: { key: params.idempotencyKey },
+        include: { order: { include: { items: true } } },
+      });
+
+      if (existing) {
+        if (existing.userId !== params.userId) {
+          throw new Error("Idempotency key mismatch", { cause: err });
+        }
+        return existing.order;
+      }
+    }
+    throw err;
+  }
 }

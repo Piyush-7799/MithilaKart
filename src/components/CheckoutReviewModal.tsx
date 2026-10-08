@@ -24,6 +24,7 @@ export interface CheckoutReviewModalProps {
   selectedLocation: DeliveryLocation | null;
   etaInfo: DeliveryEtaInfo;
   onPlaceOrder: () => void;
+  isPlacingOrder: boolean;
   onChangeAddress?: () => void;
 }
 
@@ -39,6 +40,7 @@ export function CheckoutReviewModal({
   selectedLocation,
   etaInfo,
   onPlaceOrder,
+  isPlacingOrder,
   onChangeAddress,
 }: CheckoutReviewModalProps) {
   // Lock background scroll when open
@@ -72,7 +74,7 @@ export function CheckoutReviewModal({
   const addr = selectedLocation?.address;
   const isAddressValid = Boolean(selectedLocation);
   const isCartValid = cartItems.length > 0;
-  const canPlaceOrder = isAddressValid && isCartValid;
+  const canPlaceOrder = isAddressValid && isCartValid && !isPlacingOrder;
 
   return (
     <div
@@ -318,10 +320,12 @@ export function CheckoutReviewModal({
             aria-label={`Place Order for ₹${total}`}
           >
             <div className="place-btn-content">
-              <span className="place-btn-label">Place Order</span>
-              <span className="place-btn-total">₹{total}</span>
+              <span className="place-btn-label">
+                {isPlacingOrder ? "Placing Order..." : "Place Order"}
+              </span>
+              {!isPlacingOrder && <span className="place-btn-total">₹{total}</span>}
             </div>
-            <ArrowRight size={18} />
+            {!isPlacingOrder && <ArrowRight size={18} />}
           </button>
         </div>
       </div>

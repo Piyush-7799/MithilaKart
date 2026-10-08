@@ -45,8 +45,9 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  addresses Address[]
-  orders    Order[]
+  addresses            Address[]
+  orders               Order[]
+  idempotencyRecords   OrderIdempotency[]
 
   @@index([email])
 }
@@ -134,8 +135,9 @@ model Order {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user  User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
-  items OrderItem[]
+  user         User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+  items        OrderItem[]
+  idempotency  OrderIdempotency?
 
   @@index([userId])
   @@index([status])
@@ -163,4 +165,20 @@ model OrderItem {
 
   @@index([orderId])
   @@index([productId])
+}
+
+// ─── OrderIdempotency ──────────────────────────────────────────────────────
+// Prevents duplicate orders from network retries.
+
+model OrderIdempotency {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  userId    String
+  orderId   String   @unique
+  createdAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }

@@ -17,6 +17,7 @@ export interface OrderHistoryModalProps {
   onSelectOrder: (order: Order) => void;
   onReorder: (order: Order) => void;
   onStartShopping: () => void;
+  isLoadingOrders?: boolean;
 }
 
 function formatDate(isoString: string): string {
@@ -41,6 +42,7 @@ export function OrderHistoryModal({
   onSelectOrder,
   onReorder,
   onStartShopping,
+  isLoadingOrders,
 }: OrderHistoryModalProps) {
   // Lock background scroll when open
   useEffect(() => {
@@ -108,7 +110,18 @@ export function OrderHistoryModal({
 
         {/* Content Body */}
         <div className="order-history-body">
-          {orders.length === 0 ? (
+          {isLoadingOrders ? (
+            /* Loading State */
+            <div className="order-history-empty" style={{ opacity: 0.7 }}>
+              <div className="order-empty-icon-wrap" style={{ animation: "pulse 1.5s infinite" }}>
+                <Clock size={40} className="order-empty-icon" />
+              </div>
+              <h3 className="order-empty-title">Fetching orders...</h3>
+              <p className="order-empty-desc">
+                Please wait while we retrieve your order history.
+              </p>
+            </div>
+          ) : orders.length === 0 ? (
             /* Empty State */
             <div className="order-history-empty">
               <div className="order-empty-icon-wrap">

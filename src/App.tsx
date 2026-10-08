@@ -183,14 +183,19 @@ function App() {
 
   // Phase 20: Orders and order history state
   const [orders, setOrders] = useState<Order[]>([]);
+  const [isLoadingOrders, setIsLoadingOrders] = useState(false);
   const [addresses, setAddresses] = useState<Address[]>([]);
   
   useEffect(() => {
     if (profile?.id) {
-      apiFetchOrders().then(setOrders).catch(console.error);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setIsLoadingOrders(true);
+      apiFetchOrders()
+        .then(setOrders)
+        .catch(console.error)
+        .finally(() => setIsLoadingOrders(false));
       fetchAddresses().then(setAddresses).catch(console.error);
     } else {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAddresses([]);
     }
   }, [profile?.id]);
@@ -249,11 +254,14 @@ function App() {
   const handleUpdateOrderStatus = useCallback(async (orderId: string, newStatus: OrderStatus) => {
     const success = updateOrderStatus(orderId, newStatus);
     if (success) {
+      setIsLoadingOrders(true);
       try {
         const fetchedOrders = await apiFetchOrders();
         setOrders(fetchedOrders);
       } catch (err) {
         console.error("Failed to fetch updated orders", err);
+      } finally {
+        setIsLoadingOrders(false);
       }
       setSelectedOrder((prev) =>
         prev && prev.id === orderId ? { ...prev, status: newStatus } : prev
@@ -630,11 +638,14 @@ function App() {
       const newOrder = apiOrderRes.order;
 
       // Refresh orders list from API
+      setIsLoadingOrders(true);
       try {
         const fetchedOrders = await apiFetchOrders();
         setOrders(fetchedOrders);
       } catch (err) {
         console.error("Failed to fetch updated orders", err);
+      } finally {
+        setIsLoadingOrders(false);
       }
 
       // Clear cart (only after successful creation)
@@ -1112,6 +1123,7 @@ function App() {
         isOpen={showOrderHistory}
         onClose={() => setShowOrderHistory(false)}
         orders={orders}
+        isLoadingOrders={isLoadingOrders}
         onSelectOrder={(order) => {
           setSelectedOrder(order);
           setShowOrderDetails(true);

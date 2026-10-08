@@ -7,8 +7,6 @@ import {
   MapPin,
   Package,
   ShoppingBag,
-  Edit3,
-  Check,
   ChevronRight,
   Clock,
   ShieldCheck,
@@ -17,13 +15,15 @@ import {
   Layers,
 } from "lucide-react";
 import type { UserProfile, Order } from "../types";
-import { getInitials, validateIndianPhone, validateEmail } from "../utils/profileStorage";
+import { getInitials, validateEmail } from "../utils/profileStorage";
 
 export interface AccountModalProps {
   isOpen: boolean;
   onClose: () => void;
   profile: UserProfile | null;
-  onSaveProfile: (profile: UserProfile) => void;
+  onLogin: (email: string, pass: string) => Promise<void>;
+  onRegister: (name: string, email: string, pass: string) => Promise<void>;
+  onLogout: () => void;
   orders: Order[];
   savedAddressesCount: number;
   cartCount: number;
@@ -51,7 +51,9 @@ export function AccountModal({
   isOpen,
   onClose,
   profile,
-  onSaveProfile,
+  onLogin,
+  onRegister,
+  onLogout,
   orders,
   savedAddressesCount,
   cartCount,
@@ -61,16 +63,20 @@ export function AccountModal({
   onContinueShopping,
   onOpenAdmin,
 }: AccountModalProps) {
-  const [isEditing, setIsEditing] = useState(false);
+  const [authMode, setAuthMode] = useState<"login" | "register">("login");
   const [fullName, setFullName] = useState("");
-  const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [errors, setErrors] = useState<{ fullName?: string; phone?: string; email?: string }>({});
+  const [password, setPassword] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   // Handle close and reset edit state
   const handleClose = useCallback(() => {
-    setIsEditing(false);
-    setErrors({});
+    setAuthMode("login");
+    setErrorMsg("");
+    setFullName("");
+    setEmail("");
+    setPassword("");
     onClose();
   }, [onClose]);
 
@@ -102,56 +108,38 @@ export function AccountModal({
 
   if (!isOpen) return null;
 
-  const handleStartEdit = () => {
-    setFullName(profile?.fullName || "");
-    setPhone(profile?.phone || "");
-    setEmail(profile?.email || "");
-    setErrors({});
-    setIsEditing(true);
-  };
-
-  const handleCancelEdit = () => {
-    setIsEditing(false);
-    setErrors({});
-  };
-
-  const handleSave = (e: React.FormEvent) => {
+  const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newErrors: { fullName?: string; phone?: string; email?: string } = {};
-
-    const trimmedName = fullName.trim();
-    if (!trimmedName) {
-      newErrors.fullName = "Please enter your full name.";
-    }
-
-    const trimmedPhone = phone.trim();
-    if (trimmedPhone && !validateIndianPhone(trimmedPhone)) {
-      newErrors.phone = "Please enter a valid 10-digit mobile number.";
-    }
-
+    setErrorMsg("");
     const trimmedEmail = email.trim();
-    if (trimmedEmail && !validateEmail(trimmedEmail)) {
-      newErrors.email = "Please enter a valid email address.";
+    if (!validateEmail(trimmedEmail)) {
+      setErrorMsg("Please enter a valid email address.");
+      return;
     }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
+    if (password.length < 6) {
+      setErrorMsg("Password must be at least 6 characters.");
       return;
     }
 
-    const now = new Date().toISOString();
-    const updatedProfile: UserProfile = {
-      id: profile?.id || `user_${Date.now()}`,
-      fullName: trimmedName,
-      phone: trimmedPhone || undefined,
-      email: trimmedEmail || undefined,
-      createdAt: profile?.createdAt || now,
-      updatedAt: now,
-    };
-
-    onSaveProfile(updatedProfile);
-    setIsEditing(false);
-    setErrors({});
+    setIsLoading(true);
+    try {
+      if (authMode === "login") {
+        await onLogin(trimmedEmail, password);
+      } else {
+        const trimmedName = fullName.trim();
+        if (!trimmedName) {
+          setErrorMsg("Please enter your full name.");
+          setIsLoading(false);
+          return;
+        }
+        await onRegister(trimmedName, trimmedEmail, password);
+      }
+      handleClose(); // successfully logged in/registered, close the modal
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : "Authentication failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const initials = getInitials(profile?.fullName);
@@ -221,16 +209,18 @@ export function AccountModal({
               <div className="account-profile-details">
                 <div className="account-profile-name-row">
                   <strong className="account-user-name">
-                    {profile?.fullName || "Not added"}
+                    {profile.fullName || "Not added"}
                   </strong>
                   <button
                     type="button"
                     className="account-edit-trigger-btn"
-                    onClick={handleStartEdit}
-                    aria-label="Edit Profile"
+                    onClick={() => {
+                      onLogout();
+                      handleClose();
+                    }}
+                    aria-label="Logout"
                   >
-                    <Edit3 size={13} />
-                    <span>Edit Profile</span>
+                    <span>Logout</span>
                   </button>
                 </div>
 
@@ -257,90 +247,98 @@ export function AccountModal({
                 )}
               </div>
             ) : (
-              /* Profile Edit Form */
-              <form className="account-edit-form" onSubmit={handleSave} noValidate>
-                <div className="account-form-field">
-                  <label htmlFor="account-name-input" className="account-form-label">
-                    Full Name *
-                  </label>
-                  <input
-                    id="account-name-input"
-                    type="text"
-                    className={`account-form-input ${errors.fullName ? "input-error" : ""}`}
-                    placeholder="Enter your full name"
-                    value={fullName}
-                    onChange={(e) => {
-                      setFullName(e.target.value);
-                      if (errors.fullName) setErrors((prev) => ({ ...prev, fullName: undefined }));
-                    }}
-                    autoFocus
-                  />
-                  {errors.fullName && (
-                    <span className="account-field-error" role="alert">
-                      <AlertCircle size={12} /> {errors.fullName}
-                    </span>
-                  )}
+              /* Profile Edit Form -> Login/Register Form */
+              <form className="account-edit-form" onSubmit={handleAuthSubmit} noValidate>
+                <div style={{ marginBottom: "1rem" }}>
+                  <h3 style={{ fontSize: "16px", fontWeight: "600", marginBottom: "0.25rem" }}>
+                    {authMode === "login" ? "Login to your account" : "Create a new account"}
+                  </h3>
+                  <p style={{ fontSize: "13px", color: "var(--color-text-tertiary)" }}>
+                    {authMode === "login"
+                      ? "Welcome back to MithilaKart."
+                      : "Join MithilaKart for faster checkout."}
+                  </p>
                 </div>
 
-                <div className="account-form-field">
-                  <label htmlFor="account-phone-input" className="account-form-label">
-                    Mobile Number (Optional)
-                  </label>
-                  <input
-                    id="account-phone-input"
-                    type="tel"
-                    className={`account-form-input ${errors.phone ? "input-error" : ""}`}
-                    placeholder="10-digit mobile number"
-                    value={phone}
-                    maxLength={10}
-                    onChange={(e) => {
-                      setPhone(e.target.value.replace(/\D/g, ""));
-                      if (errors.phone) setErrors((prev) => ({ ...prev, phone: undefined }));
-                    }}
-                  />
-                  {errors.phone && (
-                    <span className="account-field-error" role="alert">
-                      <AlertCircle size={12} /> {errors.phone}
-                    </span>
-                  )}
-                </div>
+                {authMode === "register" && (
+                  <div className="account-form-field">
+                    <label htmlFor="account-name-input" className="account-form-label">
+                      Full Name *
+                    </label>
+                    <input
+                      id="account-name-input"
+                      type="text"
+                      className="account-form-input"
+                      placeholder="Enter your full name"
+                      value={fullName}
+                      onChange={(e) => {
+                        setFullName(e.target.value);
+                        setErrorMsg("");
+                      }}
+                      autoFocus
+                    />
+                  </div>
+                )}
 
                 <div className="account-form-field">
                   <label htmlFor="account-email-input" className="account-form-label">
-                    Email Address (Optional)
+                    Email Address *
                   </label>
                   <input
                     id="account-email-input"
                     type="email"
-                    className={`account-form-input ${errors.email ? "input-error" : ""}`}
+                    className="account-form-input"
                     placeholder="name@example.com"
                     value={email}
                     onChange={(e) => {
                       setEmail(e.target.value);
-                      if (errors.email) setErrors((prev) => ({ ...prev, email: undefined }));
+                      setErrorMsg("");
                     }}
                   />
-                  {errors.email && (
-                    <span className="account-field-error" role="alert">
-                      <AlertCircle size={12} /> {errors.email}
-                    </span>
-                  )}
                 </div>
 
-                <div className="account-form-actions">
-                  <button
-                    type="button"
-                    className="account-cancel-btn"
-                    onClick={handleCancelEdit}
-                  >
-                    Cancel
-                  </button>
+                <div className="account-form-field">
+                  <label htmlFor="account-password-input" className="account-form-label">
+                    Password *
+                  </label>
+                  <input
+                    id="account-password-input"
+                    type="password"
+                    className="account-form-input"
+                    placeholder="Min 6 characters"
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      setErrorMsg("");
+                    }}
+                  />
+                </div>
+
+                {errorMsg && (
+                  <span className="account-field-error" role="alert" style={{ marginBottom: "1rem", display: "flex" }}>
+                    <AlertCircle size={12} style={{ marginRight: "4px" }} /> {errorMsg}
+                  </span>
+                )}
+
+                <div className="account-form-actions" style={{ flexDirection: "column", gap: "12px", marginTop: "4px" }}>
                   <button
                     type="submit"
                     className="account-save-btn"
+                    style={{ width: "100%", justifyContent: "center" }}
+                    disabled={isLoading}
                   >
-                    <Check size={14} />
-                    <span>Save Changes</span>
+                    {isLoading ? "Please wait..." : (authMode === "login" ? "Login" : "Register")}
+                  </button>
+                  <button
+                    type="button"
+                    className="account-cancel-btn"
+                    style={{ width: "100%", justifyContent: "center", border: "none", background: "none" }}
+                    onClick={() => {
+                      setAuthMode(authMode === "login" ? "register" : "login");
+                      setErrorMsg("");
+                    }}
+                  >
+                    {authMode === "login" ? "Don't have an account? Register" : "Already have an account? Login"}
                   </button>
                 </div>
               </form>

@@ -19,10 +19,23 @@ const REQUEST_TIMEOUT_MS = 8000;
 
 // ── Shared fetch helper ───────────────────────────────────────────────────────
 
+export const TOKEN_KEY = "mithilakart_token";
+
+function getAuthHeaders() {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (typeof window !== "undefined" && window.localStorage) {
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+  }
+  return headers;
+}
+
 async function apiFetch<T>(path: string, signal?: AbortSignal): Promise<T> {
   const url = `${API_BASE}${path}`;
   const response = await fetch(url, {
-    headers: { "Content-Type": "application/json" },
+    headers: getAuthHeaders(),
     signal,
   });
 
@@ -155,7 +168,7 @@ async function apiPost<T>(path: string, body: unknown, signal?: AbortSignal): Pr
   const url = `${API_BASE}${path}`;
   const response = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getAuthHeaders(),
     body: JSON.stringify(body),
     signal,
   });
@@ -179,7 +192,6 @@ async function apiPost<T>(path: string, body: unknown, signal?: AbortSignal): Pr
 }
 
 export interface CreateOrderRequest {
-  userId?: string;
   address: {
     fullName: string;
     phone: string;
@@ -208,11 +220,9 @@ export async function createOrder(
 }
 
 export async function fetchOrders(
-  userId?: string,
   signal?: AbortSignal
 ) {
-  const qs = userId ? `?userId=${encodeURIComponent(userId)}` : "";
-  const path = `/orders${qs}`;
+  const path = `/orders`;
   const data = await apiFetch<{ status: "ok"; orders: Order[] }>(path, signal);
   return data.orders;
 }
@@ -227,3 +237,17 @@ export async function fetchOrderById(
 
 /** Exported for use in the useProducts hook */
 export { REQUEST_TIMEOUT_MS };
+
+// ── Auth APIs ─────────────────────────────────────────────────────────────────
+
+export async function loginUser(email: string, password: string) {
+  return await apiPost<{ status: "ok"; token: string; user: import("../types").UserProfile }>("/auth/login", { email, password });
+}
+
+export async function registerUser(fullName: string, email: string, password: string) {
+  return await apiPost<{ status: "ok"; token: string; user: import("../types").UserProfile }>("/auth/register", { fullName, email, password });
+}
+
+export async function fetchCurrentUser(signal?: AbortSignal) {
+  return await apiFetch<{ status: "ok"; user: import("../types").UserProfile }>("/auth/me", signal);
+}

@@ -46,9 +46,12 @@ import {
 import {
   createOrder as apiCreateOrder,
   fetchOrders as apiFetchOrders,
-  fetchOrderById as apiFetchOrderById
+  fetchOrderById as apiFetchOrderById,
+  loginUser,
+  registerUser,
+  fetchCurrentUser,
+  TOKEN_KEY
 } from "./services/api";
-import { getProfile, saveProfile } from "./utils/profileStorage";
 import { calculateCartDeliveryEta } from "./utils/deliveryEta";
 import {
   getAdminProductOverrides,
@@ -172,16 +175,28 @@ function App() {
     saveWishlist(wishlist);
   }, [wishlist]);
 
-  // Phase 21: User profile & account modal state
-  const [profile, setProfile] = useState<UserProfile | null>(() => getProfile());
+  // Phase 21 & 23.4: User profile & account modal state
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [showAccountModal, setShowAccountModal] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (token) {
+      fetchCurrentUser().then(res => {
+        setProfile(res.user);
+      }).catch(() => {
+        localStorage.removeItem(TOKEN_KEY);
+        setProfile(null);
+      });
+    }
+  }, []);
 
   // Phase 20: Orders and order history state
   const [orders, setOrders] = useState<Order[]>([]);
   
   useEffect(() => {
     if (profile?.id) {
-      apiFetchOrders(profile.id).then(setOrders).catch(console.error);
+      apiFetchOrders().then(setOrders).catch(console.error);
     }
   }, [profile?.id]);
 
@@ -234,10 +249,26 @@ function App() {
     setProductOverrides({});
   }, []);
 
-  const handleSaveProfile = useCallback((updated: UserProfile) => {
-    setProfile(updated);
-    saveProfile(updated);
-    setOrderToast("Profile updated");
+  const handleLogin = useCallback(async (email: string, pass: string) => {
+    const res = await loginUser(email, pass);
+    localStorage.setItem(TOKEN_KEY, res.token);
+    setProfile(res.user);
+    setOrderToast("Logged in successfully");
+  }, []);
+
+  const handleRegister = useCallback(async (name: string, email: string, pass: string) => {
+    const res = await registerUser(name, email, pass);
+    localStorage.setItem(TOKEN_KEY, res.token);
+    setProfile(res.user);
+    setOrderToast("Account created successfully");
+  }, []);
+
+  const handleLogout = useCallback(() => {
+    localStorage.removeItem(TOKEN_KEY);
+    setProfile(null);
+    setOrders([]);
+    setOrderToast("Logged out");
+    setShowAccountModal(false);
   }, []);
 
   // Auto-dismiss floating order toasts
@@ -545,7 +576,6 @@ function App() {
       }
 
       const apiOrderRes = await apiCreateOrder({
-        userId: profile?.id,
         address: addressSnapshot,
         items: orderItems,
         paymentMethod: "Cash on Delivery",
@@ -1055,7 +1085,9 @@ function App() {
         isOpen={showAccountModal}
         onClose={() => setShowAccountModal(false)}
         profile={profile}
-        onSaveProfile={handleSaveProfile}
+        onLogin={handleLogin}
+        onRegister={handleRegister}
+        onLogout={handleLogout}
         orders={orders}
         savedAddressesCount={loadSavedAddresses().length}
         cartCount={cartCount}

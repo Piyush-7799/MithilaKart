@@ -63,10 +63,51 @@ export const createOrder: RequestHandler = async (req, res, next) => {
       return next(createApiError("Missing or invalid X-Idempotency-Key header", 400));
     }
 
+    if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
+      return next(createApiError("Invalid request body", 400));
+    }
+
     const { address, items, paymentMethod, notes } = req.body;
     
-    if (!address || !items || !Array.isArray(items) || items.length === 0) {
-      return next(createApiError("Missing address or items", 400));
+    // Validate address
+    if (!address || typeof address !== "object" || Array.isArray(address)) {
+      return next(createApiError("Missing or invalid address", 400));
+    }
+
+    const { fullName, phone, house, street, addressLine, city, state, pincode } = address;
+    const resolvedAddressLine = addressLine || (house && street ? `${house}, ${street}` : house || street);
+
+    if (
+      typeof fullName !== "string" || fullName.trim() === "" ||
+      typeof phone !== "string" || phone.trim() === "" ||
+      typeof city !== "string" || city.trim() === "" ||
+      typeof state !== "string" || state.trim() === "" ||
+      typeof pincode !== "string" || pincode.trim() === "" ||
+      (typeof resolvedAddressLine !== "string" || resolvedAddressLine.trim() === "")
+    ) {
+      return next(createApiError("Address must contain valid non-empty string fields", 400));
+    }
+
+    // Validate items
+    if (!Array.isArray(items) || items.length === 0) {
+      return next(createApiError("Missing or invalid items array", 400));
+    }
+
+    for (const item of items) {
+      if (!item || typeof item !== "object" || Array.isArray(item)) {
+        return next(createApiError("Each item must be a valid object", 400));
+      }
+      if (typeof item.productId !== "string" || item.productId.trim() === "") {
+        return next(createApiError("Item productId must be a non-empty string", 400));
+      }
+      if (
+        typeof item.quantity !== "number" ||
+        !Number.isFinite(item.quantity) ||
+        !Number.isInteger(item.quantity) ||
+        item.quantity <= 0
+      ) {
+        return next(createApiError("Item quantity must be a positive integer", 400));
+      }
     }
 
     const order = await createOrderService({

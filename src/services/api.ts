@@ -359,6 +359,19 @@ export async function fetchOrderById(
   return mapApiOrder(data.order);
 }
 
+export async function apiUpdateOrderStatus(
+  id: string,
+  status: string,
+  signal?: AbortSignal
+) {
+  const data = await apiPut<{ status: "ok"; order: ApiOrder }>(
+    `/orders/${encodeURIComponent(id)}/status`,
+    { status },
+    signal
+  );
+  return mapApiOrder(data.order);
+}
+
 /** Exported for use in the useProducts hook */
 export { REQUEST_TIMEOUT_MS };
 

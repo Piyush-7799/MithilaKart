@@ -38,7 +38,6 @@ import {
 import { loadWishlist, saveWishlist } from "./utils/wishlistStorage";
 import {
   createAddressSnapshot,
-  updateOrderStatus,
 } from "./utils/orderStorage";
 import {
   createOrder as apiCreateOrder,
@@ -48,7 +47,8 @@ import {
   registerUser,
   fetchCurrentUser,
   TOKEN_KEY,
-  fetchAddresses
+  fetchAddresses,
+  apiUpdateOrderStatus
 } from "./services/api";
 import { calculateCartDeliveryEta } from "./utils/deliveryEta";
 import {
@@ -252,20 +252,18 @@ function App() {
   );
 
   const handleUpdateOrderStatus = useCallback(async (orderId: string, newStatus: OrderStatus) => {
-    const success = updateOrderStatus(orderId, newStatus);
-    if (success) {
-      setIsLoadingOrders(true);
-      try {
-        const fetchedOrders = await apiFetchOrders();
-        setOrders(fetchedOrders);
-      } catch (err) {
-        console.error("Failed to fetch updated orders", err);
-      } finally {
-        setIsLoadingOrders(false);
-      }
+    setIsLoadingOrders(true);
+    try {
+      await apiUpdateOrderStatus(orderId, newStatus);
+      const fetchedOrders = await apiFetchOrders();
+      setOrders(fetchedOrders);
       setSelectedOrder((prev) =>
         prev && prev.id === orderId ? { ...prev, status: newStatus } : prev
       );
+    } catch (err) {
+      console.error("Failed to update order status", err);
+    } finally {
+      setIsLoadingOrders(false);
     }
   }, []);
 

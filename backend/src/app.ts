@@ -43,9 +43,11 @@ export function createApp() {
   app.use(express.json({ limit: "2mb" }));
   app.use(express.urlencoded({ extended: true, limit: "2mb" }));
 
-  // ── Request Logging (dev only) ─────────────────────────────────────────────
+  // ── Request Logging ────────────────────────────────────────────────────────
   if (env.isDev) {
     app.use(morgan("dev"));
+  } else if (env.isProd) {
+    app.use(morgan("combined"));
   }
 
   // ── Routes ─────────────────────────────────────────────────────────────────

@@ -1,5 +1,5 @@
 import type { RequestHandler } from "express";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import { createApiError } from "../middleware/errorHandler.js";
 import { hashPassword, verifyPassword, generateToken } from "../services/authService.js";
 import { env } from "../config/env.js";
@@ -14,7 +14,6 @@ function setAuthCookie(res: import("express").Response, token: string) {
   });
 }
 
-const prisma = new PrismaClient();
 
 export const register: RequestHandler = async (req, res, next) => {
   try {

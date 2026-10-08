@@ -154,32 +154,6 @@ export function createOrder(params: CreateOrderParams): Order {
   return newOrder;
 }
 
-/**
- * Updates the status of an existing order in localStorage.
- * Returns true if successfully found and updated, false otherwise.
- */
-export function updateOrderStatus(orderId: string, status: OrderStatus): boolean {
-  if (typeof window === "undefined" || !window.localStorage) {
-    return false;
-  }
-
-  try {
-    const orders = getOrders();
-    const existingIndex = orders.findIndex((o) => o.id === orderId);
-    if (existingIndex === -1) return false;
-
-    orders[existingIndex] = {
-      ...orders[existingIndex],
-      status,
-    };
-
-    localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(orders));
-    return true;
-  } catch (err) {
-    console.warn("MithilaKart: Failed to update order status in localStorage", err);
-    return false;
-  }
-}
 
 /**
  * Clears all orders from storage (for testing/development).

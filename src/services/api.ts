@@ -15,7 +15,7 @@ import type { Product } from "../types";
 const API_BASE = (import.meta.env["VITE_API_URL"] as string | undefined) ?? "http://localhost:4000/api";
 
 /** Timeout for all API calls — prevents hanging UI on slow connections */
-const REQUEST_TIMEOUT_MS = 8000;
+const REQUEST_TIMEOUT_MS = 15000;
 
 // ── Shared fetch helper ───────────────────────────────────────────────────────
 
@@ -23,9 +23,39 @@ function getAuthHeaders() {
   return { "Content-Type": "application/json" };
 }
 
+async function fetchWithTimeout(url: string, options: RequestInit): Promise<Response> {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(new Error("Request timeout")), REQUEST_TIMEOUT_MS);
+
+  let abortHandler: (() => void) | undefined;
+
+  if (options.signal) {
+    if (options.signal.aborted) {
+      controller.abort(options.signal.reason);
+    } else {
+      abortHandler = () => controller.abort(options.signal?.reason);
+      options.signal.addEventListener("abort", abortHandler);
+    }
+  }
+
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } catch (error) {
+    if (error instanceof Error && error.message === "Request timeout") {
+      throw new Error("Request timed out. Please check your connection and try again.", { cause: error });
+    }
+    throw error;
+  } finally {
+    clearTimeout(id);
+    if (options.signal && abortHandler) {
+      options.signal.removeEventListener("abort", abortHandler);
+    }
+  }
+}
+
 async function apiFetch<T>(path: string, signal?: AbortSignal): Promise<T> {
   const url = `${API_BASE}${path}`;
-  const response = await fetch(url, {
+  const response = await fetchWithTimeout(url, {
     headers: getAuthHeaders(),
     credentials: "include",
     signal,
@@ -220,7 +250,7 @@ async function apiPost<T>(path: string, body: unknown, signal?: AbortSignal, ext
   if (extraHeaders) {
     Object.assign(headers, extraHeaders);
   }
-  const response = await fetch(url, {
+  const response = await fetchWithTimeout(url, {
     method: "POST",
     headers,
     credentials: "include",
@@ -253,7 +283,7 @@ async function apiPost<T>(path: string, body: unknown, signal?: AbortSignal, ext
 
 async function apiPut<T>(path: string, body: unknown, signal?: AbortSignal): Promise<T> {
   const url = `${API_BASE}${path}`;
-  const response = await fetch(url, {
+  const response = await fetchWithTimeout(url, {
     method: "PUT",
     headers: getAuthHeaders(),
     credentials: "include",
@@ -278,7 +308,7 @@ async function apiPut<T>(path: string, body: unknown, signal?: AbortSignal): Pro
 
 async function apiDelete<T>(path: string, signal?: AbortSignal): Promise<T> {
   const url = `${API_BASE}${path}`;
-  const response = await fetch(url, {
+  const response = await fetchWithTimeout(url, {
     method: "DELETE",
     headers: getAuthHeaders(),
     credentials: "include",

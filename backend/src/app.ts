@@ -32,7 +32,7 @@ export function createApp() {
   // CORS: only allow requests from the configured frontend origin
   app.use(
     cors({
-      origin: env.CLIENT_URL,
+      origin: env.isDev ? [env.CLIENT_URL, "http://localhost:5174"] : env.CLIENT_URL,
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization", "x-idempotency-key"],
       credentials: true,

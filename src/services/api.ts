@@ -151,6 +151,7 @@ function mapApiProduct(p: ApiProduct): Product {
     badge: p.badge ?? undefined,
     isMithilaSpecial: p.isMithilaSpecial,
     description: p.description ?? undefined,
+    isAvailable: p.isAvailable,
   };
 }
 interface ApiOrderItem {

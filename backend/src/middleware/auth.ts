@@ -43,3 +43,10 @@ export const authenticate = (req: Request, res: Response, next: NextFunction) =>
     return next(createApiError("Invalid token", 401));
   }
 };
+
+export const requireAdmin = (req: Request, res: Response, next: NextFunction) => {
+  if (!req.user || req.user.role !== "ADMIN") {
+    return next(createApiError("Forbidden: Admin access required", 403));
+  }
+  next();
+};

@@ -30,6 +30,8 @@ export interface UseProductsResult {
   source: ProductSource;
   /** Human-readable error message if fetch failed */
   error: string | null;
+  /** Update a specific product in local state */
+  updateProduct: (id: string, updates: Partial<Product>) => void;
 }
 
 export function useProducts(): UseProductsResult {
@@ -41,6 +43,12 @@ export function useProducts(): UseProductsResult {
 
   // Ref to track mount status — prevents state updates after unmount
   const isMounted = useRef(true);
+
+  const updateProduct = (id: string, updates: Partial<Product>) => {
+    setProducts((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, ...updates } : p))
+    );
+  };
 
   useEffect(() => {
     isMounted.current = true;
@@ -109,5 +117,5 @@ export function useProducts(): UseProductsResult {
     };
   }, []); // Empty dep array — fetch once on mount only
 
-  return { products, isLoading, isApiConnected, source, error };
+  return { products, isLoading, isApiConnected, source, error, updateProduct };
 }

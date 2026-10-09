@@ -48,16 +48,10 @@ import {
   fetchCurrentUser,
   fetchAddresses,
   apiUpdateOrderStatus,
+  apiUpdateProductAvailability,
   logoutUser
 } from "./services/api";
 import { calculateCartDeliveryEta } from "./utils/deliveryEta";
-import {
-  getAdminProductOverrides,
-  setProductAvailability,
-  resetAdminProductOverrides,
-  isProductAvailable,
-  type AdminProductOverrides,
-} from "./utils/adminStorage";
 
 // Curated deterministic product IDs for homepage promotional rails
 const POPULAR_PICKS_IDS = [
@@ -94,7 +88,7 @@ const DEFAULT_FILTERS: FilterState = {
 
 function App() {
   // Phase 23.2: Fetch products from API; falls back to static data if unavailable
-  const { products: PRODUCTS, isLoading: productsLoading, isApiConnected } = useProducts();
+  const { products: PRODUCTS, isLoading: productsLoading, isApiConnected, updateProduct } = useProducts();
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
 
@@ -234,17 +228,15 @@ function App() {
     setShowCart
   ]);
 
-  // Phase 22: Admin Dashboard & Product Availability overrides state
+  // Phase 22/24: Admin Dashboard & Product Availability overrides state
   const [isAdminMode, setIsAdminMode] = useState(false);
-  const [productOverrides, setProductOverrides] = useState<AdminProductOverrides>(() =>
-    getAdminProductOverrides()
-  );
 
   const isItemAvailable = useCallback(
     (id: string) => {
-      return isProductAvailable(id, productOverrides);
+      const p = PRODUCTS.find((p) => p.id === id);
+      return p ? (p.isAvailable ?? false) : false;
     },
-    [productOverrides]
+    [PRODUCTS]
   );
 
   const handleUpdateOrderStatus = useCallback(async (orderId: string, newStatus: OrderStatus) => {
@@ -264,17 +256,18 @@ function App() {
   }, []);
 
   const handleToggleProductAvailability = useCallback(
-    (productId: string, isAvailable: boolean) => {
-      const updated = setProductAvailability(productId, isAvailable);
-      setProductOverrides(updated);
+    async (productId: string, isAvailable: boolean) => {
+      try {
+        const updatedProduct = await apiUpdateProductAvailability(productId, isAvailable);
+        updateProduct(productId, { isAvailable: updatedProduct.isAvailable });
+        setOrderToast(`Product ${updatedProduct.name} marked as ${isAvailable ? "Available" : "Unavailable"}`);
+      } catch (err) {
+        console.error("Failed to update product availability", err);
+        setOrderToast("Failed to update availability");
+      }
     },
-    []
+    [updateProduct, setOrderToast]
   );
-
-  const handleResetProductOverrides = useCallback(() => {
-    resetAdminProductOverrides();
-    setProductOverrides({});
-  }, []);
 
   const handleLogin = useCallback(async (email: string, pass: string) => {
     const res = await loginUser(email, pass);
@@ -737,9 +730,7 @@ function App() {
               setShowOrderDetails(true);
             }}
             products={PRODUCTS}
-            productOverrides={productOverrides}
             onToggleProductAvailability={handleToggleProductAvailability}
-            onResetProductOverrides={handleResetProductOverrides}
             userProfile={profile}
             savedAddresses={addresses}
             cartCount={cartCount}

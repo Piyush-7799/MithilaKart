@@ -60,3 +60,10 @@ export async function listProducts(params: ProductQueryParams) {
 export async function getProductById(id: string) {
   return prisma.product.findUnique({ where: { id } });
 }
+
+export async function updateProductAvailability(id: string, isAvailable: boolean) {
+  return prisma.product.update({
+    where: { id },
+    data: { isAvailable },
+  });
+}

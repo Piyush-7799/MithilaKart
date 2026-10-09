@@ -172,6 +172,38 @@ async function runTests() {
     assert.strictEqual(existingOrder.id, "existing-order-1", "Should return the existing order on P2002");
     console.log("✅ Test 5 Passed: Idempotency fallback on P2002 successful");
 
+    // Test 6: Unavailable products should fail
+    // Restore transaction mock for this test
+    // @ts-expect-error
+    prisma.$transaction = async (ops: any[]) => {
+      const results = [];
+      for (const op of ops) {
+        if (op === 'mocked_upsert') results.push({ id: 'user-1' });
+        else if (op === 'mocked_order') results.push({ id: 'order-1' });
+        else results.push(await op);
+      }
+      return results;
+    };
+
+    productsDb = [
+      { id: "p1", name: "P1", price: 10, mrp: 15, unit: "kg", image: "img", isAvailable: false }
+    ];
+
+    try {
+      await createOrder({
+        userId: "u1",
+        address,
+        paymentMethod: "cash",
+        items: [
+          { productId: "p1", quantity: 1 }
+        ]
+      });
+      assert.fail("Should have thrown error for unavailable product");
+    } catch (e: any) {
+      assert(e.message.includes("is currently unavailable"), "Error message should mention unavailable product");
+    }
+    console.log("✅ Test 6 Passed: Unavailable checkout rejected");
+
   } finally {
     // Restore mocks safely
     prisma.orderIdempotency.findUnique = originalFindUniqueIdemp;

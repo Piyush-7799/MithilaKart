@@ -255,6 +255,19 @@ export async function fetchProductById(
   }
 }
 
+export async function apiUpdateProductAvailability(
+  id: string,
+  isAvailable: boolean,
+  signal?: AbortSignal
+): Promise<Product> {
+  const data = await apiPut<{ status: "ok"; product: ApiProduct }>(
+    `/products/${encodeURIComponent(id)}/availability`,
+    { isAvailable },
+    signal
+  );
+  return mapApiProduct(data.product);
+}
+
 async function apiPost<T>(path: string, body: unknown, signal?: AbortSignal, extraHeaders?: Record<string, string>): Promise<T> {
   const url = `${API_BASE}${path}`;
   const headers = getAuthHeaders();

@@ -12,6 +12,7 @@ export interface Product {
   badge?: string;
   isMithilaSpecial?: boolean;
   description?: string;
+  isAvailable?: boolean;
 }
 
 export interface Category {

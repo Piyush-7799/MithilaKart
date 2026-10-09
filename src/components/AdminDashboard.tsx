@@ -23,7 +23,6 @@ import {
 } from "lucide-react";
 import type { Order, OrderStatus, Product, UserProfile, Address } from "../types";
 import { CATEGORIES } from "../data/products";
-import type { AdminProductOverrides } from "../utils/adminStorage";
 
 export type AdminTab = "overview" | "orders" | "products" | "inventory" | "customers" | "analytics";
 
@@ -33,9 +32,7 @@ export interface AdminDashboardProps {
   onUpdateOrderStatus: (orderId: string, newStatus: OrderStatus) => void;
   onViewOrderDetails: (order: Order) => void;
   products: Product[];
-  productOverrides: AdminProductOverrides;
   onToggleProductAvailability: (productId: string, isAvailable: boolean) => void;
-  onResetProductOverrides: () => void;
   userProfile: UserProfile | null;
   savedAddresses: Address[];
   cartCount: number;
@@ -107,9 +104,7 @@ export function AdminDashboard({
   onUpdateOrderStatus,
   onViewOrderDetails,
   products,
-  productOverrides,
   onToggleProductAvailability,
-  onResetProductOverrides,
   userProfile,
   savedAddresses,
   cartCount,
@@ -162,8 +157,8 @@ export function AdminDashboard({
   );
 
   const unavailableProductsCount = useMemo(() => {
-    return Object.values(productOverrides).filter((s) => s && s.isAvailable === false).length;
-  }, [productOverrides]);
+    return products.filter((p) => p.isAvailable === false).length;
+  }, [products]);
 
   const availableProductsCount = Math.max(0, totalProductsCount - unavailableProductsCount);
   const availabilityPercentage = totalProductsCount > 0
@@ -211,7 +206,7 @@ export function AdminDashboard({
         return false;
       }
       // Availability filter
-      const isAvailable = productOverrides[p.id]?.isAvailable ?? true;
+      const isAvailable = p.isAvailable ?? false;
       if (productAvailabilityFilter === "available" && !isAvailable) {
         return false;
       }
@@ -226,7 +221,7 @@ export function AdminDashboard({
       }
       return true;
     });
-  }, [products, productCategoryFilter, productAvailabilityFilter, productSearch, productOverrides]);
+  }, [products, productCategoryFilter, productAvailabilityFilter, productSearch]);
 
   // ----------------------------------------------------------------------
   // Filtered Inventory
@@ -235,7 +230,7 @@ export function AdminDashboard({
     const query = inventorySearch.trim().toLowerCase();
 
     return products.filter((p) => {
-      const isAvailable = productOverrides[p.id]?.isAvailable ?? true;
+      const isAvailable = p.isAvailable ?? false;
       if (inventoryFilter === "available" && !isAvailable) return false;
       if (inventoryFilter === "unavailable" && isAvailable) return false;
 
@@ -247,7 +242,7 @@ export function AdminDashboard({
       }
       return true;
     });
-  }, [products, inventoryFilter, inventorySearch, productOverrides]);
+  }, [products, inventoryFilter, inventorySearch]);
 
   // ----------------------------------------------------------------------
   // Analytics Data from actual orders
@@ -1026,7 +1021,7 @@ export function AdminDashboard({
                       </thead>
                       <tbody>
                         {filteredProducts.map((product) => {
-                          const isAvailable = productOverrides[product.id]?.isAvailable ?? true;
+                          const isAvailable = product.isAvailable ?? false;
                           const discount =
                             product.mrp > product.price
                               ? Math.round(((product.mrp - product.price) / product.mrp) * 100)
@@ -1106,7 +1101,7 @@ export function AdminDashboard({
                   {/* Mobile Product Cards */}
                   <div className="admin-product-mobile-grid admin-cards-mobile">
                     {filteredProducts.map((product) => {
-                      const isAvailable = productOverrides[product.id]?.isAvailable ?? true;
+                      const isAvailable = product.isAvailable ?? false;
                       const discount =
                         product.mrp > product.price
                           ? Math.round(((product.mrp - product.price) / product.mrp) * 100)
@@ -1261,8 +1256,7 @@ export function AdminDashboard({
                     type="button"
                     className="admin-secondary-btn"
                     onClick={() => {
-                      onResetProductOverrides();
-                      showToast("All products reset to Available default");
+                                            showToast("All products reset to Available default");
                     }}
                     title="Reset all overrides"
                   >
@@ -1300,7 +1294,7 @@ export function AdminDashboard({
                   </thead>
                   <tbody>
                     {filteredInventory.map((item) => {
-                      const isAvailable = productOverrides[item.id]?.isAvailable ?? true;
+                      const isAvailable = item.isAvailable ?? false;
                       return (
                         <tr key={item.id}>
                           <td>

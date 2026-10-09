@@ -611,6 +611,8 @@ function App() {
     }
 
     setIsPlacingOrder(true);
+    const placeOrderStart = performance.now();
+    console.info("[CheckoutTiming] Started handlePlaceOrder");
 
     try {
       const orderItems = cartItems.map(({ product, quantity }) => ({
@@ -633,18 +635,15 @@ function App() {
         idempotencyKey: checkoutIdempotencyKey,
       });
 
+      console.info(`[CheckoutTiming] apiCreateOrder completed in ${Math.round(performance.now() - placeOrderStart)}ms`);
       const newOrder = apiOrderRes.order;
 
-      // Refresh orders list from API
+      // Refresh orders list from API asynchronously
       setIsLoadingOrders(true);
-      try {
-        const fetchedOrders = await apiFetchOrders();
-        setOrders(fetchedOrders);
-      } catch (err) {
-        console.error("Failed to fetch updated orders", err);
-      } finally {
-        setIsLoadingOrders(false);
-      }
+      apiFetchOrders()
+        .then(setOrders)
+        .catch((err) => console.error("Failed to fetch updated orders", err))
+        .finally(() => setIsLoadingOrders(false));
 
       // Clear cart (only after successful creation)
       setCart({});
@@ -658,6 +657,7 @@ function App() {
       setConfirmedOrder(newOrder);
       setShowOrderConfirmation(true);
     } catch (error: unknown) {
+      console.info(`[CheckoutTiming] handlePlaceOrder failed after ${Math.round(performance.now() - placeOrderStart)}ms`);
       const msg = error instanceof Error ? error.message : "Failed to place order. Please try again.";
       if (!msg.includes("401")) {
         setOrderToast(msg);

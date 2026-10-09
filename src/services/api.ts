@@ -24,6 +24,12 @@ function getAuthHeaders() {
 }
 
 async function fetchWithTimeout(url: string, options: RequestInit): Promise<Response> {
+  const method = options.method || "GET";
+  const parsedUrl = new URL(url, window.location.origin);
+  const path = parsedUrl.pathname;
+  const tStart = performance.now();
+  console.info(`[CheckoutTiming] [${method} ${path}] Fetch started`);
+
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(new Error("Request timeout")), REQUEST_TIMEOUT_MS);
 
@@ -39,11 +45,16 @@ async function fetchWithTimeout(url: string, options: RequestInit): Promise<Resp
   }
 
   try {
-    return await fetch(url, { ...options, signal: controller.signal });
+    const res = await fetch(url, { ...options, signal: controller.signal });
+    console.info(`[CheckoutTiming] [${method} ${path}] Fetch succeeded (${res.status}) in ${Math.round(performance.now() - tStart)}ms`);
+    return res;
   } catch (error) {
+    const elapsed = Math.round(performance.now() - tStart);
     if (error instanceof Error && error.message === "Request timeout") {
+      console.error(`[CheckoutTiming] [${method} ${path}] Fetch timed out after ${elapsed}ms`);
       throw new Error("Request timed out. Please check your connection and try again.", { cause: error });
     }
+    console.error(`[CheckoutTiming] [${method} ${path}] Fetch failed after ${elapsed}ms:`, error);
     throw error;
   } finally {
     clearTimeout(id);

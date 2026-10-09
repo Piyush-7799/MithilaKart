@@ -53,6 +53,8 @@ export const getOrder: RequestHandler = async (req, res, next) => {
 
 /** POST /api/orders — create a new order */
 export const createOrder: RequestHandler = async (req, res, next) => {
+  const reqStart = performance.now();
+  console.info("[CheckoutTiming] orderController.createOrder started");
   try {
     const userId = req.user?.id;
     if (!userId) {
@@ -111,6 +113,7 @@ export const createOrder: RequestHandler = async (req, res, next) => {
       }
     }
 
+    const t0 = performance.now();
     const order = await createOrderService({
       userId,
       address,
@@ -119,8 +122,10 @@ export const createOrder: RequestHandler = async (req, res, next) => {
       notes,
       idempotencyKey,
     });
+    console.info(`[CheckoutTiming] createOrderService finished in ${Math.round(performance.now() - t0)}ms`);
 
     res.status(201).json({ status: "ok", order });
+    console.info(`[CheckoutTiming] orderController.createOrder total in ${Math.round(performance.now() - reqStart)}ms`);
   } catch (err: unknown) {
     if (err instanceof Error && (err.message.includes("Products not found") || err.message.includes("unavailable") || err.message.includes("Invalid quantity") || err.message.includes("at least one item"))) {
       return next(createApiError(err.message, 400));

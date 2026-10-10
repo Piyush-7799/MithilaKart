@@ -24,6 +24,10 @@ import authRoutes from "./routes/auth.js";
 export function createApp() {
   const app = express();
 
+  if (env.isProd) {
+    app.set("trust proxy", 1);
+  }
+
   // ── Security & Parsing ─────────────────────────────────────────────────────
 
   // Use Helmet for secure HTTP headers

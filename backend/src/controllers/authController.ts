@@ -8,7 +8,7 @@ function setAuthCookie(res: import("express").Response, token: string) {
   res.cookie("token", token, {
     httpOnly: true,
     secure: env.isProd,
-    sameSite: "strict",
+    sameSite: env.isProd ? "none" : "lax",
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     path: "/",
   });
@@ -143,6 +143,10 @@ export const me: RequestHandler = async (req, res, next) => {
 };
 
 export const logout: RequestHandler = (req, res) => {
-  res.clearCookie("token", { path: "/" });
+  res.clearCookie("token", {
+    path: "/",
+    sameSite: env.isProd ? "none" : "lax",
+    secure: env.isProd,
+  });
   res.json({ status: "ok" });
 };

@@ -178,13 +178,30 @@ function App() {
   
   useEffect(() => {
     if (profile?.id) {
+      const controller = new AbortController();
+
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLoadingOrders(true);
-      apiFetchOrders()
+      apiFetchOrders(controller.signal)
         .then(setOrders)
-        .catch(console.error)
-        .finally(() => setIsLoadingOrders(false));
-      fetchAddresses().then(setAddresses).catch(console.error);
+        .catch((err) => {
+          if (err instanceof Error && err.name === "AbortError") return;
+          console.error(err);
+        })
+        .finally(() => {
+          if (!controller.signal.aborted) {
+            setIsLoadingOrders(false);
+          }
+        });
+
+      fetchAddresses(controller.signal)
+        .then(setAddresses)
+        .catch((err) => {
+          if (err instanceof Error && err.name === "AbortError") return;
+          console.error(err);
+        });
+
+      return () => controller.abort();
     } else {
       setAddresses([]);
     }
@@ -599,6 +616,15 @@ function App() {
       setShowLocationModal(true);
       return;
     }
+
+    const hasUnavailableItems = cartItems.some(item => !isItemAvailable(item.product.id));
+    if (hasUnavailableItems) {
+      setOrderToast("Some items in your cart are no longer available. Please remove them to checkout.");
+      setShowCheckoutReview(false);
+      setShowCart(true);
+      return;
+    }
+
     if (cartItems.length === 0 || isPlacingOrder || !checkoutIdempotencyKey) {
       return;
     }
@@ -658,14 +684,14 @@ function App() {
     } finally {
       setIsPlacingOrder(false);
     }
-  }, [selectedLocation, cartItems, profile, isPlacingOrder, checkoutIdempotencyKey, setShowLocationModal, setOrderToast, setOrders, setShowCheckoutReview, setShowCart]);
+  }, [selectedLocation, cartItems, profile, isPlacingOrder, checkoutIdempotencyKey, setShowLocationModal, setOrderToast, setOrders, setShowCheckoutReview, setShowCart, isItemAvailable]);
 
   const handleReorder = useCallback((orderToReorder: Order) => {
     const availableItems: { id: string; quantity: number }[] = [];
     let skippedCount = 0;
 
     orderToReorder.items.forEach((item) => {
-      const exists = PRODUCTS.some((p) => p.id === item.productId);
+      const exists = isItemAvailable(item.productId);
       if (exists) {
         availableItems.push({ id: item.productId, quantity: item.quantity });
       } else {
@@ -688,7 +714,7 @@ function App() {
 
     if (skippedCount > 0) {
       setOrderToast(
-        `Added ${availableItems.length} items to cart (${skippedCount} discontinued item skipped).`
+        `Added ${availableItems.length} items to cart (${skippedCount} unavailable item(s) skipped).`
       );
     } else {
       setOrderToast("Items added to cart!");
@@ -698,7 +724,7 @@ function App() {
     setShowOrderHistory(false);
     setShowOrderConfirmation(false);
     setShowCart(true);
-  }, [PRODUCTS, setOrderToast, setShowCart]);
+  }, [isItemAvailable, setOrderToast, setShowCart]);
 
   const handleViewOrder = useCallback(async (orderId: string) => {
     try {
@@ -1036,6 +1062,7 @@ function App() {
           setShowCart(false);
           setShowOrderHistory(true);
         }}
+        isItemAvailable={isItemAvailable}
       />
 
       {/* Wishlist Drawer */}

@@ -41,6 +41,7 @@ interface CartDrawerProps {
   onToggleWishlist?: (id: string) => void;
   onProceedToCheckout?: () => void;
   onOpenOrders?: () => void;
+  isItemAvailable?: (id: string) => boolean;
 }
 
 export function CartDrawer({
@@ -64,6 +65,7 @@ export function CartDrawer({
   onToggleWishlist,
   onProceedToCheckout,
   onOpenOrders,
+  isItemAvailable,
 }: CartDrawerProps) {
   // Temporary accessible Undo toast state
   const [removedItem, setRemovedItem] = useState<{
@@ -582,6 +584,11 @@ export function CartDrawer({
                           {product.name}
                         </h4>
                         <span className="item-pack-unit">{product.unit}</span>
+                        {isItemAvailable && !isItemAvailable(product.id) && (
+                          <span className="product-out-of-stock-badge cart-item-oos-badge">
+                            Out of Stock
+                          </span>
+                        )}
                         <div className="item-pricing">
                           <span className="item-price-current">
                             ₹{product.price}
@@ -913,35 +920,50 @@ export function CartDrawer({
               )}
 
               {/* Proceed to Checkout CTA */}
-              <div className="checkout-action-wrapper">
-                <button
-                  type="button"
-                  className={`checkout-primary-btn ${!selectedLocation ? "checkout-btn-need-address" : ""}`}
-                  onClick={handleContinueToCheckout}
-                  disabled={cartCount === 0}
-                  aria-label={
-                    selectedLocation
-                      ? `Proceed to Checkout • Total ₹${total}`
-                      : "Select delivery address to proceed"
-                  }
-                >
-                  <div className="btn-price-summary">
-                    <span className="btn-total">₹{total}</span>
-                    <span className="btn-subtext">TOTAL</span>
-                  </div>
-                  <div className="btn-cta-text">
-                    <span>
-                      {selectedLocation ? "Proceed to Checkout" : "Select Address to Checkout"}
+              {(() => {
+                const hasUnavailableItems = cartItems.some(
+                  (item) => isItemAvailable && !isItemAvailable(item.product.id)
+                );
+                return (
+                  <div className="checkout-action-wrapper">
+                    <button
+                      type="button"
+                      className={`checkout-primary-btn ${!selectedLocation ? "checkout-btn-need-address" : ""} ${hasUnavailableItems ? "checkout-btn-disabled" : ""}`}
+                      onClick={handleContinueToCheckout}
+                      disabled={cartCount === 0 || hasUnavailableItems}
+                      aria-label={
+                        hasUnavailableItems
+                          ? "Remove unavailable items to checkout"
+                          : selectedLocation
+                          ? `Proceed to Checkout • Total ₹${total}`
+                          : "Select delivery address to proceed"
+                      }
+                    >
+                      <div className="btn-price-summary">
+                        <span className="btn-total">₹{total}</span>
+                        <span className="btn-subtext">TOTAL</span>
+                      </div>
+                      <div className="btn-cta-text">
+                        <span>
+                          {hasUnavailableItems
+                            ? "Remove out of stock items"
+                            : selectedLocation
+                            ? "Proceed to Checkout"
+                            : "Select Address to Checkout"}
+                        </span>
+                        <ArrowRight size={18} />
+                      </div>
+                    </button>
+                    <span className={`phase-note ${!selectedLocation || hasUnavailableItems ? "phase-note-alert" : ""}`}>
+                      {hasUnavailableItems
+                        ? "Please remove out of stock items from your cart to proceed"
+                        : selectedLocation
+                        ? `Doorstep delivery in ${etaInfo.etaText} • ${etaInfo.serviceabilityStatus}`
+                        : "Please select an address before checkout"}
                     </span>
-                    <ArrowRight size={18} />
                   </div>
-                </button>
-                <span className={`phase-note ${!selectedLocation ? "phase-note-alert" : ""}`}>
-                  {selectedLocation
-                    ? `Doorstep delivery in ${etaInfo.etaText} • ${etaInfo.serviceabilityStatus}`
-                    : "Please select an address before checkout"}
-                </span>
-              </div>
+                );
+              })()}
             </div>
           </>
         )}

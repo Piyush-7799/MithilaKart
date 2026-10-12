@@ -1,84 +1,66 @@
-# MithilaKart
+# MithilaKart 🛍️
 
-## Project Status
-- Phase 23.1 Backend + Neon PostgreSQL is complete
-- Phase 23.2 Product API migration is complete
-- Phase 23.3 Cart, Checkout & Orders backend integration is complete
+A Mithila-focused quick-commerce platform connecting local products with customers.
+
+MithilaKart aims to bring the convenience of modern online shopping to the Mithila region, with a focus on regional products, a smooth shopping experience, and reliable order management.
 
 ---
 
-# React + TypeScript + Vite
+## 📌 Project Status
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+- **Phase 23.1:** Backend and Neon PostgreSQL setup
+- **Phase 23.2:** Product API integration
+- **Phase 23.3:** Cart, checkout, and orders backend integration
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🛠️ Tech Stack
 
-## React Compiler
+### Frontend
+- React
+- TypeScript
+- Vite
+- CSS
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Backend
+- Node.js
+- Express
+- TypeScript
+- Prisma ORM
+- PostgreSQL (Neon)
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🚀 Getting Started
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+### Frontend
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+### Backend
+```bash
+cd backend
+npm install
+npm run dev
 ```
+
+> **Note:** Configure the required environment variables using the project's environment example files before starting the backend. Never commit secrets or `.env` files.
+
+---
+
+## 🎯 Project Goals
+
+- Deliver a responsive shopping experience.
+- Connect the storefront to a real backend and database.
+- Support product availability, cart, checkout, and order management.
+- Celebrate the products and culture of Mithila.
+
+---
+
+## 👨‍💻 Developer
+
+Created by [Piyush-7799](https://github.com/Piyush-7799).
+
+*MithilaKart — Local roots, modern shopping.*

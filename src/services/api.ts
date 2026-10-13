@@ -12,7 +12,8 @@ import type { Product } from "../types";
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
-const API_BASE = (import.meta.env["VITE_API_URL"] as string | undefined) ?? "http://localhost:4000/api";
+const configuredApiUrl = (import.meta.env["VITE_API_URL"] as string | undefined)?.trim();
+const API_BASE = configuredApiUrl || (import.meta.env.DEV ? "http://localhost:4000/api" : "/api");
 
 /** Timeout for all API calls — prevents hanging UI on slow connections */
 const REQUEST_TIMEOUT_MS = 15000;

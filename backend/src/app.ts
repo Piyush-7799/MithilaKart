@@ -21,6 +21,45 @@ import addressRoutes from "./routes/addresses.js";
 
 import authRoutes from "./routes/auth.js";
 
+/**
+ * Validates whether an incoming Origin header is trusted:
+ * - Allows requests without an Origin header (same-origin GET/HEAD, server-to-server, CLI/curl)
+ * - Allows explicitly configured CLIENT_URL
+ * - Allows local development ports in development mode
+ * - Allows exact Vercel deployment origin via VERCEL_URL (when valid)
+ * - Allows exact Vercel Git branch preview origin via VERCEL_BRANCH_URL (when valid)
+ * - Strictly rejects all other origins without regex or wildcard fallbacks
+ */
+export function isAllowedOrigin(origin: string | undefined): boolean {
+  if (!origin) {
+    return true;
+  }
+
+  if (origin === env.CLIENT_URL) {
+    return true;
+  }
+
+  if (env.isDev && (origin === "http://localhost:5173" || origin === "http://localhost:5174")) {
+    return true;
+  }
+
+  const vercelUrl = process.env["VERCEL_URL"];
+  if (typeof vercelUrl === "string" && vercelUrl.trim() !== "") {
+    if (origin === `https://${vercelUrl.trim()}`) {
+      return true;
+    }
+  }
+
+  const vercelBranchUrl = process.env["VERCEL_BRANCH_URL"];
+  if (typeof vercelBranchUrl === "string" && vercelBranchUrl.trim() !== "") {
+    if (origin === `https://${vercelBranchUrl.trim()}`) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 export function createApp() {
   const app = express();
 
@@ -33,15 +72,36 @@ export function createApp() {
   // Use Helmet for secure HTTP headers
   app.use(helmet());
 
-  // CORS: only allow requests from the configured frontend origin
+  // CORS: allow explicitly configured frontend origin, Vercel deployment URL, and project previews
   app.use(
     cors({
-      origin: env.isDev ? [env.CLIENT_URL, "http://localhost:5174"] : env.CLIENT_URL,
+      origin: (origin, callback) => {
+        if (isAllowedOrigin(origin)) {
+          callback(null, true);
+        } else {
+          // Reject untrusted browser origins without reflecting them in Access-Control-Allow-Origin
+          callback(null, false);
+        }
+      },
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization", "x-idempotency-key"],
       credentials: true,
     })
   );
+
+  // Reject state-changing requests carrying an untrusted Origin header
+  app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    if (origin && ["POST", "PUT", "PATCH", "DELETE"].includes(req.method)) {
+      if (!isAllowedOrigin(origin)) {
+        return res.status(403).json({
+          status: "error",
+          message: "Forbidden: Origin not allowed",
+        });
+      }
+    }
+    next();
+  });
 
   // Body parsing with a reasonable size limit
   app.use(express.json({ limit: "2mb" }));

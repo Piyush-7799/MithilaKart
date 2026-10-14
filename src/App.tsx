@@ -973,33 +973,37 @@ function App() {
                 </button>
               </div>
 
-              <div className="storefront-footer-col storefront-footer-dev-col">
-                <span className="storefront-footer-col-title">Operations</span>
-                <button
-                  type="button"
-                  className="storefront-admin-entry-btn"
-                  onClick={() => {
-                    window.scrollTo({ top: 0, behavior: "instant" });
-                    setIsAdminMode(true);
-                  }}
-                  title="Open Local Operations Admin"
-                  aria-label="Open Local Admin Dashboard (Development)"
-                >
-                  <Layers size={14} />
-                  <span>Local Admin (Dev)</span>
-                </button>
-                <span className="storefront-admin-hint">
-                  Client-side development dashboard
-                </span>
-              </div>
+              {import.meta.env.DEV && (
+                <div className="storefront-footer-col storefront-footer-dev-col">
+                  <span className="storefront-footer-col-title">Operations</span>
+                  <button
+                    type="button"
+                    className="storefront-admin-entry-btn"
+                    onClick={() => {
+                      window.scrollTo({ top: 0, behavior: "instant" });
+                      setIsAdminMode(true);
+                    }}
+                    title="Open Local Operations Admin"
+                    aria-label="Open Local Admin Dashboard (Development)"
+                  >
+                    <Layers size={14} />
+                    <span>Local Admin (Dev)</span>
+                  </button>
+                  <span className="storefront-admin-hint">
+                    Client-side development dashboard
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
           <div className="storefront-footer-bottom">
             <p>© {new Date().getFullYear()} MithilaKart. Authentic regional quick-commerce.</p>
-            <span className="storefront-footer-phase-badge">
-              Phase 23.2 • {isApiConnected ? `API Connected • ${PRODUCTS.length} products` : "Local Data"}
-            </span>
+            {import.meta.env.DEV && (
+              <span className="storefront-footer-phase-badge">
+                Phase 23.2 • {isApiConnected ? `API Connected • ${PRODUCTS.length} products` : "Local Data"}
+              </span>
+            )}
           </div>
         </footer>
       </main>
@@ -1203,10 +1207,14 @@ function App() {
               setShowAccountModal(false);
               handleShopNow();
             }}
-            onOpenAdmin={() => {
-              window.scrollTo({ top: 0, behavior: "instant" });
-              setIsAdminMode(true);
-            }}
+            onOpenAdmin={
+              import.meta.env.DEV
+                ? () => {
+                    window.scrollTo({ top: 0, behavior: "instant" });
+                    setIsAdminMode(true);
+                  }
+                : undefined
+            }
           />
         )}
       </Suspense>

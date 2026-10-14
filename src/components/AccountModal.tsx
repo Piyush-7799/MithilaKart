@@ -508,7 +508,7 @@ export function AccountModal({
           </div>
 
           {/* Local Admin Development Entry */}
-          {onOpenAdmin && (
+          {import.meta.env.DEV && onOpenAdmin && (
             <div className="account-dev-admin-box">
               <button
                 type="button"

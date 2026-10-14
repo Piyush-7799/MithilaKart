@@ -25,7 +25,19 @@ export async function checkDatabaseConnection(): Promise<boolean> {
   try {
     await prisma.$queryRaw`SELECT 1`;
     return true;
-  } catch {
+  } catch (error: unknown) {
+    const errorName = error instanceof Error ? error.name : typeof error;
+    const errorCode =
+      error && typeof error === "object" && "code" in error && typeof (error as { code?: unknown }).code === "string"
+        ? (error as { code: string }).code
+        : undefined;
+
+    if (errorCode) {
+      console.error(`[HealthCheck] Database connection check failed: [${errorName}] code=${errorCode}`);
+    } else {
+      console.error(`[HealthCheck] Database connection check failed: [${errorName}]`);
+    }
+
     return false;
   }
 }

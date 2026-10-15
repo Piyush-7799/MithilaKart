@@ -65,6 +65,57 @@ async function fetchWithTimeout(url: string, options: RequestInit): Promise<Resp
   }
 }
 
+/**
+ * Error thrown by API helpers when the server returns a non-OK HTTP status.
+ * Exposes the numeric HTTP status code without requiring type assertions.
+ */
+export class ApiClientError extends Error {
+  readonly status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "ApiClientError";
+    this.status = status;
+  }
+}
+
+/**
+ * Handles non-OK HTTP responses consistently across all API methods.
+ * Safely parses the error response body once, extracts any useful backend message,
+ * handles 401 session expiration without disrupting login/registration,
+ * and falls back to a generic HTTP error if no useful message exists.
+ */
+async function handleApiError(response: Response, path: string, url: string): Promise<never> {
+  if (response.status === 401) {
+    const pathname = path.split("?")[0].replace(/\/+$/, "");
+    const isAuthEntry = pathname === "/auth/login" || pathname === "/auth/register";
+    if (!isAuthEntry && typeof window !== "undefined") {
+      window.dispatchEvent(new Event("mithilakart:auth-expired"));
+    }
+  }
+
+  let backendMessage: string | null = null;
+  try {
+    const body = (await response.json()) as unknown;
+    if (
+      typeof body === "object" &&
+      body !== null &&
+      "message" in body &&
+      typeof (body as Record<string, unknown>)["message"] === "string"
+    ) {
+      const trimmed = ((body as Record<string, unknown>)["message"] as string).trim();
+      if (trimmed.length > 0) {
+        backendMessage = trimmed;
+      }
+    }
+  } catch {
+    // Response body is empty, invalid JSON, or unreadable — fallback will be used
+  }
+
+  const fallbackMessage = `API ${response.status}: ${response.statusText || "Request failed"} — ${url}`;
+  throw new ApiClientError(backendMessage || fallbackMessage, response.status);
+}
+
 async function apiFetch<T>(path: string, signal?: AbortSignal): Promise<T> {
   const url = `${API_BASE}${path}`;
   const response = await fetchWithTimeout(url, {
@@ -74,12 +125,7 @@ async function apiFetch<T>(path: string, signal?: AbortSignal): Promise<T> {
   });
 
   if (!response.ok) {
-    if (response.status === 401) {
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(new Event("mithilakart:auth-expired"));
-      }
-    }
-    throw new Error(`API ${response.status}: ${response.statusText} — ${url}`);
+    await handleApiError(response, path, url);
   }
 
   const data = (await response.json()) as unknown;
@@ -252,7 +298,12 @@ export async function fetchProductById(
     const data = await apiFetch<ApiProductResponse>(`/products/${encodeURIComponent(id)}`, signal);
     return mapApiProduct(data.product);
   } catch (err) {
-    if (err instanceof Error && err.message.includes("API 404")) return null;
+    if (
+      (err instanceof ApiClientError && err.status === 404) ||
+      (err instanceof Error && err.message.includes("API 404"))
+    ) {
+      return null;
+    }
     throw err;
   }
 }
@@ -285,12 +336,7 @@ async function apiPost<T>(path: string, body: unknown, signal?: AbortSignal, ext
   });
 
   if (!response.ok) {
-    if (response.status === 401) {
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(new Event("mithilakart:auth-expired"));
-      }
-    }
-    throw new Error(`API ${response.status}: ${response.statusText} — ${url}`);
+    await handleApiError(response, path, url);
   }
 
   const data = (await response.json()) as unknown;
@@ -318,13 +364,9 @@ async function apiPut<T>(path: string, body: unknown, signal?: AbortSignal): Pro
   });
 
   if (!response.ok) {
-    if (response.status === 401) {
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(new Event("mithilakart:auth-expired"));
-      }
-    }
-    throw new Error(`API ${response.status}: ${response.statusText}`);
+    await handleApiError(response, path, url);
   }
+
   const data = (await response.json()) as unknown;
   if (typeof data !== "object" || data === null || (data as Record<string, unknown>)["status"] === "error") {
     throw new Error("API Error");
@@ -342,13 +384,9 @@ async function apiDelete<T>(path: string, signal?: AbortSignal): Promise<T> {
   });
 
   if (!response.ok) {
-    if (response.status === 401) {
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(new Event("mithilakart:auth-expired"));
-      }
-    }
-    throw new Error(`API ${response.status}: ${response.statusText}`);
+    await handleApiError(response, path, url);
   }
+
   const data = (await response.json()) as unknown;
   if (typeof data !== "object" || data === null || (data as Record<string, unknown>)["status"] === "error") {
     throw new Error("API Error");

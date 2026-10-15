@@ -34,8 +34,21 @@ export interface UseProductsResult {
   updateProduct: (id: string, updates: Partial<Product>) => void;
 }
 
+/**
+ * Normalizes static fallback products so undefined availability defaults to true,
+ * while preserving any explicitly defined false value.
+ */
+export function normalizeStaticProducts(items: Product[]): Product[] {
+  return items.map((p) => ({
+    ...p,
+    isAvailable: p.isAvailable ?? true,
+  }));
+}
+
+export const FALLBACK_PRODUCTS: Product[] = normalizeStaticProducts(STATIC_PRODUCTS);
+
 export function useProducts(): UseProductsResult {
-  const [products, setProducts] = useState<Product[]>(STATIC_PRODUCTS);
+  const [products, setProducts] = useState<Product[]>(FALLBACK_PRODUCTS);
   const [isLoading, setIsLoading] = useState(true);
   const [isApiConnected, setIsApiConnected] = useState(false);
   const [source, setSource] = useState<ProductSource>("static");
@@ -70,7 +83,7 @@ export function useProducts(): UseProductsResult {
           console.warn(
             "[MithilaKart] API returned 0 products — using static catalogue as fallback."
           );
-          setProducts(STATIC_PRODUCTS);
+          setProducts(FALLBACK_PRODUCTS);
           setSource("static");
           setError("API returned an empty catalogue. Showing local data.");
           setIsApiConnected(false);
@@ -97,7 +110,7 @@ export function useProducts(): UseProductsResult {
         }
 
         // Always fall back to static data on failure — app stays functional
-        setProducts(STATIC_PRODUCTS);
+        setProducts(FALLBACK_PRODUCTS);
         setSource("static");
         setIsApiConnected(false);
       } finally {

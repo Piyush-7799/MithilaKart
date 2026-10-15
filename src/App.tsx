@@ -251,7 +251,7 @@ function App() {
   const isItemAvailable = useCallback(
     (id: string) => {
       const p = PRODUCTS.find((p) => p.id === id);
-      return p ? (p.isAvailable ?? false) : false;
+      return p ? p.isAvailable !== false : false;
     },
     [PRODUCTS]
   );

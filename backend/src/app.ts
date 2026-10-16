@@ -22,9 +22,16 @@ import addressRoutes from "./routes/addresses.js";
 import authRoutes from "./routes/auth.js";
 
 /**
+ * Normalizes an origin or URL string by trimming whitespace and stripping trailing slashes.
+ */
+export function normalizeOrigin(url: string): string {
+  return url.trim().replace(/\/+$/, "");
+}
+
+/**
  * Validates whether an incoming Origin header is trusted:
  * - Allows requests without an Origin header (same-origin GET/HEAD, server-to-server, CLI/curl)
- * - Allows explicitly configured CLIENT_URL
+ * - Allows explicitly configured CLIENT_URL (normalized for whitespace and trailing slashes)
  * - Allows local development ports in development mode
  * - Allows exact Vercel deployment origin via VERCEL_URL (when valid)
  * - Allows exact Vercel Git branch preview origin via VERCEL_BRANCH_URL (when valid)
@@ -35,24 +42,32 @@ export function isAllowedOrigin(origin: string | undefined): boolean {
     return true;
   }
 
-  if (origin === env.CLIENT_URL) {
+  const normalizedOrigin = normalizeOrigin(origin);
+  if (!normalizedOrigin) {
+    return false;
+  }
+
+  const normalizedClientUrl = normalizeOrigin(env.CLIENT_URL);
+  if (normalizedOrigin === normalizedClientUrl) {
     return true;
   }
 
-  if (env.isDev && (origin === "http://localhost:5173" || origin === "http://localhost:5174")) {
+  if (env.isDev && (normalizedOrigin === "http://localhost:5173" || normalizedOrigin === "http://localhost:5174")) {
     return true;
   }
 
   const vercelUrl = process.env["VERCEL_URL"];
   if (typeof vercelUrl === "string" && vercelUrl.trim() !== "") {
-    if (origin === `https://${vercelUrl.trim()}`) {
+    const normalizedVercelUrl = `https://${normalizeOrigin(vercelUrl).replace(/^https?:\/\//, "")}`;
+    if (normalizedOrigin === normalizedVercelUrl) {
       return true;
     }
   }
 
   const vercelBranchUrl = process.env["VERCEL_BRANCH_URL"];
   if (typeof vercelBranchUrl === "string" && vercelBranchUrl.trim() !== "") {
-    if (origin === `https://${vercelBranchUrl.trim()}`) {
+    const normalizedVercelBranchUrl = `https://${normalizeOrigin(vercelBranchUrl).replace(/^https?:\/\//, "")}`;
+    if (normalizedOrigin === normalizedVercelBranchUrl) {
       return true;
     }
   }

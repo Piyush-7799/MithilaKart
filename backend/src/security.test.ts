@@ -8,11 +8,13 @@
  * 4. Preflight OPTIONS behavior (trusted vs disallowed)
  * 5. Server-side HTTP 403 rejection on state-changing requests with untrusted Origin
  * 6. Non-Origin request preservation for server-to-server and CLI clients
+ * 7. Origin normalization (canonical origin matching, trailing-slash & whitespace normalization, unrelated origin rejection)
  */
 
 import assert from "node:assert";
 import http from "node:http";
-import { createApp } from "./app.js";
+import { createApp, isAllowedOrigin } from "./app.js";
+import { env } from "./config/env.js";
 import { prisma } from "./lib/prisma.js";
 import { hashPassword } from "./services/authService.js";
 
@@ -318,7 +320,82 @@ async function runSecurityTests() {
     assert.strictEqual(logoutNoOriginBody.status, "ok");
     console.log("✅ Test 16 Passed: State-changing POST without Origin header allowed (CLI/server-to-server)");
 
-    console.log("\nAll 16 security hardening tests passed successfully!");
+    // ── 5. Origin Normalization (Trailing Slashes & Whitespace) ────────────────
+
+    // Test 17: Unit-level verification of isAllowedOrigin
+    // Canonical origin matching
+    assert.strictEqual(isAllowedOrigin(env.CLIENT_URL), true, "Canonical origin must be allowed");
+    // Trailing-slash normalization
+    assert.strictEqual(isAllowedOrigin(`${env.CLIENT_URL}/`), true, "Origin with trailing slash must be allowed");
+    assert.strictEqual(isAllowedOrigin(`${env.CLIENT_URL}///`), true, "Origin with multiple trailing slashes must be allowed");
+    // Whitespace normalization
+    assert.strictEqual(isAllowedOrigin(`  ${env.CLIENT_URL}  `), true, "Origin with leading/trailing whitespace must be allowed");
+    assert.strictEqual(isAllowedOrigin(`  ${env.CLIENT_URL}/  `), true, "Origin with whitespace and trailing slash must be allowed");
+    // Rejection of unrelated origins (with or without trailing slash/whitespace)
+    assert.strictEqual(isAllowedOrigin("https://evil.com"), false, "Unrelated origin must be rejected");
+    assert.strictEqual(isAllowedOrigin("https://evil.com/"), false, "Unrelated origin with trailing slash must be rejected");
+    assert.strictEqual(isAllowedOrigin("  https://evil.com/  "), false, "Unrelated origin with whitespace must be rejected");
+    assert.strictEqual(isAllowedOrigin("https://mithilakart-attacker.vercel.app"), false, "Near-miss origin must be rejected");
+    // Rejection of whitespace-only / empty strings
+    assert.strictEqual(isAllowedOrigin("   "), false, "Whitespace-only origin must be rejected");
+    console.log("✅ Test 17 Passed: isAllowedOrigin canonical matching, trailing-slash & whitespace normalization, and rejection verified");
+
+    // Test 18: Safe request (GET) with trailing-slash Origin emits ACAO
+    const trailingSlashRes = await fetch(`${baseUrl}/api/health`, {
+      headers: { Origin: "http://localhost:5173/" },
+    });
+    assert.strictEqual(trailingSlashRes.status, 200);
+    assert.strictEqual(
+      trailingSlashRes.headers.get("access-control-allow-origin"),
+      "http://localhost:5173/",
+      "Trailing-slash Origin must be accepted and reflected"
+    );
+    console.log("✅ Test 18 Passed: Safe request with trailing-slash Origin emits ACAO");
+
+    // Test 19: Safe request (GET) with whitespace-padded Origin emits ACAO
+    const whitespaceRes = await fetch(`${baseUrl}/api/health`, {
+      headers: { Origin: "  http://localhost:5173  " },
+    });
+    assert.strictEqual(whitespaceRes.status, 200);
+    assert.strictEqual(
+      whitespaceRes.headers.get("access-control-allow-origin"),
+      "http://localhost:5173",
+      "Whitespace-padded Origin must be accepted and reflected"
+    );
+    console.log("✅ Test 19 Passed: Safe request with whitespace-padded Origin emits ACAO");
+
+    // Test 20: State-changing POST with trailing-slash Origin succeeds (not rejected with HTTP 403)
+    const logoutTrailingRes = await fetch(`${baseUrl}/api/auth/logout`, {
+      method: "POST",
+      headers: { Origin: "http://localhost:5173/" },
+    });
+    assert.strictEqual(logoutTrailingRes.status, 200, "State-changing POST with trailing-slash origin must succeed");
+    const logoutTrailingBody = await logoutTrailingRes.json();
+    assert.strictEqual(logoutTrailingBody.status, "ok");
+    console.log("✅ Test 20 Passed: State-changing POST with trailing-slash Origin succeeds");
+
+    // Test 21: State-changing POST with whitespace-padded Origin succeeds (not rejected with HTTP 403)
+    const logoutWhitespaceRes = await fetch(`${baseUrl}/api/auth/logout`, {
+      method: "POST",
+      headers: { Origin: "  http://localhost:5173  " },
+    });
+    assert.strictEqual(logoutWhitespaceRes.status, 200, "State-changing POST with whitespace-padded origin must succeed");
+    const logoutWhitespaceBody = await logoutWhitespaceRes.json();
+    assert.strictEqual(logoutWhitespaceBody.status, "ok");
+    console.log("✅ Test 21 Passed: State-changing POST with whitespace-padded Origin succeeds");
+
+    // Test 22: State-changing POST with untrusted origin containing trailing slash rejected with HTTP 403
+    const logoutEvilSlashRes = await fetch(`${baseUrl}/api/auth/logout`, {
+      method: "POST",
+      headers: { Origin: "https://evil.com/" },
+    });
+    assert.strictEqual(logoutEvilSlashRes.status, 403, "Untrusted origin with trailing slash must receive HTTP 403");
+    const logoutEvilSlashBody = await logoutEvilSlashRes.json();
+    assert.strictEqual(logoutEvilSlashBody.status, "error");
+    assert.strictEqual(logoutEvilSlashBody.message, "Forbidden: Origin not allowed");
+    console.log("✅ Test 22 Passed: State-changing POST with untrusted trailing-slash origin rejected with HTTP 403");
+
+    console.log("\nAll 22 security hardening tests passed successfully!");
   } finally {
     // Restore environment variables
     if (originalVercelUrl !== undefined) {

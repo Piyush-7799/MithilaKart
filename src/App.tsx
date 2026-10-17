@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, Suspense, lazy } from "react";
+import { useState, useEffect, useMemo, useCallback, useDeferredValue, Suspense, lazy } from "react";
 import { useProducts } from "./hooks/useProducts";
 import { ShoppingBag, ArrowRight, Sparkles, Layers } from "lucide-react";
 import "./App.css";
@@ -90,6 +90,7 @@ function App() {
   // Phase 23.2: Fetch products from API; falls back to static data if unavailable
   const { products: PRODUCTS, isLoading: productsLoading, isApiConnected, updateProduct } = useProducts();
   const [search, setSearch] = useState("");
+  const deferredSearch = useDeferredValue(search);
   const [selectedCategory, setSelectedCategory] = useState("All");
 
   // Phase 12: Smart filter and sort state (resets on refresh, no URL/storage persistence)
@@ -422,7 +423,7 @@ function App() {
   }, []);
 
   const filteredProducts = useMemo(() => {
-    const trimmed = search.trim().toLowerCase();
+    const trimmed = deferredSearch.trim().toLowerCase();
     const searchTokens = trimmed ? trimmed.split(/\s+/).filter(Boolean) : [];
 
     return PRODUCTS.filter((product) => {
@@ -499,7 +500,7 @@ function App() {
 
       return true;
     });
-  }, [search, selectedCategory, filters, PRODUCTS]);
+  }, [deferredSearch, selectedCategory, filters, PRODUCTS]);
 
   // Derived sorted catalogue products
   const sortedProducts = useMemo(() => {
@@ -900,7 +901,7 @@ function App() {
           onClearSearch={clearSearch}
           selectedCategory={selectedCategory}
           onSelectCategory={setSelectedCategory}
-          searchQuery={search}
+          searchQuery={deferredSearch}
           wishlistSet={wishlistSet}
           onToggleWishlist={handleToggleWishlist}
           filters={filters}

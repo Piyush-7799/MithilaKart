@@ -1983,12 +1983,6 @@
   position: relative;
 }
 
-.product-card:hover {
-  transform: translateY(-3px);
-  border-color: #cbd5e1;
-  box-shadow: 0 10px 24px -4px rgba(0, 0, 0, 0.08), 0 6px 10px -4px rgba(0, 0, 0, 0.04);
-}
-
 .product-card:active {
   transform: translateY(-1px);
 }
@@ -2041,21 +2035,21 @@
 }
 
 .product-signature-tag {
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 3px;
   background: linear-gradient(135deg, #064e3b, #059669);
   color: #fef3c7;
   font-size: 9px;
   font-weight: 800;
-  padding: 3px 7px;
+  padding: 2px 6px;
   border-radius: var(--radius-xs);
-  display: flex;
-  align-items: center;
-  gap: 3px;
   letter-spacing: 0.3px;
-  box-shadow: 0 2px 5px rgba(6, 78, 59, 0.25);
-  z-index: 2;
+  box-shadow: 0 1px 3px rgba(6, 78, 59, 0.2);
+  margin-bottom: 5px;
+  width: fit-content;
+  white-space: nowrap;
 }
 
 /* Product Card Wishlist Toggle Button (Phase 10) */
@@ -2080,24 +2074,10 @@
   transition: all var(--transition-fast);
 }
 
-.product-wishlist-btn:hover {
-  background: #ffffff;
-  color: #e11d48;
-  border-color: #fecdd3;
-  transform: scale(1.08);
-  box-shadow: 0 4px 10px rgba(225, 29, 72, 0.18);
-}
-
 .product-wishlist-btn-active {
   background: #fff1f2;
   border-color: #fda4af;
   color: #e11d48;
-}
-
-.product-wishlist-btn-active:hover {
-  background: #ffe4e6;
-  border-color: #fb7185;
-  color: #be123c;
 }
 
 .product-wishlist-btn:focus-visible {
@@ -2123,11 +2103,6 @@
   opacity: 0.85;
 }
 
-.product-card-signature:hover {
-  border-color: #f59e0b;
-  box-shadow: 0 14px 28px -4px rgba(217, 119, 6, 0.12), 0 4px 10px -2px rgba(0, 0, 0, 0.04);
-}
-
 .product-delivery-badge {
   position: absolute;
   bottom: 8px;
@@ -2144,6 +2119,14 @@
   align-items: center;
   gap: 3px;
   z-index: 2;
+}
+
+@media (max-width: 768px), (pointer: coarse) {
+  .product-wishlist-btn,
+  .product-delivery-badge {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
 }
 
 .delivery-zap {
@@ -2169,8 +2152,35 @@
   transition: transform var(--transition-normal), opacity 0.25s ease-in-out;
 }
 
-.product-card:hover .product-img {
-  transform: scale(1.04);
+@media (hover: hover) and (pointer: fine) {
+  .product-card:hover {
+    transform: translateY(-3px);
+    border-color: #cbd5e1;
+    box-shadow: 0 10px 24px -4px rgba(0, 0, 0, 0.08), 0 6px 10px -4px rgba(0, 0, 0, 0.04);
+  }
+
+  .product-wishlist-btn:hover {
+    background: #ffffff;
+    color: #e11d48;
+    border-color: #fecdd3;
+    transform: scale(1.08);
+    box-shadow: 0 4px 10px rgba(225, 29, 72, 0.18);
+  }
+
+  .product-wishlist-btn-active:hover {
+    background: #ffe4e6;
+    border-color: #fb7185;
+    color: #be123c;
+  }
+
+  .product-card-signature:hover {
+    border-color: #f59e0b;
+    box-shadow: 0 14px 28px -4px rgba(217, 119, 6, 0.12), 0 4px 10px -2px rgba(0, 0, 0, 0.04);
+  }
+
+  .product-card:hover .product-img {
+    transform: scale(1.04);
+  }
 }
 
 .product-img-loading {

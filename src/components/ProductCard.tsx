@@ -61,12 +61,6 @@ function ProductCardInner({
             </span>
           ) : null}
 
-          {product.isMithilaSpecial && (
-            <span className="product-signature-tag" title="Mithila Regional Special">
-              <Sparkles size={10} /> Mithila Special
-            </span>
-          )}
-
           {/* Favourite / Wishlist Toggle Button */}
           {onToggleWishlist && (
             <button
@@ -126,6 +120,12 @@ function ProductCardInner({
 
         {/* Details Area */}
         <div className="product-details">
+          {product.isMithilaSpecial && (
+            <span className="product-signature-tag" title="Mithila Regional Special">
+              <Sparkles size={10} /> Mithila Special
+            </span>
+          )}
+
           {/* 1. Product Name */}
           <h3 className="product-name" title={product.name}>
             {product.name}

@@ -6476,6 +6476,9 @@
   .product-rail-track {
     gap: 12px;
     padding: 4px 2px 14px 2px;
+    scroll-behavior: auto;
+    scroll-snap-type: none;
+    overscroll-behavior-x: contain;
   }
 
   .product-rail-track .product-card {

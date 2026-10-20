@@ -47,6 +47,11 @@ async function runTests() {
   let transactionCalled: boolean;
   let orderCreatedData: MockOrderCreateData | null;
 
+  const getCreatedOrderData = (): MockOrderCreateData => {
+    assert(orderCreatedData, "orderCreatedData should be set");
+    return orderCreatedData;
+  };
+
   setMock(prisma.orderIdempotency, "findUnique", async () => null);
   setMock(prisma.user, "findUnique", async () => null);
   setMock(
@@ -107,13 +112,13 @@ async function runTests() {
     });
 
     assert(transactionCalled, "Transaction should be called");
-    assert(orderCreatedData, "orderCreatedData should be set");
-    assert.strictEqual(orderCreatedData.items.create.length, 1, "Should aggregate into 1 item");
-    assert.strictEqual(orderCreatedData.items.create[0].quantity, 5, "Quantity should be summed (5)");
-    assert.strictEqual(orderCreatedData.subtotal, 50, "Subtotal should be 10 * 5 = 50");
-    assert.strictEqual(orderCreatedData.deliveryFee, 30, "Delivery fee should be 30 for <300");
-    assert.strictEqual(orderCreatedData.total, 80, "Total should be 50 + 30 = 80");
-    assert.strictEqual(orderCreatedData.savings, 25, "Savings should be (15-10)*5 = 25");
+    const test1OrderData = getCreatedOrderData();
+    assert.strictEqual(test1OrderData.items.create.length, 1, "Should aggregate into 1 item");
+    assert.strictEqual(test1OrderData.items.create[0].quantity, 5, "Quantity should be summed (5)");
+    assert.strictEqual(test1OrderData.subtotal, 50, "Subtotal should be 10 * 5 = 50");
+    assert.strictEqual(test1OrderData.deliveryFee, 30, "Delivery fee should be 30 for <300");
+    assert.strictEqual(test1OrderData.total, 80, "Total should be 50 + 30 = 80");
+    assert.strictEqual(test1OrderData.savings, 25, "Savings should be (15-10)*5 = 25");
     console.log("✅ Test 1 Passed: Duplicate products aggregated");
 
     // Test 2: Missing products should fail
@@ -180,12 +185,12 @@ async function runTests() {
         { productId: "p2", quantity: 1 },
       ],
     });
-    assert(orderCreatedData, "orderCreatedData should be set");
-    assert.strictEqual(orderCreatedData.items.create.length, 2);
-    assert.strictEqual(orderCreatedData.subtotal, 410, "Subtotal should be 10*1 + 400*1 = 410");
-    assert.strictEqual(orderCreatedData.deliveryFee, 0, "Delivery fee should be 0 since subtotal > 300");
-    assert.strictEqual(orderCreatedData.total, 410, "Total should be 410 + 0 = 410");
-    assert.strictEqual(orderCreatedData.savings, 5, "Savings should be (15-10)*1 + 0 = 5");
+    const test4OrderData = getCreatedOrderData();
+    assert.strictEqual(test4OrderData.items.create.length, 2);
+    assert.strictEqual(test4OrderData.subtotal, 410, "Subtotal should be 10*1 + 400*1 = 410");
+    assert.strictEqual(test4OrderData.deliveryFee, 0, "Delivery fee should be 0 since subtotal > 300");
+    assert.strictEqual(test4OrderData.total, 410, "Total should be 410 + 0 = 410");
+    assert.strictEqual(test4OrderData.savings, 5, "Savings should be (15-10)*1 + 0 = 5");
     console.log("✅ Test 4 Passed: Normal checkout successful");
 
     // Test 5: Idempotency fallback on P2002

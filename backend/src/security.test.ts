@@ -13,6 +13,7 @@
 
 import assert from "node:assert";
 import http from "node:http";
+import type { AddressInfo } from "node:net";
 import { createApp, isAllowedOrigin } from "./app.js";
 import { env } from "./config/env.js";
 import { prisma } from "./lib/prisma.js";
@@ -30,21 +31,38 @@ async function runSecurityTests() {
   const testPassword = "testPassword123";
   const passwordHash = await hashPassword(testPassword);
 
-  // @ts-ignore
-  prisma.user.findUnique = async ({ where }: any) => {
-    if (where.email === "testuser@example.com") {
-      return {
-        id: "usr-test-1",
-        fullName: "Test User",
-        email: "testuser@example.com",
-        passwordHash,
-        role: "CUSTOMER",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      } as any;
+  interface MockUser {
+    id: string;
+    fullName: string;
+    email: string;
+    passwordHash: string;
+    role: "CUSTOMER" | "ADMIN";
+    createdAt: Date;
+    updatedAt: Date;
+  }
+
+  function setMock<T, K extends keyof T>(target: T, key: K, value: unknown): void {
+    (target as Record<K, unknown>)[key] = value;
+  }
+
+  setMock(
+    prisma.user,
+    "findUnique",
+    async ({ where }: { where: { email?: string; id?: string } }): Promise<MockUser | null> => {
+      if (where.email === "testuser@example.com") {
+        return {
+          id: "usr-test-1",
+          fullName: "Test User",
+          email: "testuser@example.com",
+          passwordHash,
+          role: "CUSTOMER",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+      }
+      return null;
     }
-    return null;
-  };
+  );
 
   // Configure simulated Vercel system environment variables for testing
   const simulatedVercelUrl = "mithilakart-preview-123.vercel.app";
@@ -56,7 +74,7 @@ async function runSecurityTests() {
   const server = http.createServer(app);
 
   await new Promise<void>((resolve) => server.listen(0, resolve));
-  const addr = server.address() as any;
+  const addr = server.address() as AddressInfo;
   const baseUrl = `http://localhost:${addr.port}`;
 
   try {
@@ -410,8 +428,7 @@ async function runSecurityTests() {
     }
 
     // Restore Prisma mocks and close server cleanly
-    // @ts-ignore
-    prisma.user.findUnique = originalFindUniqueUser;
+    setMock(prisma.user, "findUnique", originalFindUniqueUser);
     server.close();
   }
 }

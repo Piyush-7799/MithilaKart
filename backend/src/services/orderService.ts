@@ -4,7 +4,9 @@
  */
 
 import { prisma } from "../lib/prisma.js";
-import type { Prisma, OrderStatus } from "@prisma/client";
+import type { Prisma, OrderStatus, User } from "@prisma/client";
+
+export type OrderWithItems = Prisma.OrderGetPayload<{ include: { items: true } }>;
 
 export interface OrderQueryParams {
   userId?: string;
@@ -164,7 +166,7 @@ export async function createOrder(params: CreateOrderParams) {
     const finalUserId = params.userId;
 
     // 2. Sequential Write Transaction
-    const operations: any[] = [];
+    const operations: Array<Prisma.PrismaPromise<User | OrderWithItems>> = [];
 
     if (finalUserId && !userExists) {
       operations.push(
@@ -225,7 +227,7 @@ export async function createOrder(params: CreateOrderParams) {
     console.info(`[CheckoutTiming] Sequential transaction took ${Math.round(performance.now() - txStart)}ms`);
 
     // Return the created order (always the last operation)
-    return results[results.length - 1];
+    return results[results.length - 1] as OrderWithItems;
   } catch (err: unknown) {
     if (
       err &&
